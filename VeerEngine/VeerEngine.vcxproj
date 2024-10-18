@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>16.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{54545be0-81a5-4f24-bb71-215261759667}</ProjectGuid>
+    <RootNamespace>veer</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>VeerEngine</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;MIR_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <PrecompiledHeader>Create</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;$(ProjectDir)Libraries\glfw-3.3.8.bin.WIN64\include;.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <ForcedIncludeFiles>pch.h</ForcedIncludeFiles>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableUAC>false</EnableUAC>
+      <AdditionalLibraryDirectories>$(VULKAN_SDK)\Lib;$(SolutionDir)\VeerEngine\Libraries\glfw-3.3.8.bin.WIN64\lib-vc2017;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>vulkan-1.lib;glfw3.lib;d3d12.lib;dxgi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;MIR_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <PrecompiledHeader>Create</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;$(ProjectDir)Libraries\glfw-3.3.8.bin.WIN64\include;.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <ForcedIncludeFiles>pch.h</ForcedIncludeFiles>
+      <LanguageStandard_C>Default</LanguageStandard_C>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableUAC>false</EnableUAC>
+      <AdditionalLibraryDirectories>$(VULKAN_SDK)\Lib;$(SolutionDir)\VeerEngine\Libraries\glfw-3.3.8.bin.WIN64\lib-vc2017;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>vulkan-1.lib;glfw3.lib;d3d12.lib;dxgi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="application.h" />
+    <ClInclude Include="application_config.h" />
+    <ClInclude Include="Core\basic_allocator.h" />
+    <ClInclude Include="Core\Containers\span.h" />
+    <ClInclude Include="Core\Containers\span.hpp" />
+    <ClInclude Include="Core\core.h" />
+    <ClInclude Include="Core\debug.h" />
+    <ClInclude Include="Core\callback_set.h" />
+    <ClInclude Include="Core\callback_set.hpp" />
+    <ClInclude Include="Core\Math\matrix3x4f.h" />
+    <ClInclude Include="Core\Math\quaternion.h" />
+    <ClInclude Include="Core\Math\vec.h" />
+    <ClInclude Include="Core\Math\vec_scalar.hpp" />
+    <ClInclude Include="Core\Math\vec_swizzle.h" />
+    <ClInclude Include="Core\service.h" />
+    <ClInclude Include="Core\service_locator.h" />
+    <ClInclude Include="Core\service_locator.hpp" />
+    <ClInclude Include="Core\singleton.h" />
+    <ClInclude Include="Display\command_buffer.h" />
+    <ClInclude Include="Display\command_queue.h" />
+    <ClInclude Include="Display\DX12\dx12_command_buffer.h" />
+    <ClInclude Include="Display\DX12\dx12_command_queue.h" />
+    <ClInclude Include="Display\DX12\dx12_pch.h" />
+    <ClInclude Include="Display\DX12\dx12_rendering_service.h" />
+    <ClInclude Include="Display\DX12\dx12_render_device.h" />
+    <ClInclude Include="Display\DX12\dx12_swap_chain.h" />
+    <ClInclude Include="Display\glfw\glfw_window.h" />
+    <ClInclude Include="Display\glfw\glfw_windowing_service.h" />
+    <ClInclude Include="Display\rendering_service.h" />
+    <ClInclude Include="Display\rendering_thread.h" />
+    <ClInclude Include="Display\render_device.h" />
+    <ClInclude Include="Display\swap_chain.h" />
+    <ClInclude Include="Display\window.h" />
+    <ClInclude Include="Display\windowing_service.h" />
+    <ClInclude Include="pch.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="application.cpp" />
+    <ClCompile Include="application_config.cpp" />
+    <ClCompile Include="Core\basic_allocator.cpp" />
+    <ClCompile Include="Core\debug.cpp" />
+    <ClCompile Include="Core\Math\matrix3x4f.cpp" />
+    <ClCompile Include="Core\Math\quaternion.hpp" />
+    <ClCompile Include="Display\command_buffer.cpp" />
+    <ClCompile Include="Display\command_queue.cpp" />
+    <ClCompile Include="Display\DX12\dx12_command_buffer.cpp" />
+    <ClCompile Include="Display\DX12\dx12_command_queue.cpp" />
+    <ClCompile Include="Display\DX12\dx12_rendering_service.cpp" />
+    <ClCompile Include="Display\DX12\dx12_render_device.cpp" />
+    <ClCompile Include="Display\DX12\dx12_swap_chain.cpp" />
+    <ClCompile Include="Display\glfw\glfw_window.cpp" />
+    <ClCompile Include="Display\glfw\glfw_windowing_service.cpp" />
+    <ClCompile Include="Display\rendering_service.cpp" />
+    <ClCompile Include="Display\render_device.cpp" />
+    <ClCompile Include="Display\swap_chain.cpp" />
+    <ClCompile Include="Display\window.cpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

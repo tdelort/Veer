@@ -34,5 +34,5 @@
 .vs/
 
 x64/
-MIRTestApp/x64/
-MIR/x64/
+VeerEngineTestApp/x64/
+VeerEngine/x64/
