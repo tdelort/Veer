@@ -5,7 +5,7 @@
 
 #include <Display/swap_chain.h>
 #include <Display/DX12/dx12_render_device.h>
-#include <Core/Math/vec2.h>
+#include <Core/Math/vec.h>
 
 namespace mir
 {

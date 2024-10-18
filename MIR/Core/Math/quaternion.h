@@ -3,8 +3,6 @@
 #define _QUAT_INC_
 
 #include "vec.h"
-#include "vec3.h"
-#include "vec4.h"
 
 namespace mir
 {

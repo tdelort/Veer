@@ -1,7 +1,7 @@
 #ifndef DISPLAY_SWAP_CHAIN_H_INCLUDED
 #define DISPLAY_SWAP_CHAIN_H_INCLUDED
 
-#include <Core/Math/vec2.h>
+#include <Core/Math/vec.h>
 
 namespace mir
 {

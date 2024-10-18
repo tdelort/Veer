@@ -2,7 +2,7 @@
 #define DISPLAY_WINDOWING_SERVICE_H_INCLUDED
 
 #include "Core/service.h"
-#include "Core/Math/vec2.h"
+#include "Core/Math/vec.h"
 #include "Display/window.h"
 
 namespace mir

@@ -4,9 +4,6 @@
 
 #include "quaternion.h"
 #include "vec.h"
-#include "vec3.h"
-#include "vec4.h"
-#include "vec_operations.h"
 
 #include <cmath>
 

@@ -67,7 +67,7 @@ namespace mir
 
 		render_device& device = m_render_service->get_render_device();
 
-		const vec2u initial_win_size(640, 480);
+		const vec2u initial_win_size(640u, 480u);
 		window* window = m_window_service->create_window( initial_win_size );
 		MIR_ASSERT(window != nullptr, ("Wrong handle to window"));
 
@@ -95,10 +95,8 @@ namespace mir
 
 			long dts = std::chrono::duration_cast<std::chrono::milliseconds>(dt).count();
 			float fps = dts > 0.f ? 1000 / dts : -1.f;
-			if ( !(frame_index & 0b1111) )
-			{
+			if ( !(frame_index & 0xF) ) // once every 16 frames
 				MIR_LOG_DEBUG("dt : " << dts << " | fps : " << fps);
-			}
 
 			window->poll_events();
 

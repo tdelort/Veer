@@ -3,7 +3,7 @@
 
 #include "Core/core.h"
 #include "Core/callback_set.h"
-#include "Core/Math/vec2.h"
+#include "Core/Math/vec.h"
 
 namespace mir
 {

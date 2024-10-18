@@ -66,7 +66,7 @@ namespace mir
 	{
 		int w, h;
 		glfwGetFramebufferSize(m_api_handle, &w, &h);
-		return vec2u(std::max(0, w), std::max(0, h));
+		return vec2u((unsigned int)std::max(0, w), (unsigned int)std::max(0, h));
 	}
 
 	void glfw_window::set_size(vec2u _size) &

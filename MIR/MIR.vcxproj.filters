@@ -48,34 +48,10 @@
     <ClInclude Include="Core\singleton.h">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="Core\Math\vec2.h">
-      <Filter>Core\Math</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\Math\vec2_scalar.hpp">
-      <Filter>Core\Math</Filter>
-    </ClInclude>
     <ClInclude Include="Core\Math\vec.h">
       <Filter>Core\Math</Filter>
     </ClInclude>
-    <ClInclude Include="Core\Math\vec_operations_scalar.hpp">
-      <Filter>Core\Math</Filter>
-    </ClInclude>
     <ClInclude Include="Core\Math\vec_scalar.hpp">
-      <Filter>Core\Math</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\Math\vec_operations.h">
-      <Filter>Core\Math</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\Math\vec3_scalar.hpp">
-      <Filter>Core\Math</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\Math\vec3.h">
-      <Filter>Core\Math</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\Math\vec4.h">
-      <Filter>Core\Math</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\Math\vec4_scalar.hpp">
       <Filter>Core\Math</Filter>
     </ClInclude>
     <ClInclude Include="Core\Math\vec_swizzle.h">

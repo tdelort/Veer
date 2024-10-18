@@ -108,14 +108,6 @@
     <ClInclude Include="Core\Math\quaternion.h" />
     <ClInclude Include="Core\Math\vec.h" />
     <ClInclude Include="Core\Math\vec_scalar.hpp" />
-    <ClInclude Include="Core\Math\vec2.h" />
-    <ClInclude Include="Core\Math\vec2_scalar.hpp" />
-    <ClInclude Include="Core\Math\vec3.h" />
-    <ClInclude Include="Core\Math\vec3_scalar.hpp" />
-    <ClInclude Include="Core\Math\vec4.h" />
-    <ClInclude Include="Core\Math\vec4_scalar.hpp" />
-    <ClInclude Include="Core\Math\vec_operations.h" />
-    <ClInclude Include="Core\Math\vec_operations_scalar.hpp" />
     <ClInclude Include="Core\Math\vec_swizzle.h" />
     <ClInclude Include="Core\service.h" />
     <ClInclude Include="Core\service_locator.h" />

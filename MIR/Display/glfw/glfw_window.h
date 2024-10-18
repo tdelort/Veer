@@ -6,7 +6,7 @@
 #include <GLFW/glfw3.h>
 
 #include "Core/singleton.h"
-#include "Core/Math/vec2.h"
+#include "Core/Math/vec.h"
 #include "Display/windowing_service.h"
 #include "Display/window.h"
 
