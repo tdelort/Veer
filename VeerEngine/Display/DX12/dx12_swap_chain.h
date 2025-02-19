@@ -5,6 +5,7 @@
 
 #include <Display/swap_chain.h>
 #include <Display/DX12/dx12_render_device.h>
+#include <Display/DX12/dx12_render_device_resource.h>
 #include <Core/Math/vec.h>
 
 namespace veer
@@ -19,16 +20,14 @@ namespace veer
 		virtual ~dx12_swap_chain();
 
 		void present(size_t _sync_intervals) override;
-
-		ComPtr<ID3D12Resource> get_backbuffer_resource( uint64_t _frame_index );
-		D3D12_CPU_DESCRIPTOR_HANDLE get_backbuffer_cpu_handle( uint64_t _frame_index );
+		render_device_resource* get_current_backbuffer() override;
+		size_t get_backbuffer_index() override;
 
 	private:
 		ComPtr<IDXGISwapChain4> m_api_swap_chain_handle;
 		ComPtr<ID3D12DescriptorHeap> m_back_buffers_descritor_heap;
 
-		ComPtr<ID3D12Resource> m_back_buffers_resources[s_swap_chain_buffer_count];
-		D3D12_CPU_DESCRIPTOR_HANDLE m_back_buffers_cpu_handles[s_swap_chain_buffer_count];
+		std::unique_ptr<dx12_render_device_resource> m_back_buffers_resources[s_swap_chain_buffer_count];
 	};
 }
 

@@ -10,16 +10,8 @@ namespace veer
 {
 	dx12_rendering_service::dx12_rendering_service()
 	{
-		UINT create_factory_flags = 0;
-		#if defined(_DEBUG)
-		create_factory_flags = DXGI_CREATE_FACTORY_DEBUG;
-		#endif
-
-		HRESULT hr = CreateDXGIFactory2(create_factory_flags, IID_PPV_ARGS(&m_dxgi_factory4));
-		VEER_ASSERT(SUCCEEDED(hr), "Failed to create DXGIFactory4, which is required for DX12! (" << hr << ")");
-
 		// Device is created :3
-		m_device = std::make_unique<dx12_render_device>( m_dxgi_factory4 );
+		m_device = std::make_unique<dx12_render_device>();
 
 		// TODO : move to rendering_thread api
 		{
@@ -33,10 +25,6 @@ namespace veer
 		m_current_frame_index = 0;
 	}
 
-	ComPtr<IDXGIFactory4> dx12_rendering_service::get_dxgi_factory()
-	{
-		return m_dxgi_factory4;
-	}
 
 	dx12_rendering_service::~dx12_rendering_service()
 	{

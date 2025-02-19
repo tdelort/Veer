@@ -16,20 +16,24 @@ namespace veer
 	class dx12_render_device : public render_device
 	{
 	public:
-		dx12_render_device( ComPtr<IDXGIFactory4>& _factory_handle );
+		dx12_render_device();
+		~dx12_render_device() override;
 
 		ID3D12Device2* get_api_handle() const;
+		ComPtr<IDXGIFactory4> get_dxgi_factory();
 
 		command_queue& get_command_queue(command_buffer::type _corresponding_command_buffer_type) override;
 
 		// factory part
 		std::unique_ptr<swap_chain> create_swap_chain(rendering_service& _render_service, window& _window, vec2u _size) override;
+
 	private:
 		std::unique_ptr<dx12_command_queue> m_graphics_queue;
 
 		ComPtr<ID3D12Device2> m_api_device_handle;
+		ComPtr<IDXGIFactory4> m_dxgi_factory;
 #if defined(_DEBUG)
-		ComPtr<ID3D12InfoQueue> m_info_queue;
+		ComPtr<IDXGIInfoQueue> m_info_queue;
 #endif // defined(_DEBUG)
 	};
 }

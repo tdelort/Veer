@@ -127,6 +127,18 @@
     <ClInclude Include="Display\rendering_thread.h">
       <Filter>Display</Filter>
     </ClInclude>
+    <ClInclude Include="Display\render_device_resource.h">
+      <Filter>Display</Filter>
+    </ClInclude>
+    <ClInclude Include="Display\resource_synchronisation.h">
+      <Filter>Display</Filter>
+    </ClInclude>
+    <ClInclude Include="Display\DX12\dx12_render_device_resource.h">
+      <Filter>Display\DX12</Filter>
+    </ClInclude>
+    <ClInclude Include="Display\DX12\dx12_resource_synchronisation.h">
+      <Filter>Display\DX12</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\Math\matrix3x4f.cpp">
@@ -180,6 +192,12 @@
       <Filter>Display</Filter>
     </ClCompile>
     <ClCompile Include="Display\DX12\dx12_command_queue.cpp">
+      <Filter>Display\DX12</Filter>
+    </ClCompile>
+    <ClCompile Include="Display\render_device_resource.cpp">
+      <Filter>Display</Filter>
+    </ClCompile>
+    <ClCompile Include="Display\DX12\dx12_render_device_resource.cpp">
       <Filter>Display\DX12</Filter>
     </ClCompile>
   </ItemGroup>

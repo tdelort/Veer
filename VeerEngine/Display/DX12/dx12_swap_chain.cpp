@@ -13,7 +13,8 @@ namespace veer
     {
 		bool allow_tearing = false;
 		
-		ComPtr<IDXGIFactory4> factory4 = _render_service.get_dxgi_factory();
+		dx12_render_device& dx12_device = static_cast<dx12_render_device&>(_render_service.get_render_device());
+		ComPtr<IDXGIFactory4> factory4 = dx12_device.get_dxgi_factory();
 
 		// DXGI 4 supposed since DX12
 		ComPtr<IDXGIFactory5> factory5;
@@ -28,7 +29,6 @@ namespace veer
 		
 		// get hwnd from window
 		HWND windows_window_handle = _window.get_os_window_handle();
-		dx12_render_device& dx12_device = static_cast<dx12_render_device&>(_render_service.get_render_device());
 
 		// Create swap chain
 		{
@@ -85,18 +85,16 @@ namespace veer
 		 
 				id3d12_device->CreateRenderTargetView(back_buffer_resource.Get(), nullptr, rtv_handle);
 		 
-				m_back_buffers_resources[i] = back_buffer_resource;
-				m_back_buffers_cpu_handles[i] = rtv_handle;
+				m_back_buffers_resources[i] = std::make_unique<dx12_render_device_resource>(resource_sync_state::Present, 1);
+				m_back_buffers_resources[i]->fill_resource(back_buffer_resource, rtv_handle);
 		 
 				rtv_handle.ptr += rtv_descriptor_size;
 			}
 		}
     }
 
-	dx12_swap_chain::~dx12_swap_chain()
+	dx12_swap_chain::~dx12_swap_chain() 
 	{
-		for (size_t i = 0; i < s_swap_chain_buffer_count; ++i)
-			m_back_buffers_resources[i].Reset();
 	}
 
 	void dx12_swap_chain::present(size_t _sync_intervals)
@@ -107,14 +105,14 @@ namespace veer
 		VEER_ASSERT(SUCCEEDED(hr), "Failed to Present swap chain");
 	}
 
-	ComPtr<ID3D12Resource> dx12_swap_chain::get_backbuffer_resource( uint64_t _frame_index )
+	render_device_resource* dx12_swap_chain::get_current_backbuffer()
 	{
-		return m_back_buffers_resources[_frame_index % s_swap_chain_buffer_count];
+		return m_back_buffers_resources[get_backbuffer_index()].get();
 	}
 
-	D3D12_CPU_DESCRIPTOR_HANDLE dx12_swap_chain::get_backbuffer_cpu_handle( uint64_t _frame_index )
+	size_t dx12_swap_chain::get_backbuffer_index()
 	{
-		return m_back_buffers_cpu_handles[_frame_index % s_swap_chain_buffer_count];
+		UINT index = m_api_swap_chain_handle->GetCurrentBackBufferIndex();
+		return (size_t)index;
 	}
-
 }

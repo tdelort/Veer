@@ -7,6 +7,7 @@ namespace veer
 {
 	class render_device;
 	class window;
+	class render_device_resource;
 
 	class swap_chain
 	{
@@ -14,6 +15,10 @@ namespace veer
 		swap_chain();
 
 		virtual ~swap_chain() = 0 {};
+
+		virtual render_device_resource* get_current_backbuffer() = 0;
+
+		virtual size_t get_backbuffer_index() = 0;
 
 		virtual void present(size_t _sync_intervals) = 0;
 

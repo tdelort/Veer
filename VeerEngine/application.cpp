@@ -7,10 +7,6 @@
 #include "Display/glfw/glfw_windowing_service.h"
 #include "Display/DX12/dx12_rendering_service.h"
 
-// TODO remove
-#include "Display/DX12/dx12_command_buffer.h"
-#include "Display/DX12/dx12_swap_chain.h"
-
 #include <chrono>
 
 namespace veer
@@ -46,8 +42,9 @@ namespace veer
 
 	application::~application()
 	{
-		m_window_service.release();
-		m_render_service.release();
+		// controlling deletion order
+		m_window_service.reset();
+		m_render_service.reset();
 	}
 
 	const application_config& application::get_config() const
@@ -78,9 +75,10 @@ namespace veer
 		command_queue& graphics_command_queue = device.get_command_queue(command_buffer::type::Graphics);
 
 		uint64_t frame_index = 0;
+		size_t backbuffer_index = swap_chain->get_backbuffer_index();
 
 		uint64_t fence_values = 0;
-		uint64_t frame_fence_values[swap_chain::s_swap_chain_buffer_count] = {};
+		uint64_t backbuffers_fence_values[swap_chain::s_swap_chain_buffer_count] = {};
 		
 		std::chrono::high_resolution_clock clock;
 		auto t0_global = clock.now();
@@ -112,36 +110,29 @@ namespace veer
 				current_win_size = this_frame_win_size;
 				swap_chain = nullptr; // destroy old swap_chain
 				swap_chain = device.create_swap_chain(*m_render_service, *window, current_win_size);
+
+				for (size_t i = 0; i < swap_chain::s_swap_chain_buffer_count; ++i)
+				{
+					backbuffers_fence_values[i] = backbuffers_fence_values[backbuffer_index];
+				}
 			}
 			
 			std::unique_ptr<command_buffer> test_frame_command_buffer = m_render_service->start_recording_command_buffer(command_buffer::type::Graphics);
 
-			ComPtr<ID3D12Resource> current_backbuffer_resource = static_cast<dx12_swap_chain*>(swap_chain.get())->get_backbuffer_resource( frame_index );
-			D3D12_CPU_DESCRIPTOR_HANDLE current_backbuffer_cpu_handle = static_cast<dx12_swap_chain*>(swap_chain.get())->get_backbuffer_cpu_handle( frame_index );
+			render_device_resource* backbuffer_resource = swap_chain->get_current_backbuffer();
 			{
 				// Transition RT to RenderTarget state (needed for Clear call)
-				D3D12_RESOURCE_BARRIER barrier = {};
-				barrier.Transition.pResource = current_backbuffer_resource.Get();
-				barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
-				barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
-				barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+				test_frame_command_buffer->transition_barrier(backbuffer_resource, resource_sync_state::Present, resource_sync_state::RenderTarget);
  
-				static_cast<dx12_command_buffer*>(test_frame_command_buffer.get())->get_api_handle()->ResourceBarrier(1, &barrier);
 
 				// Clear RT
-				float clearColor[] = { 0.4f, 0.6f, 0.9f, 1.0f };
-				static_cast<dx12_command_buffer*>(test_frame_command_buffer.get())->get_api_handle()->ClearRenderTargetView(current_backbuffer_cpu_handle, clearColor, 0, nullptr);
+				vec4f clear_color( 0.4f, 0.6f, 0.9f, 1.0f );
+				test_frame_command_buffer->clear_render_target(backbuffer_resource, clear_color);
 			}
 
 			{
 				// Transition RT to Present state (needed for Present call)
-				D3D12_RESOURCE_BARRIER barrier = {};
-				barrier.Transition.pResource = current_backbuffer_resource.Get();
-				barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
-				barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
-				barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-
-				static_cast<dx12_command_buffer*>(test_frame_command_buffer.get())->get_api_handle()->ResourceBarrier(1, &barrier);
+				test_frame_command_buffer->transition_barrier(backbuffer_resource, resource_sync_state::RenderTarget, resource_sync_state::Present);
 			}
 
 			m_render_service->stop_recording_command_buffer( *test_frame_command_buffer );
@@ -149,18 +140,20 @@ namespace veer
 			command_buffer* test_frame_command_buffer_raw_ptr = test_frame_command_buffer.get();
 			graphics_command_queue.execute_command_buffers(veer::span<command_buffer*>(&test_frame_command_buffer_raw_ptr));
 
-			swap_chain->present( 0 );
+			{
+				swap_chain->present( 0 );
 
-			// Signal current back buffer usage is ended
-			fence_values++;
-			frame_fence_values[frame_index % swap_chain::s_swap_chain_buffer_count] = fence_values;
-			graphics_command_queue.signal(fence_values);
+				// Signal current back buffer usage is ended
+				fence_values++;
+				backbuffers_fence_values[backbuffer_index] = fence_values;
+				graphics_command_queue.signal(fence_values);
+			}
 
 			frame_index++;
+			backbuffer_index = swap_chain->get_backbuffer_index();
 
 			// Wait for next frame back buffer end of next frame back buffer
-			graphics_command_queue.wait_for_value(frame_fence_values[frame_index % swap_chain::s_swap_chain_buffer_count]);
-
+			graphics_command_queue.wait_for_value(backbuffers_fence_values[backbuffer_index]);
 		}
 		return 0;
 	}

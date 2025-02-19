@@ -15,7 +15,7 @@
     <Keyword>Win32Proj</Keyword>
     <ProjectGuid>{54545be0-81a5-4f24-bb71-215261759667}</ProjectGuid>
     <RootNamespace>veer</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.22000.0</WindowsTargetPlatformVersion>
     <ProjectName>VeerEngine</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -67,7 +67,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
       <AdditionalLibraryDirectories>$(VULKAN_SDK)\Lib;$(SolutionDir)\VeerEngine\Libraries\glfw-3.3.8.bin.WIN64\lib-vc2017;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>vulkan-1.lib;glfw3.lib;d3d12.lib;dxgi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>vulkan-1.lib;glfw3.lib;d3d12.lib;dxgi.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -92,7 +92,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
       <AdditionalLibraryDirectories>$(VULKAN_SDK)\Lib;$(SolutionDir)\VeerEngine\Libraries\glfw-3.3.8.bin.WIN64\lib-vc2017;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>vulkan-1.lib;glfw3.lib;d3d12.lib;dxgi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>vulkan-1.lib;glfw3.lib;d3d12.lib;dxgi.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -116,6 +116,9 @@
     <ClInclude Include="Core\singleton.h" />
     <ClInclude Include="Display\command_buffer.h" />
     <ClInclude Include="Display\command_queue.h" />
+    <ClInclude Include="Display\DX12\dx12_render_device_resource.h" />
+    <ClInclude Include="Display\DX12\dx12_resource_synchronisation.h" />
+    <ClInclude Include="Display\render_device_resource.h" />
     <ClInclude Include="Display\DX12\dx12_command_buffer.h" />
     <ClInclude Include="Display\DX12\dx12_command_queue.h" />
     <ClInclude Include="Display\DX12\dx12_pch.h" />
@@ -127,6 +130,7 @@
     <ClInclude Include="Display\rendering_service.h" />
     <ClInclude Include="Display\rendering_thread.h" />
     <ClInclude Include="Display\render_device.h" />
+    <ClInclude Include="Display\resource_synchronisation.h" />
     <ClInclude Include="Display\swap_chain.h" />
     <ClInclude Include="Display\window.h" />
     <ClInclude Include="Display\windowing_service.h" />
@@ -141,6 +145,8 @@
     <ClCompile Include="Core\Math\quaternion.hpp" />
     <ClCompile Include="Display\command_buffer.cpp" />
     <ClCompile Include="Display\command_queue.cpp" />
+    <ClCompile Include="Display\DX12\dx12_render_device_resource.cpp" />
+    <ClCompile Include="Display\render_device_resource.cpp" />
     <ClCompile Include="Display\DX12\dx12_command_buffer.cpp" />
     <ClCompile Include="Display\DX12\dx12_command_queue.cpp" />
     <ClCompile Include="Display\DX12\dx12_rendering_service.cpp" />

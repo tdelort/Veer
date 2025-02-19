@@ -5,6 +5,10 @@
 #include <dxgi1_6.h>
 #include <d3dcompiler.h>
 
+#if defined(_DEBUG)
+#include <dxgidebug.h>
+#endif // defined(_DEBUG)
+
 using namespace Microsoft::WRL;
 
 #endif // DISPLAY_DX12_DX12PCH_H_INCLUDED

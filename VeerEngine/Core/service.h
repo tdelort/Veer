@@ -17,6 +17,8 @@ namespace veer
 	class service_generic : public T
 	{
 	public:
+		virtual ~service_generic() {}
+
 		std::type_index get_type_id() const
 		{
 			return std::type_index(typeid(T));

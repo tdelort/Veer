@@ -9,8 +9,6 @@ namespace veer
 	dx12_command_queue::dx12_command_queue( dx12_render_device& _device, command_buffer::type _type )
 		: command_queue(_type)
 	{
-		ComPtr<ID3D12CommandQueue> d3d12_command_queue;
-	 
 		D3D12_COMMAND_QUEUE_DESC desc = {};
 		desc.Type = dx12_command_buffer::s_to_dx12_type( _type );
 		desc.Priority = D3D12_COMMAND_QUEUE_PRIORITY_NORMAL;
@@ -24,6 +22,10 @@ namespace veer
 		ComPtr<ID3D12Fence> fence;
 		hr = dx12_device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&m_fence));
 		VEER_ASSERT(SUCCEEDED(hr), "Failed to create command queue fence (" << hr << ")");
+	}
+
+	dx12_command_queue::~dx12_command_queue()
+	{
 	}
 
 	void dx12_command_queue::execute_command_buffers(span<command_buffer*> _command_buffers)

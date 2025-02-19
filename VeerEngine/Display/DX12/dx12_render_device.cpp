@@ -16,17 +16,39 @@
 
 namespace veer
 {
-	dx12_render_device::dx12_render_device( ComPtr<IDXGIFactory4>& _factory_handle )
+	dx12_render_device::dx12_render_device()
 	{
-		ComPtr<IDXGIAdapter1> adapter;
-		for (UINT adapter_index = 0; DXGI_ERROR_NOT_FOUND != _factory_handle->EnumAdapters1(adapter_index, &adapter); ++adapter_index)
-		{
-#if defined(_DEBUG)
-			ComPtr<ID3D12Debug> debug_interface;
+		UINT factory_flags = 0;
 
-			D3D12GetDebugInterface(IID_PPV_ARGS(&debug_interface));
+#if defined(_DEBUG)
+		ComPtr<ID3D12Debug> debug_interface;
+		if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debug_interface))))
+		{
 			debug_interface->EnableDebugLayer();
+		}
+		else
+		{
+			VEER_LOG_ERROR("Failed to get ID3D12 Debug Interface ");
+		}
+
+		if (SUCCEEDED(DXGIGetDebugInterface1(0, IID_PPV_ARGS(&m_info_queue))))
+		{
+			factory_flags = DXGI_CREATE_FACTORY_DEBUG;
+
+			m_info_queue->SetBreakOnSeverity(DXGI_DEBUG_ALL, DXGI_INFO_QUEUE_MESSAGE_SEVERITY_CORRUPTION, TRUE);
+			m_info_queue->SetBreakOnSeverity(DXGI_DEBUG_ALL, DXGI_INFO_QUEUE_MESSAGE_SEVERITY_ERROR, TRUE);
+			m_info_queue->SetBreakOnSeverity(DXGI_DEBUG_ALL, DXGI_INFO_QUEUE_MESSAGE_SEVERITY_WARNING, TRUE);
+		}
 #endif // defined(_DEBUG)
+
+		HRESULT hr = CreateDXGIFactory2(factory_flags, IID_PPV_ARGS(&m_dxgi_factory));
+		VEER_ASSERT(SUCCEEDED(hr), "Failed to create DXGIFactory4, which is required for DX12! (" << hr << ")");
+
+
+
+		ComPtr<IDXGIAdapter1> adapter;
+		for (UINT adapter_index = 0; DXGI_ERROR_NOT_FOUND != m_dxgi_factory->EnumAdapters1(adapter_index, &adapter); ++adapter_index)
+		{
 
 			DXGI_ADAPTER_DESC1 desc;
 			HRESULT hr = adapter->GetDesc1(&desc);
@@ -50,10 +72,10 @@ namespace veer
 		}
 
 		ComPtr<ID3D12Device2> d3d12_device_2;
-		HRESULT hr = D3D12CreateDevice(adapter.Get(), D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&d3d12_device_2));
+		hr = D3D12CreateDevice(adapter.Get(), D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&d3d12_device_2));
 		VEER_ASSERT(SUCCEEDED(hr), "Failed to create D3D12 Device (" << hr << ")");
 
-#if defined(_DEBUG)
+#if 0
 		if (SUCCEEDED(d3d12_device_2.As(&m_info_queue)))
 		{
 			m_info_queue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_CORRUPTION, TRUE);
@@ -103,6 +125,18 @@ namespace veer
 		//m_copy_queue = std::unique_ptr<dx12_command_queue>(new dx12_command_queue( this, command_buffer::type::Copy ));
 	}
 
+	dx12_render_device::~dx12_render_device()
+	{
+#if defined(_DEBUG)
+		ComPtr<IDXGIDebug1> dxgi_debug;
+
+		if (SUCCEEDED(DXGIGetDebugInterface1(0, IID_PPV_ARGS(&dxgi_debug))))
+		{
+			dxgi_debug->ReportLiveObjects( DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_FLAGS(DXGI_DEBUG_RLO_SUMMARY | DXGI_DEBUG_RLO_IGNORE_INTERNAL) );
+		}
+#endif // defined(_DEBUG)
+	}
+
 	command_queue& dx12_render_device::get_command_queue(command_buffer::type _corresponding_command_buffer_type)
 	{
 		// TODO use arg when supporting more queues
@@ -119,5 +153,10 @@ namespace veer
 	ID3D12Device2* dx12_render_device::get_api_handle() const
 	{
 		return m_api_device_handle.Get();
+	}
+
+	ComPtr<IDXGIFactory4> dx12_render_device::get_dxgi_factory()
+	{
+		return m_dxgi_factory;
 	}
 }

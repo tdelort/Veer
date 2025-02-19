@@ -2,6 +2,9 @@
 #include "dx12_command_buffer.h"
 
 #include <Display/DX12/dx12_render_device.h>
+#include <Display/render_device_resource.h>
+#include <Display/DX12/dx12_render_device_resource.h>
+#include <Display/DX12/dx12_resource_synchronisation.h>
 
 namespace veer
 {
@@ -34,12 +37,12 @@ namespace veer
 
 	void dx12_command_buffer::open( dx12_render_device& _device, ComPtr<ID3D12CommandAllocator>& _command_allocator )
 	{
-		D3D12_COMMAND_LIST_TYPE dx12_type = dx12_command_buffer::s_to_dx12_type(m_type);
+		const D3D12_COMMAND_LIST_TYPE dx12_type = dx12_command_buffer::s_to_dx12_type(m_type);
 		VEER_ASSERT(m_type == command_buffer::type::Graphics, "We don't support other types yet");
 
 		if (m_command_list_handle == nullptr)
 		{
-			HRESULT hr = _device.get_api_handle()->CreateCommandList(0, dx12_type, _command_allocator.Get(), nullptr, IID_PPV_ARGS(&m_command_list_handle));
+			const HRESULT hr = _device.get_api_handle()->CreateCommandList(0, dx12_type, _command_allocator.Get(), nullptr, IID_PPV_ARGS(&m_command_list_handle));
 			VEER_ASSERT(SUCCEEDED(hr), "Failed to create command list (" << hr << ")");
 		}
 		else
@@ -52,9 +55,25 @@ namespace veer
 	{
 		if (m_command_list_handle != nullptr)
 		{
-			HRESULT hr = m_command_list_handle->Close();
+			const HRESULT hr = m_command_list_handle->Close();
 			VEER_ASSERT(SUCCEEDED(hr), "Failed to properly close command list (" << hr << ")");
 		}
+	}
+
+	void dx12_command_buffer::transition_barrier(render_device_resource* _resource, resource_sync_state _from_state, resource_sync_state _to_state)
+	{
+		D3D12_RESOURCE_BARRIER barrier = {};
+		barrier.Transition.pResource = static_cast<dx12_render_device_resource*>( _resource )->get_resource().Get();
+		barrier.Transition.StateBefore = s_convert( _from_state );
+		barrier.Transition.StateAfter = s_convert( _to_state );
+		barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+		get_api_handle()->ResourceBarrier(1, &barrier);
+	}
+
+	void dx12_command_buffer::clear_render_target(render_device_resource* _render_target_resource, vec4f _color)
+	{
+		const float arr[4] = { _color[0], _color[1], _color[2], _color[3] };
+		get_api_handle()->ClearRenderTargetView( static_cast<dx12_render_device_resource*>( _render_target_resource )->get_cpu_descriptor_handle(), arr, 0, nullptr);
 	}
 
 	ComPtr<ID3D12GraphicsCommandList> dx12_command_buffer::get_api_handle()

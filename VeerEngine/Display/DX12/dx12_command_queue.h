@@ -14,6 +14,7 @@ namespace veer
 	{
 	public:
 		dx12_command_queue( dx12_render_device& _device, command_buffer::type _type );
+		~dx12_command_queue() override;
 
 		void execute_command_buffers(span<command_buffer*> _command_buffers) override;
 
