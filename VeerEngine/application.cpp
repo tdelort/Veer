@@ -155,6 +155,14 @@ namespace veer
 			// Wait for next frame back buffer end of next frame back buffer
 			graphics_command_queue.wait_for_value(backbuffers_fence_values[backbuffer_index]);
 		}
+
+		// Wait for all previous work
+		fence_values++;
+		graphics_command_queue.signal(fence_values);
+		graphics_command_queue.wait_for_value(fence_values);
+
+		swap_chain = nullptr;
+
 		return 0;
 	}
 }

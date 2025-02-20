@@ -19,7 +19,7 @@ namespace veer
 		dx12_render_device();
 		~dx12_render_device() override;
 
-		ID3D12Device2* get_api_handle() const;
+		ComPtr<ID3D12Device2> get_api_handle() const;
 		ComPtr<IDXGIFactory4> get_dxgi_factory();
 
 		command_queue& get_command_queue(command_buffer::type _corresponding_command_buffer_type) override;

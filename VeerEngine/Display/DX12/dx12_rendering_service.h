@@ -22,11 +22,7 @@ namespace veer
 		std::unique_ptr<command_buffer> start_recording_command_buffer(command_buffer::type _type) override;
 		void stop_recording_command_buffer(command_buffer& _command_buffer) override;
 		// end rendering_thread
-
-		ComPtr<IDXGIFactory4> get_dxgi_factory();
 	private:
-		ComPtr<IDXGIFactory4> m_dxgi_factory4;
-
 		ComPtr<ID3D12CommandAllocator> m_command_allocators[swap_chain::s_swap_chain_buffer_count];
 	};
 }

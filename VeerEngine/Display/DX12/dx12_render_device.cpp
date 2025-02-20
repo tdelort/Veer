@@ -127,12 +127,17 @@ namespace veer
 
 	dx12_render_device::~dx12_render_device()
 	{
+		// release all before live objects reporting :)
+		m_graphics_queue.reset();
+		m_dxgi_factory.Reset();
+		m_api_device_handle.Reset();
+
 #if defined(_DEBUG)
 		ComPtr<IDXGIDebug1> dxgi_debug;
 
 		if (SUCCEEDED(DXGIGetDebugInterface1(0, IID_PPV_ARGS(&dxgi_debug))))
 		{
-			dxgi_debug->ReportLiveObjects( DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_FLAGS(DXGI_DEBUG_RLO_SUMMARY | DXGI_DEBUG_RLO_IGNORE_INTERNAL) );
+			dxgi_debug->ReportLiveObjects( DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_FLAGS(DXGI_DEBUG_RLO_ALL) );
 		}
 #endif // defined(_DEBUG)
 	}
@@ -150,9 +155,9 @@ namespace veer
 		return std::make_unique<dx12_swap_chain>(static_cast<dx12_rendering_service&>(_render_service), _window, _size);
 	}
 
-	ID3D12Device2* dx12_render_device::get_api_handle() const
+	ComPtr<ID3D12Device2> dx12_render_device::get_api_handle() const
 	{
-		return m_api_device_handle.Get();
+		return m_api_device_handle;
 	}
 
 	ComPtr<IDXGIFactory4> dx12_render_device::get_dxgi_factory()

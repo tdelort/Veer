@@ -21,7 +21,7 @@ namespace veer
 		void signal(uint64_t _value) override;
 		void wait_for_value(uint64_t _value) override;
 
-		ComPtr<ID3D12CommandQueue>& get_api_handle();
+		ComPtr<ID3D12CommandQueue> get_api_handle();
 	private:
 		ComPtr<ID3D12CommandQueue> m_command_queue_api_handle;
 

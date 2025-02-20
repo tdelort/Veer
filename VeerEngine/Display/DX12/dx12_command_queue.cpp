@@ -15,11 +15,10 @@ namespace veer
 		desc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
 		desc.NodeMask = 0;
 
-		ID3D12Device2* dx12_device = _device.get_api_handle();
+		ComPtr<ID3D12Device2> dx12_device = _device.get_api_handle();
 		HRESULT hr = dx12_device->CreateCommandQueue(&desc, IID_PPV_ARGS(&m_command_queue_api_handle));
 		VEER_ASSERT(SUCCEEDED(hr), "Failed to create command queue (" << hr << ")");
 
-		ComPtr<ID3D12Fence> fence;
 		hr = dx12_device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&m_fence));
 		VEER_ASSERT(SUCCEEDED(hr), "Failed to create command queue fence (" << hr << ")");
 	}
@@ -64,7 +63,7 @@ namespace veer
 		}
 	}
 
-	ComPtr<ID3D12CommandQueue>& dx12_command_queue::get_api_handle()
+	ComPtr<ID3D12CommandQueue> dx12_command_queue::get_api_handle()
 	{
 		return m_command_queue_api_handle;
 	}

@@ -11,12 +11,11 @@ namespace veer
 	dx12_swap_chain::dx12_swap_chain(dx12_rendering_service& _render_service, window& _window, vec2u _window_size )
 		: swap_chain()
     {
-		bool allow_tearing = false;
 		
 		dx12_render_device& dx12_device = static_cast<dx12_render_device&>(_render_service.get_render_device());
 		ComPtr<IDXGIFactory4> factory4 = dx12_device.get_dxgi_factory();
 
-		// DXGI 4 supposed since DX12
+		BOOL allow_tearing = false;
 		ComPtr<IDXGIFactory5> factory5;
         if (SUCCEEDED(factory4.As(&factory5)))
         {
@@ -51,15 +50,16 @@ namespace veer
 			ComPtr<IDXGISwapChain1> swap_chain1;
 			HRESULT hr = factory4->CreateSwapChainForHwnd( command_queue.get_api_handle().Get(), windows_window_handle, &swap_chain_desc, nullptr, nullptr, &swap_chain1);
 			VEER_ASSERT(SUCCEEDED(hr), "Failed to create swap chain (" << hr << ")");
+
+			hr = swap_chain1.As(&m_api_swap_chain_handle);
+			VEER_ASSERT(SUCCEEDED(hr), "Failed to cast swap chain to DXGI 4 version (" << hr << ")");
 	 
 			hr = factory4->MakeWindowAssociation(windows_window_handle, DXGI_MWA_NO_ALT_ENTER);
 			VEER_ASSERT(SUCCEEDED(hr), "Failed to create make window association (" << hr << ")");
 	 
-			hr = swap_chain1.As(&m_api_swap_chain_handle);
-			VEER_ASSERT(SUCCEEDED(hr), "Failed to cast swap chain to DXGI 4 version (" << hr << ")");
 		}
 		
-		ID3D12Device2* id3d12_device = dx12_device.get_api_handle();
+		ComPtr<ID3D12Device2> id3d12_device = dx12_device.get_api_handle();
 		// Create backbuffer descriptors
 		{
 			D3D12_DESCRIPTOR_HEAP_DESC desc = {};
@@ -95,6 +95,13 @@ namespace veer
 
 	dx12_swap_chain::~dx12_swap_chain() 
 	{
+		for (size_t i = 0; i < s_swap_chain_buffer_count; ++i)
+		{
+			m_back_buffers_resources[i].reset();
+		}
+
+		m_back_buffers_descritor_heap.Reset();
+		m_api_swap_chain_handle.Reset();
 	}
 
 	void dx12_swap_chain::present(size_t _sync_intervals)

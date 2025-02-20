@@ -11,24 +11,31 @@ namespace veer
 	dx12_rendering_service::dx12_rendering_service()
 	{
 		// Device is created :3
-		m_device = std::make_unique<dx12_render_device>();
+		std::unique_ptr<dx12_render_device> device = std::make_unique<dx12_render_device>();
 
 		// TODO : move to rendering_thread api
 		{
-			ID3D12Device2* device_handle = static_cast<dx12_render_device*>(m_device.get())->get_api_handle();
+			ComPtr<ID3D12Device2> device_handle = device->get_api_handle();
 			for (size_t i = 0; i < swap_chain::s_swap_chain_buffer_count; ++i)
 			{
 				device_handle->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&m_command_allocators[i]));
 			}
 		}
-
+		m_device = std::move( device );
 		m_current_frame_index = 0;
 	}
 
 
 	dx12_rendering_service::~dx12_rendering_service()
 	{
-		// TODO : CLEANUP !!!
+		// controlling cleanup order
+		for (size_t i = 0; i < swap_chain::s_swap_chain_buffer_count; ++i)
+		{
+			m_command_allocators[i]->Reset();
+			m_command_allocators[i].Reset();
+		}
+
+		m_device.reset();
 	}
 
 
