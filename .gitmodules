@@ -1,5 +1,5 @@
-[submodule "Libraries/D3D12MemoryAllocator"]
-	path = Libraries/D3D12MemoryAllocator
+[submodule "libraries/D3D12MemoryAllocator"]
+	path = libraries/D3D12MemoryAllocator
 	url = https://github.com/GPUOpen-LibrariesAndSDKs/D3D12MemoryAllocator.git
 [submodule "libraries/glfw"]
 	path = libraries/glfw
