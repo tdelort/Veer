@@ -24,6 +24,10 @@ set(GLFW_PATH libraries/glfw)
 set(GLFW_TARGET glfw)
 add_subdirectory(${GLFW_PATH})
 
+# D3D12MA build 
+set(D3D12MA_PATH libraries/D3D12MemoryAllocator)
+set(D3D12MA_TARGET D3D12MemoryAllocator)
+add_subdirectory(${D3D12MA_PATH})
 
 # this project build 
 add_subdirectory(src)
@@ -49,7 +53,9 @@ target_link_directories(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME}
     PUBLIC
         ${GLFW_TARGET}
+        ${D3D12MA_TARGET}
         d3d12.lib
         dxgi.lib
         dxguid.lib
+        d3dcompiler.lib
 )

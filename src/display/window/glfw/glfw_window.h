@@ -5,10 +5,10 @@
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 
-#include "core/singleton.h"
-#include "core/Math/vec.h"
-#include "display/windowing_service.h"
-#include "display/window.h"
+#include <core/singleton.h>
+#include <core/math/vec.h>
+#include <display/window/windowing_service.h>
+#include <display/window/window.h>
 
 struct GLFWwindow;
 

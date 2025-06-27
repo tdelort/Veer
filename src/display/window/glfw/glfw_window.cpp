@@ -1,6 +1,6 @@
 #include "glfw_window.h"
 
-#include <application.h>
+#include <application/application.h>
 
 #define GLFW_EXPOSE_NATIVE_WIN32
 //#define GLFW_EXPOSE_NATIVE_WGL
