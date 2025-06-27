@@ -14,14 +14,18 @@ set_target_properties(
     CMAKE_CXX_EXTENSIONS OFF
 )
 
+
 # GLFW build 
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
-set(GLFW_PATH "libraries/glfw-3.3.8.bin.WIN64")
+
+set(GLFW_PATH libraries/glfw)
 set(GLFW_TARGET glfw)
 add_subdirectory(${GLFW_PATH})
 
+
+# this project build 
 add_subdirectory(src)
 
 target_include_directories(${PROJECT_NAME}
