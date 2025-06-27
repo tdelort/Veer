@@ -4,7 +4,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 project(VeerEngine VERSION 0.1.0)
 
-add_library(${PROJECT_NAME} SHARED )
+add_library(${PROJECT_NAME} STATIC )
 
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_17)
 set_target_properties(
@@ -14,31 +14,38 @@ set_target_properties(
     CMAKE_CXX_EXTENSIONS OFF
 )
 
+# GLFW build 
+set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+set(GLFW_PATH "libraries/glfw-3.3.8.bin.WIN64")
+set(GLFW_TARGET glfw)
+add_subdirectory(${GLFW_PATH})
+
 add_subdirectory(src)
 
 target_include_directories(${PROJECT_NAME}
     PUBLIC
         include
 
-    PRIVATE 
+    # TODO : meh, when I have a clear seperation between private and public API ( in include vs src ) I should get this back to PRIVATE
+    PUBLIC 
         src
 
     PRIVATE 
         libraries/glfw-3.3.8.bin.WIN64/include
         libraries/D3D12MemoryAllocator/include
-        ${VULKAN_SDK}/Include
 )
 
 target_link_directories(${PROJECT_NAME}
-    PRIVATE 
-        ${VULKAN_SDK}/Lib
+    PUBLIC 
         "libraries/glfw-3.3.8.bin.WIN64/lib-vc2017"
 )
 
 target_link_libraries(${PROJECT_NAME}
-    vulkan-1.lib
-    glfw3.lib
-    d3d12.lib
-    dxgi.lib
-    dxguid.lib
+    PUBLIC
+        ${GLFW_TARGET}
+        d3d12.lib
+        dxgi.lib
+        dxguid.lib
 )
