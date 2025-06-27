@@ -1,0 +1,3 @@
+[submodule "VeerEngine/Libraries/D3D12MemoryAllocator"]
+	path = VeerEngine/Libraries/D3D12MemoryAllocator
+	url = https://github.com/GPUOpen-LibrariesAndSDKs/D3D12MemoryAllocator.git

@@ -1,0 +1,10 @@
+target_sources(${PROJECT_NAME}
+	PRIVATE
+        dx12_command_buffer.cpp
+        dx12_command_queue.cpp
+        dx12_descriptor_heap.cpp
+        dx12_render_device_resource.cpp
+        dx12_render_device.cpp
+        dx12_rendering_service.cpp
+        dx12_swap_chain.cpp
+)
