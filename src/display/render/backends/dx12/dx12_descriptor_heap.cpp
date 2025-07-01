@@ -17,6 +17,7 @@ namespace veer
 		HRESULT hr = _device.get_api_handle()->CreateDescriptorHeap(&rtv_heap_desc, IID_PPV_ARGS(&m_api_handle));
 		VEER_ASSERT(SUCCEEDED(hr), "Failed to create RTV descriptor heap (" << hr << ")");
 
+        m_first_available_descriptor_index = 0u;
         m_increment_size = _device.get_api_handle()->GetDescriptorHandleIncrementSize( _type );
         m_size = _size;
     }

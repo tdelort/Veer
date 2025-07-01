@@ -44,12 +44,12 @@ namespace veer
 {											\
 	std::stringstream VEER_LOG_INTERNAL__ss;	\
 	VEER_LOG_INTERNAL__ss << _msg;			\
-	debug::print( _level, VEER_LOG_INTERNAL__ss.str(), __FILE__, VEER_PRETTY_FUNCTION, __LINE__ ); \
+	veer::debug::print( _level, VEER_LOG_INTERNAL__ss.str(), __FILE__, VEER_PRETTY_FUNCTION, __LINE__ ); \
 }
 
-#define VEER_LOG_ERROR(_msg) VEER_LOG_INTERNAL(debug::log_level::error, _msg );
-#define VEER_LOG_WARNING(_msg) VEER_LOG_INTERNAL(debug::log_level::warn, _msg );
-#define VEER_LOG(_msg) VEER_LOG_INTERNAL(debug::log_level::log, _msg );
-#define VEER_LOG_DEBUG(_msg) VEER_LOG_INTERNAL(debug::log_level::debug, _msg );
+#define VEER_LOG_ERROR(_msg) VEER_LOG_INTERNAL(veer::debug::log_level::error, _msg );
+#define VEER_LOG_WARNING(_msg) VEER_LOG_INTERNAL(veer::debug::log_level::warn, _msg );
+#define VEER_LOG(_msg) VEER_LOG_INTERNAL(veer::debug::log_level::log, _msg );
+#define VEER_LOG_DEBUG(_msg) VEER_LOG_INTERNAL(veer::debug::log_level::debug, _msg );
 
 #endif // CORE_DEBUG_H_INCLUDED

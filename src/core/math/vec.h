@@ -1,6 +1,8 @@
 ﻿#ifndef CORE_MATH_VEC_H_INCLUDED
 #define CORE_MATH_VEC_H_INCLUDED
 
+#include <core/core.h>
+
 namespace veer
 {
     template<typename TYPE, size_t ELEM_COUNT>

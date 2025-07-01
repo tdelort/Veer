@@ -1,6 +1,5 @@
 #include "dx12_swap_chain.h"
 
-#include "dx12_rendering_service.h"
 #include "dx12_descriptor_heap.h"
 
 #include <display/render/rendering_service.h>
@@ -68,9 +67,12 @@ namespace veer
 				ComPtr<ID3D12Resource> back_buffer_resource;
 				HRESULT hr = m_api_swap_chain_handle->GetBuffer((UINT)i, IID_PPV_ARGS(&back_buffer_resource));
 				VEER_ASSERT(SUCCEEDED(hr), "Failed to retrieve swap chain back buffer resource");
+				VEER_ASSERT(back_buffer_resource.Get() != nullptr, "Retrieved swap chain back buffer resource is nullptr");
 		 
+				VEER_LOG( "here : vec2u(" << _window_size[0] << "," << _window_size[1] << ")" );
 				dx12_descriptor new_descriptor = rtv_heap.acquire_descriptor();
 				id3d12_device->CreateRenderTargetView(back_buffer_resource.Get(), nullptr, new_descriptor.m_handle );
+				VEER_LOG( "here2");
 		 
 				m_back_buffers_resources[i] = std::make_unique<dx12_render_device_resource>(resource_sync_state::Present, 1);
 				m_back_buffers_resources[i]->fill_resource(back_buffer_resource, new_descriptor);

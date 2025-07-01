@@ -24,6 +24,9 @@ set(GLFW_PATH libraries/glfw)
 set(GLFW_TARGET glfw)
 add_subdirectory(${GLFW_PATH})
 
+# don't need it yet
+# find_package(OpenGL REQUIRED)
+
 # D3D12MA build 
 set(D3D12MA_PATH libraries/D3D12MemoryAllocator)
 set(D3D12MA_TARGET D3D12MemoryAllocator)
@@ -52,6 +55,8 @@ target_link_directories(${PROJECT_NAME}
 
 target_link_libraries(${PROJECT_NAME}
     PUBLIC
+        # don't need it yet
+        # OpenGL::GL
         ${GLFW_TARGET}
         ${D3D12MA_TARGET}
         d3d12.lib

@@ -71,12 +71,13 @@ namespace veer
 	{
 		//windowing_service& ws = windowing_service::instance();
 
-
 		render_device& device = m_render_service->get_render_device();
 
 		const vec2u initial_win_size(640u, 480u);
 		window* window = m_window_service->create_window(initial_win_size);
 		VEER_ASSERT(window != nullptr, ("Wrong handle to window"));
+		VEER_LOG( "we have a window yipee" );
+
 
 		vec2u current_win_size = window->get_size();
 
@@ -86,6 +87,7 @@ namespace veer
 
 		uint64_t fence_values = 0;
 
+#if 0
 		// TODO : abstractize
 		ComPtr<ID3D12RootSignature> root_signature_obj;
 		{
@@ -340,6 +342,7 @@ namespace veer
 			vertex_buffer_view.StrideInBytes = sizeof( float ) * vertex_size; 
 			vertex_buffer_view.SizeInBytes = vertex_buffer_size_in_bytes;
 		}
+#endif // 0
 
 		
 
@@ -399,6 +402,7 @@ namespace veer
 
 				// Draw !!
 
+				#if 0
 				dx12_command_buffer* dx12_test_frame_command_buffer = static_cast<dx12_command_buffer*>(test_frame_command_buffer.get());
 
 				D3D12_VIEWPORT viewport;
@@ -427,6 +431,7 @@ namespace veer
 				dx12_test_frame_command_buffer->get_api_handle()->IASetVertexBuffers(0, 1, &vertex_buffer_view);
 				dx12_test_frame_command_buffer->get_api_handle()->IASetIndexBuffer( &index_buffer_view );
 				dx12_test_frame_command_buffer->get_api_handle()->DrawInstanced(3, 1, 0, 0);
+				#endif 0
 			}
 
 			{

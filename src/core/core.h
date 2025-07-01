@@ -20,6 +20,8 @@
 #include <set>
 #include <array>
 
+#include <type_traits>
+
 // Custom STD Containers
 #include <core/Containers/span.h>
 
