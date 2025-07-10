@@ -1,10 +1,10 @@
-# Veer Engine
+# Veer
 
-Renamed MIR to Veer. Old name didn't have a meaning really close to what this project is apart from the "modular" part of a space station (and yet, this is not the main purpose of the project), plus Mir seemed to be an already used name (at least glfw mentions a Mir lib in its patch logs)  
+> If you wish to make an apple pie from scratch, you must first invent the universe  
+--- Carl Sagan
 
-## Description  
-
-Game Engine made to learn about as many things as possible about game engines.  
+Veer is the low level framework from which I'll build my game engine, using as little dependencies as possible (the goal being to learn things)   
+The first apple pie will probably be a flight simulator game  
 
 ## Tasks
 
