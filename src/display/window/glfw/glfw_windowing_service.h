@@ -1,5 +1,4 @@
-#ifndef DISPLAY_GLFW_GLFW_WINDOWING_SYSTEM_H_INCLUDED
-#define DISPLAY_GLFW_GLFW_WINDOWING_SYSTEM_H_INCLUDED
+#pragma once
 
 #include <core/core.h>
 #include <display/window/windowing_service.h>
@@ -7,7 +6,7 @@
 
 struct GLFWwindow;
 
-namespace veer
+namespace veer::display::window
 {
 	class glfw_windowing_service : public service_generic<windowing_service>
 	{
@@ -15,7 +14,7 @@ namespace veer
 		glfw_windowing_service();
 		virtual ~glfw_windowing_service() override;
 
-		window* create_window(vec2u _dims) override;
+		window* create_window(veer::math::vec2u _dims) override;
 
 		window* get_window(size_t _index) const override;
 		size_t get_window_count() override;
@@ -23,5 +22,3 @@ namespace veer
 		void destroy_window(size_t _index) override;
 	};
 }
-
-#endif // DISPLAY_GLFW_GLFW_WINDOWING_SYSTEM_H_INCLUDED

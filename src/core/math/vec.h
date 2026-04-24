@@ -1,17 +1,21 @@
-﻿#ifndef CORE_MATH_VEC_H_INCLUDED
-#define CORE_MATH_VEC_H_INCLUDED
+﻿#pragma once
 
 #include <core/core.h>
+#include <core/concepts.h>
 
-namespace veer
+// TODO : implement it
+// #define VEC_SIMD
+
+namespace veer::math
 {
-    template<typename TYPE, size_t ELEM_COUNT>
+    template<arithmetic TYPE, size_t ELEM_COUNT>
     struct vec
     {
     public:
         using value_type = TYPE;
         using type = vec<TYPE, ELEM_COUNT>;
-        size_t m_size = ELEM_COUNT;
+		using size_type = size_t;
+        size_type m_size = ELEM_COUNT;
 
     protected:
 #if defined( VEC_SIMD )
@@ -27,76 +31,93 @@ namespace veer
         
         vec(TYPE _e);
 
-		template<typename ...ARGS, typename = typename std::enable_if<(sizeof...(ARGS) == ELEM_COUNT)>::type>
+		template<arithmetic ...ARGS, typename = typename std::enable_if<(sizeof...(ARGS) == ELEM_COUNT)>::type>
         vec(ARGS&&... _args)
-            : m_data{ std::forward<ARGS>(_args)... }
+            : m_data{ std::forward<TYPE>(_args)... }
         { }
+		
+		// TODO : add copy/move ctors + cast ctors
+		template<arithmetic OTHER_TYPE, size_t OTHER_ELEM_COUNT, typename = typename std::enable_if<ELEM_COUNT == OTHER_ELEM_COUNT>::type>
+		vec( const vec<OTHER_TYPE, OTHER_ELEM_COUNT>& _other )
+		{
+			for( size_t i = 0; i < ELEM_COUNT; ++i )
+				m_data[i] = _other[i];
+		}
+		
+        [[nodiscard]] TYPE operator[](size_type _index) const;
+        TYPE& operator[](size_type _index);
 
-		//template<size_t VEC_SIZE, typename ...ARGS, typename = typename std::enable_if<( (sizeof...(Args) + VEC_SIZE) == COUNT)>::type>
-        //vec(const vec<TYPE, VEC_SIZE> _vec, ARGS&&... _args)
-        //{
-        //}
 
-        [[nodiscard]] TYPE operator[](size_t _index) const;
-        TYPE& operator[](size_t _index);
+        [[nodiscard]] TYPE x() const requires veer::greater<ELEM_COUNT, 0u>;
+        TYPE& x() requires veer::greater<ELEM_COUNT, 0u>;
+		      
+        [[nodiscard]] TYPE y() const requires veer::greater<ELEM_COUNT, 1u>;
+        TYPE& y() requires veer::greater<ELEM_COUNT, 1u>;
+		      
+        [[nodiscard]] TYPE z() const requires veer::greater<ELEM_COUNT, 2u>;
+        TYPE& z() requires veer::greater<ELEM_COUNT, 2u>;
 
-		template<typename E0>                                                   
-		[[nodiscard]] vec<TYPE, ELEM_COUNT>& operator+=(E0 _other);                     
-		template<typename E0>                                                   
-		[[nodiscard]] vec<TYPE, ELEM_COUNT>& operator+=(const vec<E0, ELEM_COUNT>& _other);     
+        [[nodiscard]] TYPE w() const requires veer::greater<ELEM_COUNT, 3u>;
+        TYPE& w() requires veer::greater<ELEM_COUNT, 3u>;
+
+
+		template<arithmetic OTHER_TYPE>                                                   
+		[[nodiscard]] vec<TYPE, ELEM_COUNT>& operator+=(OTHER_TYPE _other);                     
+		template<arithmetic OTHER_TYPE>                                                   
+		[[nodiscard]] vec<TYPE, ELEM_COUNT>& operator+=(const vec<OTHER_TYPE, ELEM_COUNT>& _other);     
 																				
-		template<typename E0>                                                   
-		[[nodiscard]] vec<TYPE, ELEM_COUNT>& operator-=(E0 _other);                     
-		template<typename E0>                                                   
-		[[nodiscard]] vec<TYPE, ELEM_COUNT>& operator-=(const vec<E0, ELEM_COUNT>& _other);     
+		template<arithmetic OTHER_TYPE>                                                   
+		[[nodiscard]] vec<TYPE, ELEM_COUNT>& operator-=(OTHER_TYPE _other);                     
+		template<arithmetic OTHER_TYPE>                                                   
+		[[nodiscard]] vec<TYPE, ELEM_COUNT>& operator-=(const vec<OTHER_TYPE, ELEM_COUNT>& _other);     
 																				
-		template<typename E0>                                                   
-		[[nodiscard]] vec<TYPE, ELEM_COUNT>& operator*=(E0 _other);                     
-		template<typename E0>                                                   
-		[[nodiscard]] vec<TYPE, ELEM_COUNT>& operator*=(const vec<E0, ELEM_COUNT>& _other);
+		template<arithmetic OTHER_TYPE>                                                   
+		[[nodiscard]] vec<TYPE, ELEM_COUNT>& operator*=(OTHER_TYPE _other);                     
+		template<arithmetic OTHER_TYPE>                                                   
+		[[nodiscard]] vec<TYPE, ELEM_COUNT>& operator*=(const vec<OTHER_TYPE, ELEM_COUNT>& _other);
 
-		template<typename E0>                                                   
-		[[nodiscard]] vec<TYPE, ELEM_COUNT>& operator/=(E0 _other);                     
-		template<typename E0>                                                   
-		[[nodiscard]] vec<TYPE, ELEM_COUNT>& operator/=(const vec<E0, ELEM_COUNT>& _other);
+		template<arithmetic OTHER_TYPE>                                                   
+		[[nodiscard]] vec<TYPE, ELEM_COUNT>& operator/=(OTHER_TYPE _other);                     
+		template<arithmetic OTHER_TYPE>                                                   
+		[[nodiscard]] vec<TYPE, ELEM_COUNT>& operator/=(const vec<OTHER_TYPE, ELEM_COUNT>& _other);
 
     };
 
-    template<typename TYPE, size_t ELEM_COUNT>
+    template<arithmetic TYPE, size_t ELEM_COUNT>
 	vec<TYPE, ELEM_COUNT> operator-( const vec<TYPE, ELEM_COUNT>& _vec);
 
 
-    template<typename TYPE, size_t ELEM_COUNT>
+    template<arithmetic TYPE, size_t ELEM_COUNT>
 	vec<TYPE, ELEM_COUNT> operator+(const vec<TYPE, ELEM_COUNT>& _lhs, const vec<TYPE, ELEM_COUNT>& _rhs);
 
-    template<typename TYPE, size_t ELEM_COUNT>
+    template<arithmetic TYPE, size_t ELEM_COUNT>
 	vec<TYPE, ELEM_COUNT> operator-(const vec<TYPE, ELEM_COUNT>& _lhs, const vec<TYPE, ELEM_COUNT>& _rhs);
 
-    template<typename TYPE, size_t ELEM_COUNT>
+    template<arithmetic TYPE, size_t ELEM_COUNT>
 	vec<TYPE, ELEM_COUNT> operator*(const vec<TYPE, ELEM_COUNT>& _lhs, const vec<TYPE, ELEM_COUNT>& _rhs);
 
-    template<typename TYPE, size_t ELEM_COUNT>
+    template<arithmetic TYPE, size_t ELEM_COUNT>
 	vec<TYPE, ELEM_COUNT> operator/(const vec<TYPE, ELEM_COUNT>& _lhs, const vec<TYPE, ELEM_COUNT>& _rhs);
 
 
-	template<typename TYPE, size_t ELEM_COUNT>
+	template<arithmetic TYPE, size_t ELEM_COUNT>
 	TYPE dot(const vec<TYPE, ELEM_COUNT>& _lhs, const vec<TYPE, ELEM_COUNT>& _rhs);
 
 	// Only defined on R3
-	template<typename TYPE>
+	template<arithmetic TYPE>
 	vec<TYPE, 3u> cross(const vec<TYPE, 3u>& _lhs, const vec<TYPE, 3u>& _rhs);
 
-	template<typename TYPE, size_t ELEM_COUNT>
+	template<arithmetic TYPE, size_t ELEM_COUNT>
 	float sq_length(const vec<TYPE, ELEM_COUNT>& _v);
 
-	template<typename TYPE, size_t ELEM_COUNT>
+	template<arithmetic TYPE, size_t ELEM_COUNT>
 	float length(const vec<TYPE, ELEM_COUNT>& _v);
 
 	// Unsafe version
-	template<typename TYPE, size_t ELEM_COUNT>
+	template<arithmetic TYPE, size_t ELEM_COUNT>
 	vec<TYPE, ELEM_COUNT> normalize(const vec<TYPE, ELEM_COUNT>& _v);
 	
-	template<typename TYPE, size_t ELEM_COUNT>
+	template<arithmetic TYPE, size_t ELEM_COUNT>
 	vec<TYPE, ELEM_COUNT> normalize_safe(const vec<TYPE, ELEM_COUNT>& _v, float _epsilon = FLT_EPSILON);
 
 
@@ -114,5 +135,3 @@ namespace veer
 }
 
 #include "vec_scalar.hpp"
-
-#endif // CORE_MATH_VEC_H_INCLUDED

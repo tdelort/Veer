@@ -1,33 +1,32 @@
-﻿#ifndef CORE_MATH_VEC_SCALAR_HPP_INCLUDED
-#define CORE_MATH_VEC_SCALAR_HPP_INCLUDED
+﻿#pragma once
 
 #include "vec.h"
 #include <core/debug.h>
 
-namespace veer
+namespace veer::math
 {
-	template<typename TYPE, size_t ELEM_COUNT>
+	template<arithmetic TYPE, size_t ELEM_COUNT>
 	vec<TYPE,ELEM_COUNT>::vec() 
 		: m_data{ 0 }
 	{}
 
-	template<typename TYPE, size_t ELEM_COUNT>
+	template<arithmetic TYPE, size_t ELEM_COUNT>
 	vec<TYPE,ELEM_COUNT>::vec( TYPE _e ) 
 		: m_data{ _e }
 	{}
 
-	template<typename TYPE, size_t ELEM_COUNT>
+	template<arithmetic TYPE, size_t ELEM_COUNT>
     vec<TYPE,ELEM_COUNT>::~vec() { }
 
 
-	template<typename TYPE, size_t ELEM_COUNT>
+	template<arithmetic TYPE, size_t ELEM_COUNT>
 	[[nodiscard]] TYPE vec<TYPE,ELEM_COUNT>::operator[](size_t _index) const
 	{
 		VEER_ASSERT( _index < ELEM_COUNT, "Index out of range" );
 		return m_data[_index];
 	}
 
-	template<typename TYPE, size_t ELEM_COUNT>
+	template<arithmetic TYPE, size_t ELEM_COUNT>
 	TYPE& vec<TYPE, ELEM_COUNT>::operator[](size_t _index)
 	{
 		VEER_ASSERT( _index < ELEM_COUNT, "Index out of range" );
@@ -40,9 +39,9 @@ namespace veer
 	//----------------------------------------------------------------------------
 
 	// += 
-	template<typename TYPE, size_t ELEM_COUNT>
-	template<typename E0>
-	[[nodiscard]] vec<TYPE, ELEM_COUNT>& vec<TYPE, ELEM_COUNT>::operator+=(E0 _other)
+	template<arithmetic TYPE, size_t ELEM_COUNT>
+	template<arithmetic OTHER_TYPE>
+	[[nodiscard]] vec<TYPE, ELEM_COUNT>& vec<TYPE, ELEM_COUNT>::operator+=(OTHER_TYPE _other)
 	{
 		const TYPE casted_other = static_cast<TYPE>(_other);
 		for ( size_t i = 0; i < ELEM_COUNT; ++i)
@@ -50,9 +49,9 @@ namespace veer
 		return *this;
 	}
 
-	template<typename TYPE, size_t ELEM_COUNT>
-	template<typename E0>
-	[[nodiscard]] vec<TYPE, ELEM_COUNT>& vec<TYPE, ELEM_COUNT>::operator+=(const vec<E0, ELEM_COUNT>& _other)
+	template<arithmetic TYPE, size_t ELEM_COUNT>
+	template<arithmetic OTHER_TYPE>
+	[[nodiscard]] vec<TYPE, ELEM_COUNT>& vec<TYPE, ELEM_COUNT>::operator+=(const vec<OTHER_TYPE, ELEM_COUNT>& _other)
 	{
 		for ( size_t i = 0; i < ELEM_COUNT; ++i)
 			m_data[i] += static_cast<TYPE>(_other.m_data[i]);
@@ -60,9 +59,9 @@ namespace veer
 	}
 
 	// -= 
-	template<typename TYPE, size_t ELEM_COUNT>
-	template<typename E0>
-	[[nodiscard]] vec<TYPE, ELEM_COUNT>& vec<TYPE, ELEM_COUNT>::operator-=(E0 _other)
+	template<arithmetic TYPE, size_t ELEM_COUNT>
+	template<arithmetic OTHER_TYPE>
+	[[nodiscard]] vec<TYPE, ELEM_COUNT>& vec<TYPE, ELEM_COUNT>::operator-=(OTHER_TYPE _other)
 	{
 		const TYPE casted_other = static_cast<TYPE>(_other);
 		for ( size_t i = 0; i < ELEM_COUNT; ++i)
@@ -70,9 +69,9 @@ namespace veer
 		return *this;
 	}
 
-	template<typename TYPE, size_t ELEM_COUNT>
-	template<typename E0>
-	[[nodiscard]] vec<TYPE, ELEM_COUNT>& vec<TYPE, ELEM_COUNT>::operator-=(const vec<E0, ELEM_COUNT>& _other)
+	template<arithmetic TYPE, size_t ELEM_COUNT>
+	template<arithmetic OTHER_TYPE>
+	[[nodiscard]] vec<TYPE, ELEM_COUNT>& vec<TYPE, ELEM_COUNT>::operator-=(const vec<OTHER_TYPE, ELEM_COUNT>& _other)
 	{
 		for ( size_t i = 0; i < ELEM_COUNT; ++i)
 			m_data[i] -= static_cast<TYPE>(_other.m_data[i]);
@@ -80,9 +79,9 @@ namespace veer
 	}
 
 	// *= 
-	template<typename TYPE, size_t ELEM_COUNT>
-	template<typename E0>
-	[[nodiscard]] vec<TYPE, ELEM_COUNT>& vec<TYPE, ELEM_COUNT>::operator*=(E0 _other)
+	template<arithmetic TYPE, size_t ELEM_COUNT>
+	template<arithmetic OTHER_TYPE>
+	[[nodiscard]] vec<TYPE, ELEM_COUNT>& vec<TYPE, ELEM_COUNT>::operator*=(OTHER_TYPE _other)
 	{
 		const TYPE casted_other = static_cast<TYPE>(_other);
 		for ( size_t i = 0; i < ELEM_COUNT; ++i)
@@ -90,9 +89,9 @@ namespace veer
 		return *this;
 	}
 
-	template<typename TYPE, size_t ELEM_COUNT>
-	template<typename E0>
-	[[nodiscard]] vec<TYPE, ELEM_COUNT>& vec<TYPE, ELEM_COUNT>::operator*=(const vec<E0, ELEM_COUNT>& _other)
+	template<arithmetic TYPE, size_t ELEM_COUNT>
+	template<arithmetic OTHER_TYPE>
+	[[nodiscard]] vec<TYPE, ELEM_COUNT>& vec<TYPE, ELEM_COUNT>::operator*=(const vec<OTHER_TYPE, ELEM_COUNT>& _other)
 	{
 		for ( size_t i = 0; i < ELEM_COUNT; ++i)
 			m_data[i] *= static_cast<TYPE>(_other.m_data[i]);
@@ -100,9 +99,9 @@ namespace veer
 	}
 
 	// /= 
-	template<typename TYPE, size_t ELEM_COUNT>
-	template<typename E0>
-	[[nodiscard]] vec<TYPE, ELEM_COUNT>& vec<TYPE, ELEM_COUNT>::operator/=(E0 _other)
+	template<arithmetic TYPE, size_t ELEM_COUNT>
+	template<arithmetic OTHER_TYPE>
+	[[nodiscard]] vec<TYPE, ELEM_COUNT>& vec<TYPE, ELEM_COUNT>::operator/=(OTHER_TYPE _other)
 	{
 		const TYPE casted_other = static_cast<TYPE>(_other);
 		for ( size_t i = 0; i < ELEM_COUNT; ++i)
@@ -110,9 +109,9 @@ namespace veer
 		return *this;
 	}
 
-	template<typename TYPE, size_t ELEM_COUNT>
-	template<typename E0>
-	[[nodiscard]] vec<TYPE, ELEM_COUNT>& vec<TYPE, ELEM_COUNT>::operator/=(const vec<E0, ELEM_COUNT>& _other)
+	template<arithmetic TYPE, size_t ELEM_COUNT>
+	template<arithmetic OTHER_TYPE>
+	[[nodiscard]] vec<TYPE, ELEM_COUNT>& vec<TYPE, ELEM_COUNT>::operator/=(const vec<OTHER_TYPE, ELEM_COUNT>& _other)
 	{
 		for ( size_t i = 0; i < ELEM_COUNT; ++i)
 			m_data[i] /= static_cast<TYPE>(_other.m_data[i]);
@@ -120,32 +119,32 @@ namespace veer
 	}
 
 
-    template<typename TYPE, size_t ELEM_COUNT>
+    template<arithmetic TYPE, size_t ELEM_COUNT>
 	vec<TYPE, ELEM_COUNT> operator-(const vec<TYPE, ELEM_COUNT>& _vec)
 	{
 		return vec<TYPE, ELEM_COUNT>( -_vec.m_data[0], -_vec.m_data[1], -_vec.m_data[2], -_vec.m_data[3] );
 	}
 
 
-    template<typename TYPE, size_t ELEM_COUNT>
+    template<arithmetic TYPE, size_t ELEM_COUNT>
 	vec<TYPE, ELEM_COUNT> operator+(const vec<TYPE, ELEM_COUNT>& _lhs, const vec<TYPE, ELEM_COUNT>& _rhs)
 	{
 		return vec<TYPE, ELEM_COUNT>(_lhs) += _rhs;
 	}
 
-    template<typename TYPE, size_t ELEM_COUNT>
+    template<arithmetic TYPE, size_t ELEM_COUNT>
 	vec<TYPE, ELEM_COUNT> operator-(const vec<TYPE, ELEM_COUNT>& _lhs, const vec<TYPE, ELEM_COUNT>& _rhs)
 	{
 		return vec<TYPE, ELEM_COUNT>(_lhs) -= _rhs;
 	}
 
-    template<typename TYPE, size_t ELEM_COUNT>
+    template<arithmetic TYPE, size_t ELEM_COUNT>
 	vec<TYPE, ELEM_COUNT> operator/(const vec<TYPE, ELEM_COUNT>& _lhs, const vec<TYPE, ELEM_COUNT>& _rhs)
 	{
 		return vec<TYPE, ELEM_COUNT>(_lhs) /= _rhs;
 	}
 
-    template<typename TYPE, size_t ELEM_COUNT>
+    template<arithmetic TYPE, size_t ELEM_COUNT>
 	vec<TYPE, ELEM_COUNT> operator*(const vec<TYPE, ELEM_COUNT>& _lhs, const vec<TYPE, ELEM_COUNT>& _rhs)
 	{
 		return vec<TYPE, ELEM_COUNT>(_lhs) *= _rhs;
@@ -157,7 +156,7 @@ namespace veer
 	//						COMMON GEOMETRIC FUNCTIONS
 	//----------------------------------------------------------------------------
 
-	template<typename TYPE, size_t ELEM_COUNT>
+	template<arithmetic TYPE, size_t ELEM_COUNT>
 	TYPE dot(const vec<TYPE, ELEM_COUNT>& _lhs, const vec<TYPE, ELEM_COUNT>& _rhs)
 	{
 		TYPE accum = 0.f;
@@ -166,7 +165,7 @@ namespace veer
 		return accum;
 	}
 
-	template<typename TYPE>
+	template<arithmetic TYPE>
 	vec<TYPE, 3u> cross(const vec<TYPE, 3u>& _lhs, const vec<TYPE, 3u>& _rhs)
 	{
 		return vec<TYPE, 3u>(
@@ -178,7 +177,7 @@ namespace veer
 
 	// sq_length 
 
-	template<typename TYPE, size_t ELEM_COUNT>
+	template<arithmetic TYPE, size_t ELEM_COUNT>
 	float sq_length(const vec<TYPE, ELEM_COUNT>& _v)
 	{
 		float size_accum = 0.f;
@@ -190,20 +189,20 @@ namespace veer
 		return size_accum;
 	}
 
-	template<typename TYPE, size_t ELEM_COUNT>
+	template<arithmetic TYPE, size_t ELEM_COUNT>
 	float length(const vec<TYPE, ELEM_COUNT>& _v)
 	{
 		return std::sqrt(sq_length(_v));
 	}
 
-	template<typename TYPE, size_t ELEM_COUNT>
+	template<arithmetic TYPE, size_t ELEM_COUNT>
 	vec<TYPE, ELEM_COUNT> normalize(const vec<TYPE, ELEM_COUNT>& _v)
 	{
 		const float len = length(_v);
 		return _v / len;
 	}
 
-	template<typename TYPE, size_t ELEM_COUNT>
+	template<arithmetic TYPE, size_t ELEM_COUNT>
 	vec<TYPE, ELEM_COUNT> normalize_safe(const vec<TYPE, ELEM_COUNT>& _v, float _epsilon)
 	{
 		const float len = length(_v);
@@ -213,5 +212,3 @@ namespace veer
 	}
 
 }
-
-#endif // CORE_MATH_VEC_SCALAR_HPP_INCLUDED

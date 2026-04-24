@@ -1,9 +1,11 @@
-#ifndef CORE_CONTAINERS_STATIC_ARRAY_H_INCLUDED
-#define CORE_CONTAINERS_STATIC_ARRAY_H_INCLUDED
+#pragma once
 
-namespace veer
+#include <core/core.h>
+#include <core/containers/span.h>
+
+namespace veer::containers
 {
-	template<typename T, size_t N >
+	template<typename T, size_t N>
 	class static_array
 	{
 		using value_type = T;
@@ -14,17 +16,6 @@ namespace veer
 		using iterator = T*;
 		using const_iterator = const T*;
 	public:
-		// this ctor does not support non default constructible T :[ (i think I can live with this for now)
-		// But I can thus use default T() param without worrying too much :]
-		constexpr static_array( const_reference _val = T() );
-
-		constexpr static_array( std::initializer_list<T> _list );
-
-		static_array(const static_array& _other);
-		static_array& operator=(const static_array& _other);
-		static_array(static_array&& _other);
-		static_array& operator=(static_array&& _other);
-
 		pointer data() { return m_data; }
 		const_pointer data() const { return m_data; }
 
@@ -39,12 +30,11 @@ namespace veer
 		reference operator[](size_t _i) { return m_data[_i]; }
 		const_reference operator[](size_t _i) const { return m_data[_i]; }
 
-	private:
+		// public so that it can be init using default ctors
 		T m_data[N];
+	private:
 		static constexpr size_t m_size = N;
 	};
 }
 
 #include "static_array.hpp"
-
-#endif // CORE_CONTAINERS_STATIC_ARRAY_H_INCLUDED

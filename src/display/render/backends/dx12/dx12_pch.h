@@ -1,5 +1,4 @@
-#ifndef DISPLAY_DX12_DX12PCH_H_INCLUDED
-#define DISPLAY_DX12_DX12PCH_H_INCLUDED
+#pragma once
 
 #include <core/core.h>
 
@@ -15,5 +14,3 @@
 using namespace Microsoft::WRL;
 
 #include <D3D12MemAlloc.h>
-
-#endif // DISPLAY_DX12_DX12PCH_H_INCLUDED

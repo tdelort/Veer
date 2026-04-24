@@ -6,5 +6,7 @@ target_sources(${PROJECT_NAME}
         dx12_render_device_resource.cpp
         dx12_render_device.cpp
         dx12_rendering_service.cpp
+        dx12_shader_compiler.cpp
         dx12_swap_chain.cpp
+        dx12_technique.cpp
 )

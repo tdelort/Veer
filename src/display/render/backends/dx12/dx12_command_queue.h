@@ -1,12 +1,11 @@
-#ifndef DISPLAY_DX12_DX12_COMMAND_QUEUE_H_INCLUDED
-#define DISPLAY_DX12_DX12_COMMAND_QUEUE_H_INCLUDED
+#pragma once
 
 #include "dx12_pch.h"
 
 #include <display/render/command_buffer.h>
 #include <display/render/command_queue.h>
 
-namespace veer
+namespace veer::display::render
 {
 	class dx12_render_device;
 
@@ -16,7 +15,7 @@ namespace veer
 		dx12_command_queue( dx12_render_device& _device, command_buffer::type _type );
 		~dx12_command_queue() override;
 
-		void execute_command_buffers(span<command_buffer*> _command_buffers) override;
+		void execute_command_buffers(veer::containers::span<command_buffer*> _command_buffers) override;
 
 		void signal(uint64_t _value) override;
 		void wait_for_value(uint64_t _value) override;
@@ -28,5 +27,3 @@ namespace veer
 		ComPtr<ID3D12Fence> m_fence;
 	};
 }
-
-#endif // DISPLAY_DX12_DX12_COMMAND_QUEUE_H_INCLUDED

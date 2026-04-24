@@ -4,8 +4,11 @@
 #include "dx12_command_buffer.h"
 
 #include <core/debug.h>
+#include <core/core.h>
+#include <core/containers/resizable_array.h>
 
-namespace veer
+
+namespace veer::display::render
 {
 	dx12_command_queue::dx12_command_queue( dx12_render_device& _device, command_buffer::type _type )
 		: command_queue(_type)
@@ -28,15 +31,16 @@ namespace veer
 	{
 	}
 
-	void dx12_command_queue::execute_command_buffers(span<command_buffer*> _command_buffers)
+	void dx12_command_queue::execute_command_buffers(veer::containers::span<command_buffer*> _command_buffers)
 	{
-		std::vector<ID3D12CommandList*> dx12_command_lists;
+		veer::containers::resizable_array<ID3D12CommandList*> dx12_command_lists;
 		dx12_command_lists.reserve(_command_buffers.size());
 		for (command_buffer* command_buffer : _command_buffers)
 		{
 			dx12_command_lists.push_back(static_cast<dx12_command_buffer*>(command_buffer)->get_api_handle().Get());
 		}
 
+		VEER_LOG( "ExecuteCommandLists( " << dx12_command_lists.size() << ",  )" );
 		m_command_queue_api_handle->ExecuteCommandLists( (UINT)dx12_command_lists.size(), dx12_command_lists.data());
 	}
 

@@ -1,13 +1,11 @@
-
-#ifndef CORE_MATH_QUATERNION_HPP_INCLUDED
-#define CORE_MATH_QUATERNION_HPP_INCLUDED
+#pragma once
 
 #include "quaternion.h"
 #include "vec.h"
 
-#include <cmath>
+#include <core/core.h>
 
-namespace veer
+namespace veer::math
 {
 	quaternion::quaternion()
 		: base_type{ 0.f, 0.f, 0.f, 1.f }
@@ -64,5 +62,3 @@ namespace veer
 		return quaternion( *this ) *= _rhs;
 	}
 } // namespace veer
-
-#endif // CORE_MATH_QUATERNION_HPP_INCLUDED

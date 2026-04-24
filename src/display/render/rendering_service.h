@@ -1,18 +1,19 @@
-#ifndef DISPLAY_RENDERING_SERVICE_H_INCLUDED
-#define DISPLAY_RENDERING_SERVICE_H_INCLUDED
+#pragma once
 
-#include "render_device.h"
 
 #include <core/service.h>
+#include <display/render/render_device.h>
+#include <display/render/shader_compiler.h>
 
-namespace veer
+namespace veer::display::render
 {
 	class rendering_service : public service_interface
 	{
 	public:
-		virtual ~rendering_service() = 0 {};
+		virtual ~rendering_service() = 0;
 		render_device& get_render_device() const;
 
+		shader_compiler& get_shader_compiler() const; 
 
 		// start rendering_tread api
 		// these function will make more sence in a rendering_thread api when going multithreaded
@@ -22,10 +23,10 @@ namespace veer
 		virtual std::unique_ptr<command_buffer> start_recording_command_buffer(command_buffer::type _type) = 0;
 		virtual void stop_recording_command_buffer( command_buffer& _command_buffer ) = 0;
 		// end rendering_tread api
+
 	protected:
 		std::unique_ptr<render_device> m_device;
+		std::unique_ptr<shader_compiler> m_shader_compiler;
 		uint64_t m_current_frame_index;
 	};
 }
-
-#endif // DISPLAY_RENDERING_SERVICE_H_INCLUDED

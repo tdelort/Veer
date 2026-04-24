@@ -1,6 +1,4 @@
-#ifndef CORE_SERVICE_LOCATOR_HPP_INCLUDED
-#define CORE_SERVICE_LOCATOR_HPP_INCLUDED
-
+#pragma once
 
 namespace veer
 {
@@ -48,4 +46,3 @@ namespace veer
 		return found_service;
 	}
 }
-#endif // CORE_SERVICE_LOCATOR_HPP_INCLUDED

@@ -1,12 +1,9 @@
-#ifndef DISPLAY_RENDERING_THREAD_H_INCLUDED
-#define DISPLAY_RENDERING_THREAD_H_INCLUDED
+#pragma once
 
-namespace veer
+namespace veer::display::render
 {
 	class rendering_thread
 	{
 		void reset();
 	};
 }
-
-#endif // DISPLAY_RENDERING_THREAD_H_INCLUDED

@@ -1,6 +1,7 @@
 #include "dx12_pch.h"
 #include "dx12_render_device.h"
 
+#include "dx12_technique.h"
 #include "dx12_command_buffer.h"
 #include "dx12_swap_chain.h"
 #include "dx12_command_queue.h"
@@ -11,7 +12,7 @@
 #include <display/render/command_buffer.h>
 #include <display/render/rendering_service.h>
 
-namespace veer
+namespace veer::display::render
 {
 	static constexpr size_t s_rtv_descriptor_heap_size = 4096u;
 	static constexpr size_t s_srv_descriptor_heap_size = 4096u;
@@ -28,7 +29,7 @@ namespace veer
 		}
 		else
 		{
-		VEER_LOG_ERROR("Failed to get ID3D12 Debug Interface ");
+			VEER_LOG_ERROR("Failed to get ID3D12 Debug Interface ");
 		}
 
 		if (SUCCEEDED(DXGIGetDebugInterface1(0, IID_PPV_ARGS(&m_info_queue))))
@@ -142,7 +143,7 @@ namespace veer
 		D3D12MA::ALLOCATOR_DESC allocator_desc = {};
 		allocator_desc.pDevice = m_api_device_handle.Get();
 		allocator_desc.pAdapter = m_adapter.Get();
-		allocator_desc.Flags = D3D12MA::ALLOCATOR_FLAG_MSAA_TEXTURES_ALWAYS_COMMITTED | D3D12MA::ALLOCATOR_FLAG_DEFAULT_POOLS_NOT_ZEROED;
+		allocator_desc.Flags = D3D12MA::ALLOCATOR_FLAGS( D3D12MA::ALLOCATOR_FLAG_MSAA_TEXTURES_ALWAYS_COMMITTED | D3D12MA::ALLOCATOR_FLAG_DEFAULT_POOLS_NOT_ZEROED );
 
 		HRESULT hr = D3D12MA::CreateAllocator(&allocator_desc, &m_allocator);
 		VEER_ASSERT(SUCCEEDED(hr), "Failed to create D3D12MA Allocator");
@@ -176,16 +177,24 @@ namespace veer
 		return *m_graphics_queue.get();
 	}
 
-	std::unique_ptr<swap_chain> dx12_render_device::create_swap_chain( window& _window, vec2u _size)
+
+
+	std::unique_ptr<swap_chain> dx12_render_device::create_swap_chain( veer::display::window::window& _window, veer::math::vec2u _size)
 	{
 		return std::make_unique<dx12_swap_chain>( *this, _window, _size);
 	}
 
-	void dx12_render_device::delete_swap_chain(std::unique_ptr<swap_chain> _swap_chain)
+	std::unique_ptr<graphics_technique> dx12_render_device::create_graphics_technique(const shader_stage_source_container_t& _source_code, const shader_signature& _signature, const shader_render_state& _render_state)
 	{
-		static_cast<dx12_swap_chain*>(_swap_chain.get())->destroy( *this ); 
-		_swap_chain.reset(); // call dtor
+		return std::make_unique<dx12_graphics_technique>(*this, _source_code, _signature, _render_state);
 	}
+
+	std::unique_ptr<compute_technique> dx12_render_device::create_compute_technique(const shader_stage_source_container_t& _source_code)
+	{
+		return std::make_unique<dx12_compute_technique>(*this, _source_code);
+	}
+
+
 
 	ComPtr<ID3D12Device2> dx12_render_device::get_api_handle() const
 	{

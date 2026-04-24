@@ -1,5 +1,4 @@
-#ifndef DISPLAY_DX12_DX12_RENDER_DEVICE_H_INCLUDED
-#define DISPLAY_DX12_DX12_RENDER_DEVICE_H_INCLUDED
+#pragma once
 
 #include "dx12_pch.h"
 #include "dx12_command_queue.h"
@@ -8,8 +7,7 @@
 #include <display/render/command_buffer.h>
 #include <display/window/window.h>
 
-
-namespace veer
+namespace veer::display::render
 {
 	class swap_chain;
 	class dx12_descriptor_heap;
@@ -30,8 +28,10 @@ namespace veer
 		command_queue& get_command_queue(command_buffer::type _corresponding_command_buffer_type) override;
 
 		// factory part
-		std::unique_ptr<swap_chain> create_swap_chain(window& _window, vec2u _size) override;
-		void delete_swap_chain(std::unique_ptr<swap_chain> _swap_chain) override;
+		std::unique_ptr<swap_chain> create_swap_chain(veer::display::window::window& _window, veer::math::vec2u _size) override;
+
+  		std::unique_ptr<graphics_technique> create_graphics_technique(const shader_stage_source_container_t& _source_code, const shader_signature& _signature, const shader_render_state& _render_state) override;
+    	std::unique_ptr<compute_technique> create_compute_technique(const shader_stage_source_container_t& _source_code) override;
 
 	private:
 		void create_descriptor_heaps();
@@ -54,5 +54,3 @@ namespace veer
 
 	};
 }
-
-#endif // DISPLAY_DX12_DX12_RENDER_DEVICE_H_INCLUDED

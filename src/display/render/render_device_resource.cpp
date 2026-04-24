@@ -1,32 +1,49 @@
 #include "render_device_resource.h"
 
+#include "render_device_resource_sync_state.h"
+
 #include <core/debug.h>
 
-namespace veer
+namespace veer::display::render
 {
-
-	render_device_resource::render_device_resource( resource_sync_state _default_state, size_t _subresource_count )
+	render_device_resource::render_device_resource( render_device& _device )
+		: m_device( _device )
 	{
-		// TODO : implement resource creation
-		m_subresource_count = _subresource_count;
-		m_sync_states.resize( m_subresource_count, _default_state);
+		
 	}
 
-	size_t render_device_resource::get_subresource_count() const
+	render_device_resource::~render_device_resource()
 	{
-		// TODO implement sub resources
-		return m_subresource_count;
+		
 	}
 
-	void render_device_resource::set_resource_state( resource_sync_state _new_state, size_t _subresource_index )
+	const render_device_resource_sync_state_traking& render_device_resource::get_sync_state_tracking() const
 	{
-		VEER_ASSERT(_subresource_index < get_subresource_count(), "subresource index bigger than subresource count");
-		m_sync_states[_subresource_index] = _new_state;
+		return m_sync_state_tracking;
 	}
 
-	resource_sync_state render_device_resource::get_resource_state( size_t _subresource_index ) const
+	render_device_resource_sync_state_traking& render_device_resource::get_sync_state_tracking()
 	{
-		VEER_ASSERT(_subresource_index < get_subresource_count(), "subresource index bigger than subresource count");
-		return m_sync_states[_subresource_index];
+		return m_sync_state_tracking;
+	}
+
+	bool render_device_resource::get_is_upload_dirty_alloc() const
+	{
+		return flags::get( m_upload_flags, upload_flags::dirty_alloc );
+	}
+
+	bool render_device_resource::get_is_upload_dirty_data() const
+	{
+		return flags::get( m_upload_flags, upload_flags::dirty_data );
+	}
+
+	void render_device_resource::set_is_upload_dirty_alloc( bool _val )
+	{
+		flags::set( m_upload_flags, upload_flags::dirty_alloc );
+	}
+
+	void render_device_resource::set_is_upload_dirty_data( bool _val )
+	{
+		flags::set( m_upload_flags, upload_flags::dirty_data );
 	}
 }

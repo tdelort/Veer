@@ -1,5 +1,4 @@
-#ifndef DISPLAY_DX12_DX12_RENDERING_SERVICE_H_INCLUDED
-#define DISPLAY_DX12_DX12_RENDERING_SERVICE_H_INCLUDED
+#pragma once
 
 #include "dx12_pch.h"
 
@@ -7,7 +6,7 @@
 #include <display/render/render_device.h>
 #include <display/render/rendering_service.h>
 
-namespace veer
+namespace veer::display::render
 {
 	class dx12_rendering_service : public service_generic<rendering_service>
 	{
@@ -26,5 +25,3 @@ namespace veer
 		ComPtr<ID3D12CommandAllocator> m_command_allocators[swap_chain::s_swap_chain_buffer_count];
 	};
 }
-
-#endif // DISPLAY_DX12_DX12_RENDERING_SERVICE_H_INCLUDED

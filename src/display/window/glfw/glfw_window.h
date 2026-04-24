@@ -1,5 +1,4 @@
-#ifndef DISPLAY_GLFW_GLFW_WINDOW_H_INCLUDED
-#define DISPLAY_GLFW_GLFW_WINDOW_H_INCLUDED
+#pragma once
 
 // GLFW Headers
 #define GLFW_INCLUDE_NONE
@@ -12,20 +11,20 @@
 
 struct GLFWwindow;
 
-namespace veer
+namespace veer::display::window
 {
 	// TODO : most glfw function must be called from the main thread => no thread should ever have access to a window
 	class glfw_window : public window
 	{
 	public:
-		glfw_window( vec2u _size );
+		glfw_window( veer::math::vec2u _size );
 		~glfw_window();
 
 		bool is_open() const override;
 		void poll_events() override;
 
-		vec2u get_size() const override;
-		void set_size( vec2u _size ) & override;
+		veer::math::vec2u get_size() const override;
+		void set_size( veer::math::vec2u _size ) & override;
 
 		os_window_handle get_os_window_handle() override;
 	private:
@@ -35,8 +34,6 @@ namespace veer
 
 		GLFWwindow* m_api_handle;
 
-		vec2f m_window_to_frame_buffer_size_ratio{ 1.f, 1.f };
+		veer::math::vec2f m_window_to_frame_buffer_size_ratio{ 1.f, 1.f };
 	};
 }
-
-#endif // DISPLAY_GLFW_GLFW_WINDOW_H_INCLUDED

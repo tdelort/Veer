@@ -1,22 +1,18 @@
-#ifndef DISPLAY_SWAP_CHAIN_H_INCLUDED
-#define DISPLAY_SWAP_CHAIN_H_INCLUDED
+#pragma once
 
-#include <core/Math/vec.h>
+#include <core/math/vec.h>
 
-namespace veer
+namespace veer::display::render
 {
 	class render_device;
-	class window;
 	class render_device_resource;
 
 	class swap_chain
 	{
 	public:
-		swap_chain();
+		virtual ~swap_chain() = 0;
 
-		virtual ~swap_chain() = 0 {};
-
-		virtual render_device_resource* get_current_backbuffer() = 0;
+		virtual render_device_resource& get_current_backbuffer() = 0;
 
 		virtual size_t get_backbuffer_index() = 0;
 
@@ -27,5 +23,3 @@ namespace veer
 		bool m_tearing_allowed;
 	};
 }
-
-#endif // DISPLAY_SWAP_CHAIN_H_INCLUDED

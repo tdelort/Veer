@@ -1,14 +1,16 @@
 #include "dx12_swap_chain.h"
 
+#include "display/render/render_device_data_format.h"
 #include "dx12_descriptor_heap.h"
+#include "dx12_render_device_resource.h"
 
 #include <display/render/rendering_service.h>
 #include <display/window/window.h>
 
-namespace veer
+namespace veer::display::render
 {
-	dx12_swap_chain::dx12_swap_chain(dx12_render_device& _device, window& _window, vec2u _window_size )
-		: swap_chain()
+	dx12_swap_chain::dx12_swap_chain(dx12_render_device& _device, veer::display::window::window& _window, veer::math::vec2u _window_size )
+		: veer::display::render::swap_chain()
     {
 		
 		ComPtr<IDXGIFactory4> factory4 = _device.get_dxgi_factory();
@@ -68,26 +70,16 @@ namespace veer
 				HRESULT hr = m_api_swap_chain_handle->GetBuffer((UINT)i, IID_PPV_ARGS(&back_buffer_resource));
 				VEER_ASSERT(SUCCEEDED(hr), "Failed to retrieve swap chain back buffer resource");
 				VEER_ASSERT(back_buffer_resource.Get() != nullptr, "Retrieved swap chain back buffer resource is nullptr");
+
+				texture_2d_desc backbuffer_desc;
+				backbuffer_desc.m_size = _window_size;
+				backbuffer_desc.m_flags = texture_desc::usage_flags::render_target;
+				backbuffer_desc.m_format = render_device_data_format::r8g8b8a8_unorm;
 		 
-				VEER_LOG( "here : vec2u(" << _window_size[0] << "," << _window_size[1] << ")" );
-				dx12_descriptor new_descriptor = rtv_heap.acquire_descriptor();
-				id3d12_device->CreateRenderTargetView(back_buffer_resource.Get(), nullptr, new_descriptor.m_handle );
-				VEER_LOG( "here2");
-		 
-				m_back_buffers_resources[i] = std::make_unique<dx12_render_device_resource>(resource_sync_state::Present, 1);
-				m_back_buffers_resources[i]->fill_resource(back_buffer_resource, new_descriptor);
+				m_back_buffers_resources[i] = std::make_unique<dx12_render_device_backbuffer>( _device, backbuffer_desc, back_buffer_resource.Get() );
 			}
 		}
     }
-
-	void dx12_swap_chain::destroy(dx12_render_device& _device)
-	{
-		for (size_t i = 0; i < s_swap_chain_buffer_count; ++i)
-		{
-			dx12_descriptor descriptor = m_back_buffers_resources[i]->get_cpu_descriptor_handle();
-			_device.get_rtv_descriptor_heap().release_descriptor(descriptor);
-		}
-	}
 
 	dx12_swap_chain::~dx12_swap_chain() 
 	{
@@ -106,9 +98,10 @@ namespace veer
 		VEER_ASSERT(SUCCEEDED(hr), "Failed to Present swap chain");
 	}
 
-	render_device_resource* dx12_swap_chain::get_current_backbuffer()
+	render_device_resource& dx12_swap_chain::get_current_backbuffer()
 	{
-		return m_back_buffers_resources[get_backbuffer_index()].get();
+		render_device_resource* resource_ptr = static_cast<render_device_resource*>( m_back_buffers_resources[get_backbuffer_index()].get() );
+		return *resource_ptr;
 	}
 
 	size_t dx12_swap_chain::get_backbuffer_index()

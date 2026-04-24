@@ -1,5 +1,4 @@
-#ifndef CORE_DEBUG_H_INCLUDED
-#define CORE_DEBUG_H_INCLUDED
+#pragma once
 
 #include <core/core.h>
 
@@ -51,5 +50,3 @@ namespace veer
 #define VEER_LOG_WARNING(_msg) VEER_LOG_INTERNAL(veer::debug::log_level::warn, _msg );
 #define VEER_LOG(_msg) VEER_LOG_INTERNAL(veer::debug::log_level::log, _msg );
 #define VEER_LOG_DEBUG(_msg) VEER_LOG_INTERNAL(veer::debug::log_level::debug, _msg );
-
-#endif // CORE_DEBUG_H_INCLUDED

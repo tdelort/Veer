@@ -1,11 +1,9 @@
 #include "glfw_windowing_service.h"
 
 #include "glfw_window.h"
+#include <core/core.h>
 
-#include <memory>
-#include <iterator>
-
-namespace veer
+namespace veer::display::window
 {
 	glfw_windowing_service::glfw_windowing_service() 
 	{
@@ -18,7 +16,7 @@ namespace veer
 		glfwTerminate();	
 	}
 
-	window* glfw_windowing_service::create_window( vec2u _dims )
+	window* glfw_windowing_service::create_window( veer::math::vec2u _dims )
 	{
 		std::unique_ptr<glfw_window> win_ptr =  std::make_unique<glfw_window>( _dims );
 		std::unique_ptr<window>& win_ptr_ref = m_windows.emplace_back( std::move( win_ptr ) );

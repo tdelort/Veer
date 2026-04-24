@@ -7,7 +7,7 @@
 #define GLFW_NATIVE_INCLUDE_NONE
 #include <GLFW/glfw3native.h>
 
-namespace veer
+namespace veer::display::window
 {
 #if 0
 	void glfw_window::s_glfw_on_frame_buffer_size_changed_callback(GLFWwindow* _window, int _w, int _h)
@@ -28,7 +28,7 @@ namespace veer
 #endif // 0
 
 	// Window
-	glfw_window::glfw_window( vec2u _size )
+	glfw_window::glfw_window( veer::math::vec2u _size )
 	{
 		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 		// TODO : handle resizable window
@@ -38,11 +38,11 @@ namespace veer
 
 		//glfwSetFramebufferSizeCallback( m_api_handle, s_glfw_on_frame_buffer_size_changed_callback );
 
-		vec2i frame_buffer_size;
+		veer::math::vec2i frame_buffer_size;
 		glfwGetFramebufferSize(m_api_handle, &frame_buffer_size[0], &frame_buffer_size[1]);
 
 		// TODO : improve vec
-		m_window_to_frame_buffer_size_ratio = vec2f( _size[0] == 0 ? 1.f : frame_buffer_size[0] / _size[0], _size[1] == 0 ? 1.f :frame_buffer_size[1] / _size[1]);
+		m_window_to_frame_buffer_size_ratio = veer::math::vec2f( _size[0] == 0 ? 1.f : frame_buffer_size[0] / _size[0], _size[1] == 0 ? 1.f :frame_buffer_size[1] / _size[1]);
 	}
 
 	bool glfw_window::is_open() const
@@ -62,14 +62,14 @@ namespace veer
 		glfwPollEvents();
 	}
 
-	vec2u glfw_window::get_size() const
+	veer::math::vec2u glfw_window::get_size() const
 	{
 		int w, h;
 		glfwGetFramebufferSize(m_api_handle, &w, &h);
-		return vec2u((unsigned int)std::max(0, w), (unsigned int)std::max(0, h));
+		return veer::math::vec2u((unsigned int)std::max(0, w), (unsigned int)std::max(0, h));
 	}
 
-	void glfw_window::set_size(vec2u _size) &
+	void glfw_window::set_size(veer::math::vec2u _size) &
 	{
 
 	}

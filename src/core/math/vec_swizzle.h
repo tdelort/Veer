@@ -1,5 +1,4 @@
-﻿#ifndef CORE_MATH_VEC_SWIZZLE_H_INCLUDED
-#define CORE_MATH_VEC_SWIZZLE_H_INCLUDED
+﻿#pragma once
 
 #define VEER_VEC_DEFINE_GETTER( _name, _i0 )						\
 	[[nodiscard]] TYPE _name() const { return m_data[_i0]; }    \
@@ -144,5 +143,3 @@ VEER_VEC_DEFINE_GETTER_3( zzyz, 2, 2, 1, 2 )	\
 VEER_VEC_DEFINE_GETTER_3( zzzx, 2, 2, 2, 0 )	\
 VEER_VEC_DEFINE_GETTER_3( zzzy, 2, 2, 2, 1 )	\
 VEER_VEC_DEFINE_GETTER_3( zzzz, 2, 2, 2, 2 )	\
-
-#endif // CORE_MATH_VEC_SWIZZLE_H_INCLUDED

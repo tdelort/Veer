@@ -1,20 +1,25 @@
-#ifndef DISPLAY_DX12_DX12_DESCRIPTOR_HEAP_H_INCLUDED
-#define DISPLAY_DX12_DX12_DESCRIPTOR_HEAP_H_INCLUDED
+#pragma once
 
-#include <core/core.h>
 #include "dx12_pch.h"
 
-namespace veer
+#include <core/core.h>
+#include <core/containers/resizable_array.h>
+
+namespace veer::display::render
 {
 	class dx12_render_device;
 
 	struct dx12_descriptor
 	{
-		dx12_descriptor() : m_handle{}, m_index{} { }
+		static constexpr size_t s_invalid_index = size_t( -1 );
+
+		dx12_descriptor() : m_handle{}, m_index{ s_invalid_index } { }
 
 		dx12_descriptor(D3D12_CPU_DESCRIPTOR_HANDLE _handle, size_t _index)
 			: m_handle(_handle), m_index(_index)
 		{ }
+
+		bool is_valid() const { return m_index != s_invalid_index; }
 
 		D3D12_CPU_DESCRIPTOR_HANDLE m_handle;
 
@@ -39,9 +44,7 @@ namespace veer
 		size_t m_size;
 		size_t m_first_available_descriptor_index;
 
-		std::vector<size_t> m_free_indices;
+		veer::containers::resizable_array<size_t> m_free_indices;
 		size_t m_last_used_index;
 	};
 }
-
-#endif // DISPLAY_DESCRIPTOR_HEAP_H_INCLUDED

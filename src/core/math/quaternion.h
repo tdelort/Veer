@@ -1,10 +1,8 @@
 #pragma once
-#ifndef _QUAT_INC_
-#define _QUAT_INC_
 
 #include "vec.h"
 
-namespace veer
+namespace veer::math
 {
 	/*
 	 * x : i axis
@@ -29,4 +27,3 @@ namespace veer
 }
 
 #include "quaternion.hpp"
-#endif // _QUAT_INC_

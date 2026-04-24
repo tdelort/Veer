@@ -1,6 +1,4 @@
-#ifndef CORE_APPLICATION_H_INCLUDED
-#define CORE_APPLICATION_H_INCLUDED
-
+#pragma once
 
 #include "application_config.h"
 
@@ -21,10 +19,8 @@ namespace veer
 		const application_config& get_config() const;
 
 	private:
-		std::unique_ptr<rendering_service> m_render_service;
-		std::unique_ptr<windowing_service> m_window_service;
+		std::unique_ptr<veer::display::render::rendering_service> m_render_service;
+		std::unique_ptr<veer::display::window::windowing_service> m_window_service;
 		application_config m_application_config;
 	};
 }
-
-#endif // !CORE_APPLICATION_H_INCLUDED

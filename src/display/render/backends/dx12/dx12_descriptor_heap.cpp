@@ -4,17 +4,15 @@
 #include <core/core.h>
 #include <core/debug.h>
 
-namespace veer
+namespace veer::display::render
 {
     dx12_descriptor_heap::dx12_descriptor_heap(dx12_render_device& _device, D3D12_DESCRIPTOR_HEAP_TYPE _type, D3D12_DESCRIPTOR_HEAP_FLAGS _flags, size_t _size)
     {
-		// Create descriptor heaps.
-        // Describe and create a render target view (RTV) descriptor heap.
-        D3D12_DESCRIPTOR_HEAP_DESC rtv_heap_desc = {};
-        rtv_heap_desc.NumDescriptors = (UINT)_size;
-        rtv_heap_desc.Type = _type;
-        rtv_heap_desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-		HRESULT hr = _device.get_api_handle()->CreateDescriptorHeap(&rtv_heap_desc, IID_PPV_ARGS(&m_api_handle));
+        D3D12_DESCRIPTOR_HEAP_DESC heap_desc = {};
+        heap_desc.NumDescriptors = (UINT)_size;
+        heap_desc.Type = _type;
+        heap_desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
+		HRESULT hr = _device.get_api_handle()->CreateDescriptorHeap(&heap_desc, IID_PPV_ARGS(&m_api_handle));
 		VEER_ASSERT(SUCCEEDED(hr), "Failed to create RTV descriptor heap (" << hr << ")");
 
         m_first_available_descriptor_index = 0u;
@@ -48,6 +46,15 @@ namespace veer
     void dx12_descriptor_heap::release_descriptor(dx12_descriptor _descriptor)
     {
         size_t index = _descriptor.m_index;
+        
+        // quick checks first
+        if( !_descriptor.is_valid() || index >= m_first_available_descriptor_index )
+            return;
+        
+        // slower checks last
+        veer::containers::resizable_array<size_t>::const_iterator it = std::find( m_free_indices.cbegin(), m_free_indices.cend(), index );
+        if( it == m_free_indices.cend() )
+            return;
 
         m_free_indices.push_back(index);
     }

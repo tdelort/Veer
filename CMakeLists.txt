@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 4.0.2)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
@@ -6,14 +6,24 @@ project(VeerEngine VERSION 0.1.0)
 
 add_library(${PROJECT_NAME} STATIC )
 
-target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_17)
+target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_20)
 set_target_properties(
     ${PROJECT_NAME} PROPERTIES
 
-    CMAKE_CXX_STANDARD_REQUIRED ON
+    CMAKE_CXX_STANDARD 20
+    CMAKE_CXX_STANDARD_REQUIRED TRUE
+    CMAKE_CXX_SCAN_FOR_MODULES ON
     CMAKE_CXX_EXTENSIONS OFF
 )
 
+target_compile_options(${PROJECT_NAME}
+    PRIVATE
+#         -Od
+#         -Zi
+    -O0
+    -g
+    -gdwarf
+)
 
 # GLFW build 
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
@@ -28,7 +38,7 @@ add_subdirectory(${GLFW_PATH})
 # find_package(OpenGL REQUIRED)
 
 # D3D12MA build 
-set(D3D12MA_PATH libraries/D3D12MemoryAllocator)
+set(D3D12MA_PATH libraries/D3D12MA)
 set(D3D12MA_TARGET D3D12MemoryAllocator)
 add_subdirectory(${D3D12MA_PATH})
 

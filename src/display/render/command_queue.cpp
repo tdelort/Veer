@@ -1,9 +1,14 @@
 #include "command_queue.h"
 
-namespace veer
+namespace veer::display::render
 {
 	command_queue::command_queue(command_buffer::type _type)
 		: m_type{ _type }
+	{
+
+	}
+
+	command_queue::~command_queue()
 	{
 
 	}

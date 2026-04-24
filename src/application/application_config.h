@@ -1,5 +1,4 @@
-#ifndef CORE_APPLICATION_CONFIG_H_INCLUDED
-#define CORE_APPLICATION_CONFIG_H_INCLUDED
+#pragma once
 
 namespace veer
 {
@@ -7,7 +6,7 @@ namespace veer
 	{
 		enum class windowing_service_type
 		{
-			glfw,
+			glfw
 		};
 
 		enum class rendering_service_type
@@ -20,5 +19,3 @@ namespace veer
 		rendering_service_type m_rendering_service_choice;
 	};
 }
-
-#endif // CORE_APPLICATION_CONFIG_H_INCLUDED

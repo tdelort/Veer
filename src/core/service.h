@@ -1,7 +1,6 @@
-#ifndef CORE_SERVICE_H_INCLUDED
-#define CORE_SERVICE_H_INCLUDED
+#pragma once
 
-#include <typeindex>
+#include <core/core.h>
 
 namespace veer
 {
@@ -25,5 +24,3 @@ namespace veer
 		}
 	};
 }
-
-#endif // CORE_SERVICE_H_INCLUDED

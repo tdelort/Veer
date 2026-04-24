@@ -1,10 +1,6 @@
-#ifndef CORE_SERVICE_LOCATOR_H_INCLUDED
-#define CORE_SERVICE_LOCATOR_H_INCLUDED
+#pragma once
 
-#include <unordered_map>
-#include <typeindex>
-#include <mutex>
-
+#include <core/core.h>
 #include "service.h"
 
 namespace veer
@@ -29,5 +25,3 @@ namespace veer
 }
 
 #include "service_locator.hpp"
-
-#endif // CORE_SERVICE_LOCATOR_H_INCLUDED

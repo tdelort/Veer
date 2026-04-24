@@ -2,10 +2,11 @@
 #include "dx12_rendering_service.h"
 #include "dx12_render_device.h"
 #include "dx12_command_buffer.h"
+#include "dx12_shader_compiler.h"
 
 using namespace Microsoft::WRL;
 
-namespace veer
+namespace veer::display::render
 {
 	dx12_rendering_service::dx12_rendering_service()
 	{
@@ -21,6 +22,11 @@ namespace veer
 			}
 		}
 		m_device = std::move( device );
+
+		std::unique_ptr<dx12_shader_compiler> shader_compiler = std::make_unique<dx12_shader_compiler>();
+		m_shader_compiler = std::move( shader_compiler );
+
+
 		m_current_frame_index = 0;
 	}
 
