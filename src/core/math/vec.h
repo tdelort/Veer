@@ -6,6 +6,24 @@
 // TODO : implement it
 // #define VEC_SIMD
 
+
+#define ELEM_ACCESS_DECLARE(_elem, _index)											\
+	[[nodiscard]] TYPE _elem () const requires veer::greater<ELEM_COUNT, _index>; 	\
+	TYPE& _elem () requires veer::greater<ELEM_COUNT, _index>;								
+
+#define ELEM_ACCESS_DEFINE(_elem, _index)																	\
+	template<arithmetic TYPE, size_t ELEM_COUNT>															\
+	[[nodiscard]] TYPE vec<TYPE, ELEM_COUNT>:: _elem () const requires veer::greater<ELEM_COUNT, _index> 	\
+	{ 																										\
+		return m_data[_index]; 																				\
+	}																										\
+	template<arithmetic TYPE, size_t ELEM_COUNT>															\
+	TYPE& vec<TYPE, ELEM_COUNT>:: _elem () requires veer::greater<ELEM_COUNT, _index> 						\
+	{ 																										\
+		return m_data[_index]; 																				\
+	}																										
+
+
 namespace veer::math
 {
     template<arithmetic TYPE, size_t ELEM_COUNT>
@@ -48,17 +66,15 @@ namespace veer::math
         TYPE& operator[](size_type _index);
 
 
-        [[nodiscard]] TYPE x() const requires veer::greater<ELEM_COUNT, 0u>;
-        TYPE& x() requires veer::greater<ELEM_COUNT, 0u>;
-		      
-        [[nodiscard]] TYPE y() const requires veer::greater<ELEM_COUNT, 1u>;
-        TYPE& y() requires veer::greater<ELEM_COUNT, 1u>;
-		      
-        [[nodiscard]] TYPE z() const requires veer::greater<ELEM_COUNT, 2u>;
-        TYPE& z() requires veer::greater<ELEM_COUNT, 2u>;
+		ELEM_ACCESS_DECLARE(x, 0u)
+		ELEM_ACCESS_DECLARE(y, 1u)
+		ELEM_ACCESS_DECLARE(z, 2u)
+		ELEM_ACCESS_DECLARE(w, 3u)
 
-        [[nodiscard]] TYPE w() const requires veer::greater<ELEM_COUNT, 3u>;
-        TYPE& w() requires veer::greater<ELEM_COUNT, 3u>;
+		ELEM_ACCESS_DECLARE(r, 0u)
+		ELEM_ACCESS_DECLARE(g, 1u)
+		ELEM_ACCESS_DECLARE(b, 2u)
+		ELEM_ACCESS_DECLARE(a, 3u)
 
 
 		template<arithmetic OTHER_TYPE>                                                   

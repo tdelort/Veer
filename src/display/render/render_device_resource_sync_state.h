@@ -9,7 +9,7 @@ namespace veer::display::render
 	//        I should update my API in order to be able to infer both of these from each enum value (even if it means having 2 enums)
 	enum class render_device_resource_sync_state
 	{
-		// sorry for the very dx12 nomes
+		// sorry for the very dx12 names
 		Common					= 0,
 
 		PixelShaderResource		= 1 << 0,

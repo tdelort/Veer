@@ -53,6 +53,8 @@ namespace veer::containers
 		template<typename... ARGS>
 		reference emplace_back(ARGS&&... _args);
 
+		iterator erase(iterator _it);
+
 		void reserve(size_t _new_capacity);
 		void resize(size_t _new_size, const_reference _new_values = T());
 
@@ -64,9 +66,9 @@ namespace veer::containers
 		void alloc( size_t _new_capacity );
 
 	private:
-		T* m_data;
-		size_t m_size;
-		size_t m_capacity;
+		T* m_data{nullptr};
+		size_t m_size{0u};
+		size_t m_capacity{0u};
 	};
 }
 

@@ -2,17 +2,17 @@
 
 #include "dx12_pch.h"
 
-#include <display/render/command_buffer.h>
 #include <display/render/command_queue.h>
 
 namespace veer::display::render
 {
 	class dx12_render_device;
+	class command_buffer;
 
 	class dx12_command_queue : public command_queue
 	{
 	public:
-		dx12_command_queue( dx12_render_device& _device, command_buffer::type _type );
+		dx12_command_queue(dx12_render_device& _device, command_buffer::type _type);
 		~dx12_command_queue() override;
 
 		void execute_command_buffers(veer::containers::span<command_buffer*> _command_buffers) override;

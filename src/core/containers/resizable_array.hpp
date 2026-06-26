@@ -83,7 +83,7 @@ namespace veer::containers
 			return;
 
 		const size_t last_index = ( size() - 1 );
-		std::destroy_at( m_data + last_index );
+		std::destroy_at(m_data + last_index);
 		m_size--;
 	}
 
@@ -103,13 +103,32 @@ namespace veer::containers
 	template<typename... ARGS>
 	resizable_array<T>::reference resizable_array<T>::emplace_back(ARGS&&... _args)
 	{
-		if ( m_size + 1 > m_capacity )
+		if ( size() + 1 > capacity() )
 			grow();
 
-		T* ptr = new(m_data + m_size) T(std::forward<ARGS>(_args)...);
+		T* ptr = new(end()) T(std::forward<ARGS>(_args)...);
 		m_size++;
 
 		return *ptr;
+	}
+
+	template<typename T>
+	resizable_array<T>::iterator resizable_array<T>::erase(iterator _it)
+	{
+		VEER_ASSERT(_it >= begin() && _it < end() && size() != 0u, "Iterator out of bounds");
+		VEER_ASSERT(_it != nullptr, "Iterator is invalid");
+
+		size_t index = ( _it - begin() ) / sizeof(T); 
+		std::destroy_at(m_data + index);
+
+		for(size_t i = index; i < size() - 1; ++i)
+		{
+			m_data[i] = m_data[i + 1];
+		}
+
+		m_size--;
+
+		return begin() + index;
 	}
 
 	template<typename T>
@@ -157,6 +176,7 @@ namespace veer::containers
 		}
 
 		m_data = new_data; 
+		m_capacity = _new_capacity;
 	}
 
 	template<typename T>

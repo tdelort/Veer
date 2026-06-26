@@ -3,7 +3,6 @@
 #include "core/core.h"
 #include "dx12_pch.h"
 
-#include <d3d12.h>
 #include <display/render/render_device_resource_sync_state.h>
 
 namespace veer::display::render

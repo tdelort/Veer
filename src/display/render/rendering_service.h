@@ -1,12 +1,13 @@
 #pragma once
 
-
 #include <core/service.h>
 #include <display/render/render_device.h>
 #include <display/render/shader_compiler.h>
 
 namespace veer::display::render
 {
+	class command_buffer;
+
 	class rendering_service : public service_interface
 	{
 	public:
@@ -20,8 +21,8 @@ namespace veer::display::render
 		virtual void start_frame( uint64_t _frame_index );
 		virtual void end_frame();
 
-		virtual std::unique_ptr<command_buffer> start_recording_command_buffer(command_buffer::type _type) = 0;
-		virtual void stop_recording_command_buffer( command_buffer& _command_buffer ) = 0;
+		virtual void open_command_buffer(command_buffer& command_buffer) = 0;
+		virtual void close_command_buffer(command_buffer& command_buffer) = 0;
 		// end rendering_tread api
 
 	protected:

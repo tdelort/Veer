@@ -1,7 +1,6 @@
 #include "dx12_pch.h"
 #include "dx12_rendering_service.h"
 #include "dx12_render_device.h"
-#include "dx12_command_buffer.h"
 #include "dx12_shader_compiler.h"
 
 using namespace Microsoft::WRL;
@@ -56,19 +55,14 @@ namespace veer::display::render
 		rendering_service::end_frame();
 	}
 
-	std::unique_ptr<command_buffer> dx12_rendering_service::start_recording_command_buffer(command_buffer::type _type)
+	void dx12_rendering_service::open_command_buffer(command_buffer& command_buffer)
 	{
-		std::unique_ptr<dx12_command_buffer> command_buffer = std::make_unique<dx12_command_buffer>(_type);
-
-		VEER_ASSERT(m_device != nullptr, "Render device is null while trying to start recording a command buffer");
-		command_buffer->open(static_cast<dx12_render_device&>(*m_device), m_command_allocators[m_current_frame_index % swap_chain::s_swap_chain_buffer_count]);
-
-		return command_buffer;
+		command_buffer.open(static_cast<dx12_render_device&>(get_render_device()), m_command_allocators[m_current_frame_index % swap_chain::s_swap_chain_buffer_count]);
 	}
 
-	void dx12_rendering_service::stop_recording_command_buffer(command_buffer& _command_buffer)
+	void dx12_rendering_service::close_command_buffer(command_buffer& command_buffer)
 	{
-		static_cast<dx12_command_buffer&>(_command_buffer).close();
+		command_buffer.close();
 	}
 }
 

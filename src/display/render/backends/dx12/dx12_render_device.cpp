@@ -1,8 +1,10 @@
+#include "core/containers/resizable_array.h"
+#include "core/containers/static_array.h"
+#include "core/debug.h"
 #include "dx12_pch.h"
 #include "dx12_render_device.h"
 
 #include "dx12_technique.h"
-#include "dx12_command_buffer.h"
 #include "dx12_swap_chain.h"
 #include "dx12_command_queue.h"
 #include "dx12_rendering_service.h"
@@ -11,6 +13,7 @@
 #include <display/render/swap_chain.h>
 #include <display/render/command_buffer.h>
 #include <display/render/rendering_service.h>
+#include <dxgidebug.h>
 
 namespace veer::display::render
 {
@@ -122,7 +125,7 @@ namespace veer::display::render
 
 		// Now create needed command queues
 
-		m_graphics_queue = std::make_unique<dx12_command_queue>(*this, command_buffer::type::Graphics);
+		m_graphics_queue = std::make_unique<dx12_command_queue>(*this, command_buffer::type::graphics);
 		//m_compute_queue = std::unique_ptr<dx12_command_queue>(new dx12_command_queue( this, command_buffer::type::Compute ));
 		//m_copy_queue = std::unique_ptr<dx12_command_queue>(new dx12_command_queue( this, command_buffer::type::Copy ));
 
@@ -133,7 +136,7 @@ namespace veer::display::render
 	void dx12_render_device::create_descriptor_heaps()
 	{
 		m_rtv_descriptor_heap = std::make_unique<dx12_descriptor_heap>(*this, D3D12_DESCRIPTOR_HEAP_TYPE_RTV, D3D12_DESCRIPTOR_HEAP_FLAG_NONE, s_rtv_descriptor_heap_size);
-		m_srv_descriptor_heap = std::make_unique<dx12_descriptor_heap>(*this, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE, s_rtv_descriptor_heap_size);
+		m_srv_descriptor_heap = std::make_unique<dx12_descriptor_heap>(*this, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE, s_srv_descriptor_heap_size);
 		// m_sampler_descriptor_heap = std::make_unique<dx12_descriptor_heap>(*this, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER, D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE, s_rtv_descriptor_heap_size);
 	}
 
@@ -166,6 +169,10 @@ namespace veer::display::render
 		{
 			dxgi_debug->ReportLiveObjects( DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_FLAGS(DXGI_DEBUG_RLO_ALL) );
 		}
+		else 
+		{
+			VEER_LOG_ERROR("Failed to get debug interface");
+		}
 #endif // defined(_DEBUG)
 	}
 
@@ -179,21 +186,83 @@ namespace veer::display::render
 
 
 
-	std::unique_ptr<swap_chain> dx12_render_device::create_swap_chain( veer::display::window::window& _window, veer::math::vec2u _size)
+	std::unique_ptr<swap_chain> dx12_render_device::alloc_internal( veer::display::window::window& _window, veer::math::vec2u _size)
 	{
 		return std::make_unique<dx12_swap_chain>( *this, _window, _size);
 	}
 
-	std::unique_ptr<graphics_technique> dx12_render_device::create_graphics_technique(const shader_stage_source_container_t& _source_code, const shader_signature& _signature, const shader_render_state& _render_state)
+	std::unique_ptr<graphics_technique> dx12_render_device::alloc_internal(const shader_stage_source_container_t& _source_code, const shader_signature& _signature, const shader_render_state& _render_state)
 	{
 		return std::make_unique<dx12_graphics_technique>(*this, _source_code, _signature, _render_state);
 	}
 
-	std::unique_ptr<compute_technique> dx12_render_device::create_compute_technique(const shader_stage_source_container_t& _source_code)
+	std::unique_ptr<compute_technique> dx12_render_device::alloc_internal(const shader_stage_source_container_t& _source_code)
 	{
 		return std::make_unique<dx12_compute_technique>(*this, _source_code);
 	}
 
+
+	void dx12_render_device::check_errors()
+	{
+#if defined(_DEBUG)
+
+		HRESULT deviceRemoved = get_api_handle()->GetDeviceRemovedReason();
+		VEER_ASSERT(deviceRemoved == S_OK, "Device has been removed");
+
+		if( m_info_queue == nullptr )
+			return;
+
+		size_t count = m_info_queue->GetNumStoredMessages(DXGI_DEBUG_ALL);
+
+		containers::resizable_array<char> buffer;
+
+		size_t message_length = 0u;
+		for( UINT64 i = 0; i < count; ++i )
+		{
+			m_info_queue->GetMessage(DXGI_DEBUG_ALL, i, NULL, &message_length);
+
+			buffer.resize(message_length);
+			DXGI_INFO_QUEUE_MESSAGE* message = (DXGI_INFO_QUEUE_MESSAGE*)(buffer.data());
+			m_info_queue->GetMessage(DXGI_DEBUG_ALL, i, message, &message_length);
+
+			if( message == nullptr )
+			{
+				VEER_ASSERT(false, "Validation message could not be retrieved");
+				continue;
+			}
+
+			switch( message->Severity )
+			{
+			case DXGI_INFO_QUEUE_MESSAGE_SEVERITY_CORRUPTION:
+			case DXGI_INFO_QUEUE_MESSAGE_SEVERITY_ERROR:
+			{
+				VEER_LOG_ERROR("[D3D12 ERROR] (" << (message->ID) << "): " << message->pDescription);
+			}
+			break;
+
+			case DXGI_INFO_QUEUE_MESSAGE_SEVERITY_WARNING:
+			{
+				VEER_LOG_WARNING("[D3D12 WARNING] (" << (message->ID) << "): " << message->pDescription);
+			}
+			break;
+
+			case DXGI_INFO_QUEUE_MESSAGE_SEVERITY_MESSAGE:
+			case DXGI_INFO_QUEUE_MESSAGE_SEVERITY_INFO:
+			{
+				VEER_LOG_DEBUG("[D3D12 INFO] (" << (message->ID) << "): " << message->pDescription);
+			}
+			break;
+			}
+		}
+		size_t missed_messages = m_info_queue->GetNumMessagesDiscardedByMessageCountLimit(DXGI_DEBUG_ALL);
+		if( missed_messages > 0u )
+		{
+			VEER_LOG_ERROR( "[D3D12] " << missed_messages << " additional validation messages were received but could not be stored in the queue.");
+		}
+		m_info_queue->ClearStoredMessages(DXGI_DEBUG_ALL);
+
+#endif // _GAMING_XBOX_SCARLETT
+	}
 
 
 	ComPtr<ID3D12Device2> dx12_render_device::get_api_handle() const

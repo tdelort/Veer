@@ -27,11 +27,12 @@ namespace veer::display::render
 
 		command_queue& get_command_queue(command_buffer::type _corresponding_command_buffer_type) override;
 
+		void check_errors();
+	protected:
 		// factory part
-		std::unique_ptr<swap_chain> create_swap_chain(veer::display::window::window& _window, veer::math::vec2u _size) override;
-
-  		std::unique_ptr<graphics_technique> create_graphics_technique(const shader_stage_source_container_t& _source_code, const shader_signature& _signature, const shader_render_state& _render_state) override;
-    	std::unique_ptr<compute_technique> create_compute_technique(const shader_stage_source_container_t& _source_code) override;
+		std::unique_ptr<swap_chain> alloc_internal(veer::display::window::window& _window, veer::math::vec2u _size) override;
+		std::unique_ptr<graphics_technique> alloc_internal(const shader_stage_source_container_t& _source_code, const shader_signature& _signature, const shader_render_state& _render_state) override;
+		std::unique_ptr<compute_technique> alloc_internal(const shader_stage_source_container_t& _source_code) override;
 
 	private:
 		void create_descriptor_heaps();

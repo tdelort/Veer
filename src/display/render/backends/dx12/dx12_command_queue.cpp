@@ -1,7 +1,7 @@
 #include "dx12_command_queue.h"
 
+#include "display/render/command_queue.h"
 #include "dx12_render_device.h"
-#include "dx12_command_buffer.h"
 
 #include <core/debug.h>
 #include <core/core.h>
@@ -10,11 +10,11 @@
 
 namespace veer::display::render
 {
-	dx12_command_queue::dx12_command_queue( dx12_render_device& _device, command_buffer::type _type )
+	dx12_command_queue::dx12_command_queue(dx12_render_device& _device, command_buffer::type _type)
 		: command_queue(_type)
 	{
 		D3D12_COMMAND_QUEUE_DESC desc = {};
-		desc.Type = dx12_command_buffer::s_to_dx12_type( _type );
+		desc.Type = command_buffer::s_convert(_type);
 		desc.Priority = D3D12_COMMAND_QUEUE_PRIORITY_NORMAL;
 		desc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
 		desc.NodeMask = 0;
@@ -37,18 +37,24 @@ namespace veer::display::render
 		dx12_command_lists.reserve(_command_buffers.size());
 		for (command_buffer* command_buffer : _command_buffers)
 		{
-			dx12_command_lists.push_back(static_cast<dx12_command_buffer*>(command_buffer)->get_api_handle().Get());
+			dx12_command_lists.push_back(command_buffer->get_api_handle());
 		}
 
 		VEER_LOG( "ExecuteCommandLists( " << dx12_command_lists.size() << ",  )" );
-		m_command_queue_api_handle->ExecuteCommandLists( (UINT)dx12_command_lists.size(), dx12_command_lists.data());
+		m_command_queue_api_handle->ExecuteCommandLists((UINT)dx12_command_lists.size(), dx12_command_lists.data());
+
+		command_queue::execute_command_buffers(_command_buffers);
 	}
 
 	// TODO : . Ping pong between backbuffer index (given as a parameter) for m_fence_value
 	void dx12_command_queue::signal(uint64_t _value)
 	{
+		VEER_ASSERT(_value > m_last_signaled_fence_value, "Trying to signal a fence value (" << _value << ") lower than last signaled value (" << m_last_signaled_fence_value << ")");
+
 		HRESULT hr = m_command_queue_api_handle->Signal(m_fence.Get(), _value);
 		VEER_ASSERT(SUCCEEDED(hr), "Failed to signal command queue fence (" << hr << ")");
+
+		command_queue::signal(_value);
 	}
 
 	void dx12_command_queue::wait_for_value(uint64_t _value)
@@ -66,6 +72,8 @@ namespace veer::display::render
 			WaitForSingleObject(event, INFINITE);
 			CloseHandle(event);
 		}
+
+		command_queue::wait_for_value(_value);
 	}
 
 	ComPtr<ID3D12CommandQueue> dx12_command_queue::get_api_handle()

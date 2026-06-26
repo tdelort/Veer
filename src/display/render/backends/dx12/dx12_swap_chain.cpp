@@ -2,7 +2,7 @@
 
 #include "display/render/render_device_data_format.h"
 #include "dx12_descriptor_heap.h"
-#include "dx12_render_device_resource.h"
+#include "dx12_render_device_backbuffer.h"
 
 #include <display/render/rendering_service.h>
 #include <display/window/window.h>
@@ -19,7 +19,7 @@ namespace veer::display::render
 		ComPtr<IDXGIFactory5> factory5;
         if (SUCCEEDED(factory4.As(&factory5)))
         {
-			if (FAILED(factory5->CheckFeatureSupport( DXGI_FEATURE_PRESENT_ALLOW_TEARING, &allow_tearing, sizeof(allow_tearing))))
+			if (FAILED(factory5->CheckFeatureSupport(DXGI_FEATURE_PRESENT_ALLOW_TEARING, &allow_tearing, sizeof(allow_tearing))))
 			{
 				allow_tearing = false;
 			}
@@ -45,10 +45,10 @@ namespace veer::display::render
 			// It is recommended to always allow tearing if tearing support is available.
 			swap_chain_desc.Flags = m_tearing_allowed ? DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING : 0;
 
-			dx12_command_queue& command_queue = static_cast<dx12_command_queue&>( _device.get_command_queue(command_buffer::type::Graphics) );
+			dx12_command_queue& command_queue = static_cast<dx12_command_queue&>( _device.get_command_queue(command_buffer::type::graphics) );
 
 			ComPtr<IDXGISwapChain1> swap_chain1;
-			HRESULT hr = factory4->CreateSwapChainForHwnd( command_queue.get_api_handle().Get(), windows_window_handle, &swap_chain_desc, nullptr, nullptr, &swap_chain1);
+			HRESULT hr = factory4->CreateSwapChainForHwnd(command_queue.get_api_handle().Get(), windows_window_handle, &swap_chain_desc, nullptr, nullptr, &swap_chain1);
 			VEER_ASSERT(SUCCEEDED(hr), "Failed to create swap chain (" << hr << ")");
 
 			hr = swap_chain1.As(&m_api_swap_chain_handle);
@@ -76,7 +76,7 @@ namespace veer::display::render
 				backbuffer_desc.m_flags = texture_desc::usage_flags::render_target;
 				backbuffer_desc.m_format = render_device_data_format::r8g8b8a8_unorm;
 		 
-				m_back_buffers_resources[i] = std::make_unique<dx12_render_device_backbuffer>( _device, backbuffer_desc, back_buffer_resource.Get() );
+				m_back_buffers_resources[i] = std::make_unique<dx12_render_device_backbuffer>(_device, backbuffer_desc, back_buffer_resource.Get());
 			}
 		}
     }
@@ -98,9 +98,9 @@ namespace veer::display::render
 		VEER_ASSERT(SUCCEEDED(hr), "Failed to Present swap chain");
 	}
 
-	render_device_resource& dx12_swap_chain::get_current_backbuffer()
+	render_device_texture_2d& dx12_swap_chain::get_current_backbuffer()
 	{
-		render_device_resource* resource_ptr = static_cast<render_device_resource*>( m_back_buffers_resources[get_backbuffer_index()].get() );
+		render_device_texture_2d* resource_ptr = static_cast<render_device_texture_2d*>( m_back_buffers_resources[get_backbuffer_index()].get() );
 		return *resource_ptr;
 	}
 

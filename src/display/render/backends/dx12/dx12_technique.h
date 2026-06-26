@@ -5,7 +5,6 @@
 #include "display/render/shader_source.h"
 #include "dx12_pch.h"
 #include "display/render/technique.h"
-#include <d3d12.h>
 
 namespace veer::display::render
 {

@@ -1,61 +1,42 @@
 #include "application.h"
 #include "application_config.h"
-#include "display/render/backends/dx12/dx12_render_device_resource.h"
-#include "display/render/technique.h"
-#include "display/render/shader_source.h"
-
-#include <d3d12.h>
-#include <display/render/rendering_service.h>
-#include <display/window/windowing_service.h>
-
-// TODO remove
-#include <display/render/swap_chain.h>
-
-// TODO remove
-#include <display/window/glfw/glfw_windowing_service.h>
-#include <display/render/backends/dx12/dx12_rendering_service.h>
-#include <display/render/backends/dx12/dx12_render_device.h>
-#include <display/render/backends/dx12/dx12_command_buffer.h>
-#include <D3D12MemAlloc.h>
-
-#include <dxgiformat.h>
-#include <memory>
-#include <stdlib.h>
 
 #include <core/core.h>
+#include <core/containers/span.h>
+#include <core/containers/static_array.h>
+#include <core/math/vec.h>
 
-// TODO remove
-#include <comdef.h>
+#include <display/render/base_types.h>
+#include <display/render/render_device_buffer.h>
+#include <display/render/render_device_texture_2d.h>
+#include <display/render/technique.h>
+#include <display/render/shader_source.h>
+#include <display/render/rendering_service.h>
+#include <display/render/swap_chain.h>
+#include <display/render/command_queue.h>
+#if defined(D3D12_RENDER_BACKEND)
+#include <display/render/backends/dx12/dx12_rendering_service.h>
+#include <display/render/backends/dx12/dx12_render_device.h>
+#endif // defined(D3D12_RENDER_BACKEND)
+
+#include <display/window/windowing_service.h>
+//#if defined(GLFW_WINDOW_BACKEND)
+#include <display/window/glfw/glfw_windowing_service.h>
+//#endif // defined(GLFW_WINDOW_BACKEND)
+
+#include <memory>
+#include <stdlib.h>
 
 namespace veer
 {
 	application::application( const application_config& _config )
 	{
 		m_application_config = _config;
+		m_window_service = std::make_unique<veer::display::window::glfw_windowing_service>();
 
-		switch (_config.m_windowing_service_choice)
-		{
-			case application_config::windowing_service_type::glfw:
-				m_window_service = std::make_unique<veer::display::window::glfw_windowing_service>();
-				break;
-			default:
-			{
-				VEER_LOG_ERROR("Windowing service backend not set in application_config");
-				return;
-			}
-		}
-
-		switch (_config.m_rendering_service_choice)
-		{
-			case application_config::rendering_service_type::dx12:
-				m_render_service = std::make_unique<veer::display::render::dx12_rendering_service>();
-				break;
-			default:
-			{
-				VEER_LOG_ERROR("Windowing service backend not set in application_config");
-				return;
-			}
-		}
+#if defined(D3D12_RENDER_BACKEND)
+		m_render_service = std::make_unique<veer::display::render::dx12_rendering_service>();
+#endif // defined(D3D12_RENDER_BACKEND)
 	}
 
 	application::~application()
@@ -95,9 +76,9 @@ namespace veer
 
 		veer::math::vec2u current_win_size = window->get_size();
 
-		std::unique_ptr<veer::display::render::swap_chain> swap_chain = device.create_swap_chain(*window, current_win_size);
+		std::unique_ptr<veer::display::render::swap_chain> swap_chain = device.alloc<veer::display::render::swap_chain>(*window, current_win_size);
 
-		veer::display::render::command_queue& graphics_command_queue = device.get_command_queue(veer::display::render::command_buffer::type::Graphics);
+		veer::display::render::command_queue& graphics_command_queue = device.get_command_queue(veer::display::render::command_buffer::type::graphics);
 
 		uint64_t fence_values = 0;
 		uint64_t frame_index = 0;
@@ -168,8 +149,8 @@ namespace veer
 			}
 
 
-			veer::display::render::shader_signature::input_elem position("POSITION", 0, veer::display::render::render_device_data_format::r32g32b32_float);
-			veer::display::render::shader_signature::input_elem texcoord("TEXCOORD", 0, veer::display::render::render_device_data_format::r32g32_float);
+			veer::display::render::shader_signature::input_elem position("POSITION", 0, veer::display::render::render_device_data_format::r32g32b32_float, 0u);
+			veer::display::render::shader_signature::input_elem texcoord("TEXCOORD", 0, veer::display::render::render_device_data_format::r32g32_float, 12u);
 			veer::containers::static_array<veer::display::render::shader_signature::input_elem, 2> shader_input = { position, texcoord };
 
 			veer::containers::static_array<veer::display::render::shader_signature::output_elem, 1> shader_output = 
@@ -177,181 +158,96 @@ namespace veer
 				{ veer::display::render::render_device_data_format::r8g8b8a8_unorm }
 			};
 
+			veer::display::render::shader_signature shader_signature(shader_input, shader_output);
+
 			veer::display::render::blend_state shader_blend_state = {}; // default 
 			veer::display::render::rasterizer_state rasterizer_state = {}; // default ? 
+			veer::display::render::shader_render_state shader_render_state({ shader_blend_state }, rasterizer_state);
 
-			fullscreen_uv_technique = device.create_graphics_technique( shader_source_code, { shader_input, shader_output }, { { shader_blend_state }, rasterizer_state } );
+			fullscreen_uv_technique = device.alloc<veer::display::render::graphics_technique>(shader_source_code, shader_signature, shader_render_state);
 		}
 
-		D3D12_INDEX_BUFFER_VIEW index_buffer_view;
-		D3D12_VERTEX_BUFFER_VIEW vertex_buffer_view;
-		{
-			// 	vec3f m_pos;
-			// 	vec2f m_uv;
-			static const size_t vertex_size = 5u;
-			static const size_t vertex_count = 4u;
-			static const size_t vertex_buffer_size = vertex_count * vertex_size;
-			static const size_t vertex_buffer_size_in_bytes = vertex_buffer_size * sizeof(float);
 
-			static const float vertex_buffer[vertex_buffer_size] =
+
+		static const size_t index_buffer_size = 6;
+		static const size_t index_buffer_size_in_bytes = index_buffer_size * sizeof(uint32_t);
+		std::unique_ptr<veer::display::render::render_device_buffer> index_buffer = nullptr; 
+
+		static const size_t vertex_size = 5u;
+		static const size_t vertex_count = 4u;
+		static const size_t vertex_buffer_size = vertex_count * vertex_size;
+		static const size_t vertex_buffer_size_in_bytes = vertex_buffer_size * sizeof(float);
+		std::unique_ptr<veer::display::render::render_device_buffer> vertex_buffer = nullptr;
+		{
+			static containers::static_array<float, vertex_buffer_size> vertex_buffer_data =
 			{
 				-1.f, -1.f, 0.5f,   0.f, 0.f,
-				-1.f, 1.f, 0.5f,   0.f, 1.f,
-				1.f, 1.f, 0.5f,   1.f, 1.f,
-				1.f, -1.f, 0.5f,   1.f, 0.f,
+				-1.f,  1.f, 0.5f,   0.f, 1.f,
+				 1.f,  1.f, 0.5f,   1.f, 1.f,
+				 1.f, -1.f, 0.5f,   1.f, 0.f,
 			};
 
-
-			static const size_t index_buffer_size = 6;
-			static const size_t index_buffer_size_in_bytes = index_buffer_size * sizeof(unsigned int);
-
-			static const unsigned int index_buffer[index_buffer_size] =
+			static containers::static_array<uint32_t, index_buffer_size> index_buffer_data =
 			{
 				0, 1, 2,
 				2, 3, 0
 			};
 
-			veer::display::render::dx12_render_device& dx12_device = static_cast<veer::display::render::dx12_render_device&>(device);
-
-			D3D12_RESOURCE_DESC vb_desc = {};
-			vb_desc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-			vb_desc.Alignment = 0;
-			vb_desc.Width = vertex_buffer_size_in_bytes;
-			vb_desc.Height = 1;
-			vb_desc.DepthOrArraySize = 1;
-			vb_desc.MipLevels = 1;
-			vb_desc.Format = DXGI_FORMAT_UNKNOWN;
-			vb_desc.SampleDesc.Count = 1;
-			vb_desc.SampleDesc.Quality = 0;
-			vb_desc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-			vb_desc.Flags = D3D12_RESOURCE_FLAG_NONE;
-
-			D3D12_RESOURCE_DESC ib_desc = {};
-			ib_desc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-			ib_desc.Alignment = 0;
-			ib_desc.Width = index_buffer_size_in_bytes;
-			ib_desc.Height = 1;
-			ib_desc.DepthOrArraySize = 1;
-			ib_desc.MipLevels = 1;
-			ib_desc.Format = DXGI_FORMAT_UNKNOWN;
-			ib_desc.SampleDesc.Count = 1;
-			ib_desc.SampleDesc.Quality = 0;
-			ib_desc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-			ib_desc.Flags = D3D12_RESOURCE_FLAG_NONE;
-			 
-
-			D3D12MA::ALLOCATION_DESC default_alloc_desc = {};
-			default_alloc_desc.HeapType = D3D12_HEAP_TYPE_DEFAULT;
-
-			D3D12MA::ALLOCATION_DESC upload_alloc_desc = {};
-			upload_alloc_desc.HeapType = D3D12_HEAP_TYPE_UPLOAD;
-			 
-
-			HRESULT hr;
-			D3D12MA::Allocation* vb_resource_alloc;
-			hr = dx12_device.get_allocator()->CreateResource( &default_alloc_desc, &vb_desc, D3D12_RESOURCE_STATE_COMMON, NULL, &vb_resource_alloc, IID_NULL, NULL);
-			VEER_ASSERT(SUCCEEDED(hr), "Failed to create vertex buffer resource. Error (" << hr << ")");
-
-			D3D12MA::Allocation* vb_upload_alloc;
-			hr = dx12_device.get_allocator()->CreateResource( &upload_alloc_desc, &vb_desc, D3D12_RESOURCE_STATE_GENERIC_READ, NULL, &vb_upload_alloc, IID_NULL, NULL);
-			VEER_ASSERT(SUCCEEDED(hr), "Failed to create vertex buffer upload resource. Error (" << hr << ")");
 
 
-			D3D12MA::Allocation* ib_resource_alloc;
-			hr = dx12_device.get_allocator()->CreateResource( &default_alloc_desc, &ib_desc, D3D12_RESOURCE_STATE_COMMON, NULL, &ib_resource_alloc, IID_NULL, NULL);
-			VEER_ASSERT(SUCCEEDED(hr), "Failed to create index buffer resource. Error (" << hr << ")");
+			veer::display::render::buffer_desc index_buffer_desc
+			{
+				.m_flags = veer::display::render::buffer_desc::usage_flags::index,
+				.m_size = index_buffer_size,
+				.m_stride = sizeof(uint32_t) 
+			};
 
-			D3D12MA::Allocation* ib_upload_alloc;
-			hr = dx12_device.get_allocator()->CreateResource( &upload_alloc_desc, &ib_desc, D3D12_RESOURCE_STATE_GENERIC_READ, NULL, &ib_upload_alloc, IID_NULL, NULL);
-			VEER_ASSERT(SUCCEEDED(hr), "Failed to create index buffer upload resource. Error (" << hr << ")");
+			index_buffer = std::make_unique<veer::display::render::render_device_buffer>(device, index_buffer_desc);
+			index_buffer->set_data(containers::span<uint32_t>(index_buffer_data));
 
-			uint8_t* data_vertex;
-			vb_upload_alloc->GetResource()->Map(0u, nullptr, reinterpret_cast<void**>(&data_vertex));
-			memcpy(data_vertex, vertex_buffer, vertex_buffer_size_in_bytes);
-			vb_upload_alloc->GetResource()->Unmap(0u, nullptr);
 
-			uint8_t* data_index;
-			ib_upload_alloc->GetResource()->Map(0u, nullptr, reinterpret_cast<void**>(&data_index));
-			memcpy(data_index, index_buffer, index_buffer_size_in_bytes);
-			ib_upload_alloc->GetResource()->Unmap(0u, nullptr);
+			veer::display::render::buffer_desc vertex_buffer_desc
+			{
+				.m_flags = veer::display::render::buffer_desc::usage_flags::vertex,
+				.m_size = vertex_buffer_size,
+				.m_stride = vertex_size * sizeof(float) 
+			};
+
+			vertex_buffer = std::make_unique<veer::display::render::render_device_buffer>(device, vertex_buffer_desc);
+			vertex_buffer->set_data(containers::span<float>(vertex_buffer_data));
+
+
 
 			// now, copy from upload heap to gpu resource
-			std::unique_ptr<veer::display::render::command_buffer> upload_command_buffer = m_render_service->start_recording_command_buffer(veer::display::render::command_buffer::type::Graphics);
-			veer::display::render::dx12_command_buffer* dx12_upload_command_buffer = static_cast<veer::display::render::dx12_command_buffer*>(upload_command_buffer.get());
-
+			std::unique_ptr<veer::display::render::copy_command_buffer> upload_command_buffer = std::make_unique<veer::display::render::copy_command_buffer>();
 			{
-				D3D12_RESOURCE_BARRIER barrier = {};
-				barrier.Transition.pResource = vb_resource_alloc->GetResource();
-				barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_COMMON;
-				barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_COPY_DEST;
-				barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-				dx12_upload_command_buffer->get_api_handle()->ResourceBarrier(1, &barrier);
-			}
+				m_render_service->open_command_buffer(*upload_command_buffer);
 
-			{
-				D3D12_RESOURCE_BARRIER barrier = {};
-				barrier.Transition.pResource = ib_resource_alloc->GetResource();
-				barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_COMMON;
-				barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_COPY_DEST;
-				barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-				dx12_upload_command_buffer->get_api_handle()->ResourceBarrier(1, &barrier);
-			}
-			
-			dx12_upload_command_buffer->get_api_handle()->CopyResource(vb_resource_alloc->GetResource(), vb_upload_alloc->GetResource());
-			dx12_upload_command_buffer->get_api_handle()->CopyResource(ib_resource_alloc->GetResource(), ib_upload_alloc->GetResource());
+				index_buffer->upload(*upload_command_buffer);
+				vertex_buffer->upload(*upload_command_buffer);
 
-			{
-				D3D12_RESOURCE_BARRIER barrier = {};
-				barrier.Transition.pResource = vb_resource_alloc->GetResource();
-				barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_COPY_DEST;
-				barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER;
-				barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-				dx12_upload_command_buffer->get_api_handle()->ResourceBarrier(1, &barrier);
-			}
+				// not needed when everything is abstracted
+				upload_command_buffer->transition_barrier(*index_buffer, index_buffer->get_sync_state_tracking().get_resource_state(), veer::display::render::render_device_resource_sync_state::IndexBuffer);
+				upload_command_buffer->transition_barrier(*vertex_buffer, vertex_buffer->get_sync_state_tracking().get_resource_state(), veer::display::render::render_device_resource_sync_state::VertexAndConstantBuffer);
 
-			{
-				D3D12_RESOURCE_BARRIER barrier = {};
-				barrier.Transition.pResource = ib_resource_alloc->GetResource();
-				barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_COPY_DEST;
-				barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_INDEX_BUFFER;
-				barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-				dx12_upload_command_buffer->get_api_handle()->ResourceBarrier(1, &barrier);
+				m_render_service->close_command_buffer(*upload_command_buffer);
 			}
-
-			m_render_service->stop_recording_command_buffer( *upload_command_buffer );
 
 			veer::display::render::command_buffer* upload_command_buffer_raw_ptr = upload_command_buffer.get();
-			graphics_command_queue.execute_command_buffers(veer::containers::span<veer::display::render::command_buffer*>( upload_command_buffer_raw_ptr ));
+			graphics_command_queue.execute_command_buffers(veer::containers::span<veer::display::render::command_buffer*>(upload_command_buffer_raw_ptr));
 
 			fence_values++;
 			graphics_command_queue.signal(fence_values);
 			graphics_command_queue.wait_for_value(fence_values);
 
-			// clear upload resources
-			ib_upload_alloc->Release();
-			vb_upload_alloc->Release();
-
-			index_buffer_view.BufferLocation = ib_resource_alloc->GetResource()->GetGPUVirtualAddress();
-			index_buffer_view.Format = DXGI_FORMAT_R32_UINT; // 32-bit unsigned integer (this is what a dword is, double word, a word is 2 bytes)
-			index_buffer_view.SizeInBytes = index_buffer_size_in_bytes;
-
-			vertex_buffer_view.BufferLocation = vb_resource_alloc->GetResource()->GetGPUVirtualAddress();
-			vertex_buffer_view.StrideInBytes = sizeof( float ) * vertex_size; 
-			vertex_buffer_view.SizeInBytes = vertex_buffer_size_in_bytes;
-		//#else // 0
-		//	index_buffer_view.BufferLocation = ib_upload_alloc->GetResource()->GetGPUVirtualAddress();
-		//	index_buffer_view.Format = DXGI_FORMAT_R32_UINT;
-		//	index_buffer_view.SizeInBytes = index_buffer_size_in_bytes;
-
-		//	vertex_buffer_view.BufferLocation = vb_upload_alloc->GetResource()->GetGPUVirtualAddress();
-		//	vertex_buffer_view.StrideInBytes = /*sizeof( float ) * */ 4 * vertex_size; 
-		//	vertex_buffer_view.SizeInBytes = vertex_buffer_size_in_bytes;
-		//#endif // 0
+			// temporary upload resources should be released automatically here
 		}
 		
 		std::chrono::high_resolution_clock clock;
 		auto t0_global = clock.now();
 		auto t0_frame = t0_global;
+
+		std::unique_ptr<veer::display::render::graphics_command_buffer> test_frame_command_buffer = std::make_unique<veer::display::render::graphics_command_buffer>();
 
 		// TODO create event handler
 		while(window->is_open()) 
@@ -378,7 +274,7 @@ namespace veer
 
 				current_win_size = this_frame_win_size;
 				swap_chain = nullptr; // destroy old swap_chain
-				swap_chain = device.create_swap_chain( *window, current_win_size);
+				swap_chain = device.alloc<veer::display::render::swap_chain>( *window, current_win_size);
 
 				for (size_t i = 0; i < veer::display::render::swap_chain::s_swap_chain_buffer_count; ++i)
 				{
@@ -386,62 +282,90 @@ namespace veer
 				}
 			}
 			
-			std::unique_ptr<veer::display::render::command_buffer> test_frame_command_buffer = m_render_service->start_recording_command_buffer(veer::display::render::command_buffer::type::Graphics);
-
-			veer::display::render::render_device_resource& backbuffer_resource = swap_chain->get_current_backbuffer();
+			veer::display::render::render_device_texture_2d& backbuffer_resource = swap_chain->get_current_backbuffer();
 			{
-				// Transition RT to RenderTarget state (needed for Clear call)
-				test_frame_command_buffer->transition_barrier(backbuffer_resource, veer::display::render::render_device_resource_sync_state::Present, veer::display::render::render_device_resource_sync_state::RenderTarget);
- 
+				m_render_service->open_command_buffer(*test_frame_command_buffer);
 
+				// Transition RT to RenderTarget state (needed for Clear call)
+				test_frame_command_buffer->transition_barrier(backbuffer_resource, backbuffer_resource.get_sync_state_tracking().get_resource_state(), veer::display::render::render_device_resource_sync_state::RenderTarget);
+ 
 				// Clear RT
-				veer::math::vec4f clear_color( 0.4f, 0.6f, 0.9f, 1.0f );
+				// veer::math::vec4f clear_color( 0.4f, 0.6f, 0.9f, 1.0f );
 				// test_frame_command_buffer->clear_render_target(backbuffer_resource, clear_color);
 
 				// Draw !!
-
-				veer::display::render::dx12_command_buffer* dx12_test_frame_command_buffer = static_cast<veer::display::render::dx12_command_buffer*>(test_frame_command_buffer.get());
-
-				test_frame_command_buffer->set_technique(*fullscreen_uv_technique);
-
-
-				const veer::display::render::dx12_descriptor& backbuffer_cpu_handle = static_resource_cast<veer::display::render::dx12_render_device_resource>( backbuffer_resource ).get_cpu_handle();
-				dx12_test_frame_command_buffer->get_api_handle()->OMSetRenderTargets(1, &backbuffer_cpu_handle.m_handle, FALSE, nullptr);
-
-				// Record commands.
-				dx12_test_frame_command_buffer->get_api_handle()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-				dx12_test_frame_command_buffer->get_api_handle()->IASetVertexBuffers(0, 1, &vertex_buffer_view);
-				dx12_test_frame_command_buffer->get_api_handle()->IASetIndexBuffer( &index_buffer_view );
-
 				{
-					// draw function
-					D3D12_VIEWPORT viewport;
-					viewport.TopLeftX = 0;
-					viewport.TopLeftY = 0;
-					viewport.Width = current_win_size[0];
-					viewport.Height = current_win_size[1];
-					viewport.MinDepth = 0.0f;
-					viewport.MaxDepth = 1.0f;
+					test_frame_command_buffer->set_technique(*fullscreen_uv_technique);
 
-					D3D12_RECT scissor_rect;
-					scissor_rect.left = 0;
-					scissor_rect.top = 0;
-					scissor_rect.right = current_win_size[0];
-					scissor_rect.bottom = current_win_size[1];
-					
-					dx12_test_frame_command_buffer->get_api_handle()->RSSetViewports(1, &viewport);
-					dx12_test_frame_command_buffer->get_api_handle()->RSSetScissorRects(1, &scissor_rect);
+					test_frame_command_buffer->set_render_output(nullptr, &backbuffer_resource);
+
+					test_frame_command_buffer->set_vertex_buffer(*vertex_buffer);
+					test_frame_command_buffer->set_index_buffer(*index_buffer);
+
+					display::render::viewport viewport
+					{
+						.m_position = math::vec2u(0u, 0u),
+						.m_size = current_win_size, 
+						.m_depth = math::vec2f(0.f, 1.f)
+					};
+					test_frame_command_buffer->set_viewports(containers::span<display::render::viewport>(viewport));
+
+					display::render::rect scissor_rect
+					{
+						.m_min = math::vec2u(0u, 0u),
+						.m_max = current_win_size
+					};
+					test_frame_command_buffer->set_scissors(scissor_rect);
+
+					test_frame_command_buffer->draw_indexed_instanced(index_buffer_size, 1u);
+
+// possible "submit context" usage idea
+#if 0
+					// const veer::display::render::graphics_submit_context& gfx_ctx = test_frame_command_buffer->alloc_graphics_submit_context();
+
+					// gfx_ctx->set_technique(*fullscreen_uv_technique);
+					// gfx_ctx->set_mesh()
+					// {
+					// 	// Record commands.
+					// 	dx12_test_frame_command_buffer->get_api_handle()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+					// 	dx12_test_frame_command_buffer->get_api_handle()->IASetVertexBuffers(0, 1, &vertex_buffer_view);
+					// 	dx12_test_frame_command_buffer->get_api_handle()->IASetIndexBuffer( &index_buffer_view );
+					// }
+
+					// gfx_ctx->set_viewport()
+					// gfx_ctx->set_scissors()
+					// {
+					// 	// draw function
+					// 	D3D12_VIEWPORT viewport;
+					// 	viewport.TopLeftX = 0;
+					// 	viewport.TopLeftY = 0;
+					// 	viewport.Width = current_win_size[0];
+					// 	viewport.Height = current_win_size[1];
+					// 	viewport.MinDepth = 0.0f;
+					// 	viewport.MaxDepth = 1.0f;
+
+					// 	D3D12_RECT scissor_rect;
+					// 	scissor_rect.left = 0;
+					// 	scissor_rect.top = 0;
+					// 	scissor_rect.right = current_win_size[0];
+					// 	scissor_rect.bottom = current_win_size[1];
+					// 	
+					// 	dx12_test_frame_command_buffer->get_api_handle()->RSSetViewports(1, &viewport);
+					// 	dx12_test_frame_command_buffer->get_api_handle()->RSSetScissorRects(1, &scissor_rect);
+					// }
 				
-					dx12_test_frame_command_buffer->get_api_handle()->DrawIndexedInstanced( 6, 1, 0, 0, 0 );
+					// gfx_ctx.submit();
+					// {
+					// 	dx12_test_frame_command_buffer->get_api_handle()->DrawIndexedInstanced( 6, 1, 0, 0, 0 );
+					// }
+#endif // 0
 				}
-			}
 
-			{
 				// Transition RT to Present state (needed for Present call)
-				test_frame_command_buffer->transition_barrier(backbuffer_resource, veer::display::render::render_device_resource_sync_state::RenderTarget, veer::display::render::render_device_resource_sync_state::Present);
-			}
+				test_frame_command_buffer->transition_barrier(backbuffer_resource, backbuffer_resource.get_sync_state_tracking().get_resource_state(), veer::display::render::render_device_resource_sync_state::Present);
 
-			m_render_service->stop_recording_command_buffer( *test_frame_command_buffer );
+				m_render_service->close_command_buffer(*test_frame_command_buffer);
+			}
 
 			veer::display::render::command_buffer* test_frame_command_buffer_raw_ptr = test_frame_command_buffer.get();
 			graphics_command_queue.execute_command_buffers(veer::containers::span<veer::display::render::command_buffer*>(test_frame_command_buffer_raw_ptr));
@@ -460,6 +384,9 @@ namespace veer
 
 			// Wait for next frame back buffer end of next frame back buffer
 			graphics_command_queue.wait_for_value(backbuffers_fence_values[backbuffer_index]);
+		
+			veer::display::render::dx12_render_device& dx12_device = static_cast<veer::display::render::dx12_render_device&>(device);
+			dx12_device.check_errors();
 		}
 
 		// Wait for all previous work

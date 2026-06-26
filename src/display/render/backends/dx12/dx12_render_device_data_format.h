@@ -7,7 +7,7 @@
 
 namespace veer::display::render
 {
-    static inline DXGI_FORMAT s_convert( render_device_data_format _format )
+    static inline DXGI_FORMAT s_convert(render_device_data_format _format)
     {
         DXGI_FORMAT s_conversionTable[] =  
         {

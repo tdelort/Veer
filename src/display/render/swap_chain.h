@@ -1,5 +1,6 @@
 #pragma once
 
+#include "display/render/render_device_texture_2d.h"
 #include <core/math/vec.h>
 
 namespace veer::display::render
@@ -12,7 +13,7 @@ namespace veer::display::render
 	public:
 		virtual ~swap_chain() = 0;
 
-		virtual render_device_resource& get_current_backbuffer() = 0;
+		virtual render_device_texture_2d& get_current_backbuffer() = 0;
 
 		virtual size_t get_backbuffer_index() = 0;
 

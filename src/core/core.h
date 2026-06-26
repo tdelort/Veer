@@ -1,5 +1,21 @@
 #pragma once
 
+// TODO : move render backend macros in platform_specific.h file or smth
+#define D3D12_RENDER_BACKEND
+// #define VULKAN_RENDER_BACKEND
+// #define METAL_RENDER_BACKEND
+
+// TODO after above TODO : set RENDER_BACKEND macros via build system
+#define RENDER_BACKEND D3D12_RENDER_BACKEND 
+
+#if defined(D3D12_RENDER_BACKEND) 
+#define RENDER_BACKEND_PLATFORM_PREFIX "dx12"
+#elif defined(VULKAN_RENDER_BACKEND) 
+#define RENDER_BACKEND_PLATFORM_PREFIX "vulkan"
+#elif defined(METAL_RENDER_BACKEND) 
+#define RENDER_BACKEND_PLATFORM_PREFIX "metal"
+#endif
+
 // STD lib headers
 // TODO : remove them one by one by implementing your own version (we are here to make an apple pie,
 // and to make an apple pie, one first need to invent the universe)
@@ -24,6 +40,7 @@
 #include <type_traits>
 #include <mutex>
 #include <cstdint>
+#include <functional>
 
 
 #define VEER_MAKE_STMT(_expr) do { _expr } while(0)
@@ -79,7 +96,7 @@ namespace veer::flags
     constexpr bool none( ENUM_TYPE _val )
     {
         using underlying_type = std::underlying_type_t<ENUM_TYPE>;                                                       \
-        return static_cast<underlying_type>(_val) != static_cast<underlying_type>(0);
+        return static_cast<underlying_type>(_val) == static_cast<underlying_type>(0);
     }
     
     template<typename ENUM_TYPE>

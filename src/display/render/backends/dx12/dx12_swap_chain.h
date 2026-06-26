@@ -3,7 +3,7 @@
 #include "dx12_pch.h"
 
 #include "dx12_render_device.h"
-#include "dx12_render_device_resource.h"
+#include "dx12_render_device_backbuffer.h"
 
 #include <core/math/vec.h>
 
@@ -25,7 +25,7 @@ namespace veer::display::render
 		virtual ~dx12_swap_chain();
 
 		void present(size_t _sync_intervals) override;
-		render_device_resource& get_current_backbuffer() override;
+		render_device_texture_2d& get_current_backbuffer() override;
 		size_t get_backbuffer_index() override;
 	private:
 		ComPtr<IDXGISwapChain4> m_api_swap_chain_handle;

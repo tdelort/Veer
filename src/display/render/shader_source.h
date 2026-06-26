@@ -30,7 +30,7 @@ namespace veer::display::render
             const char* m_semantic_name;
             size_t m_semantic_index;
             render_device_data_format m_format;
-            // uint32_t m_offset;
+            uint32_t m_offset;
         };
 
         struct output_elem

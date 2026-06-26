@@ -6,7 +6,6 @@
 #include "dx12_pch.h"
 #include "dx12_render_device.h"
 #include "dx12_render_device_data_format.h"
-#include <d3d12.h>
 
 namespace veer::display::render
 {
@@ -18,7 +17,7 @@ namespace veer::display::render
         dx12_input_elem.Format = s_convert( _input_elem.m_format );
 
         dx12_input_elem.InputSlot = 0u;
-        dx12_input_elem.AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
+        dx12_input_elem.AlignedByteOffset = _input_elem.m_offset; // D3D12_APPEND_ALIGNED_ELEMENT;
         dx12_input_elem.InputSlotClass = D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA;
         dx12_input_elem.InstanceDataStepRate = 0;
 

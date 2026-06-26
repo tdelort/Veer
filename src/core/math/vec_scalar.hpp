@@ -33,6 +33,15 @@ namespace veer::math
 		return m_data[_index];
 	}
 
+	ELEM_ACCESS_DEFINE(x, 0u)
+	ELEM_ACCESS_DEFINE(y, 1u)
+	ELEM_ACCESS_DEFINE(z, 2u)
+	ELEM_ACCESS_DEFINE(w, 3u)
+
+	ELEM_ACCESS_DEFINE(r, 0u)
+	ELEM_ACCESS_DEFINE(g, 1u)
+	ELEM_ACCESS_DEFINE(b, 2u)
+	ELEM_ACCESS_DEFINE(a, 3u)
 
 	//----------------------------------------------------------------------------
 	//							COUMPOUND OPERATORS

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "core/core.h"
+
 namespace veer
 {
     template<size_t A, size_t B>
