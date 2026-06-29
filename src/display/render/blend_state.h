@@ -4,7 +4,6 @@
 
 namespace veer::display::render
 {
-    // TODO move to its own file 
     struct blend_state
     {
         enum class factor

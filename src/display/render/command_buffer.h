@@ -2,8 +2,8 @@
 
 #include "core/containers/static_array.h"
 // TODO use only texture_base whenever possible
+#include "display/render/render_device_texture_base.h"
 #include "display/render/render_device_texture_2d.h"
-#include "display/render/render_device_texture_3d.h"
 #include "display/render/render_device_buffer.h"
 #include "render_device_resource_sync_state.h"
 
@@ -40,8 +40,7 @@ namespace veer::display::render
 		command_buffer(command_buffer::type _type);
 		virtual ~command_buffer();
 
-		// TODO : this is the low level api, I should implement something to handle state tracking and transitions when multi threaded rendering in an higher level class 
-		void transition_barrier(render_device_resource& _resource, render_device_resource_sync_state _from_state, render_device_resource_sync_state _to_state);
+		void transition_barrier(render_device_resource& _resource, render_device_resource_sync_state _to_state);
 
 	public:
 		void do_after_execution(after_execution_callback_t&& _callback)
@@ -83,7 +82,7 @@ namespace veer::display::render
 		copy_command_buffer(command_buffer::type _type);
 
 	public:
-		void copy_texture(const render_device_texture_2d& _dst, const render_device_texture_2d& _src);
+		void copy_texture(const render_device_texture_base& _dst, const render_device_texture_base& _src);
 		// TODO void copy_texture_region ?
 
 		void copy_buffer(const render_device_buffer& _dst, const render_device_buffer& _src, uint64_t _num_bytes);
@@ -102,10 +101,8 @@ namespace veer::display::render
 	public:
 		void set_technique(compute_technique& _technique);
 
-		void clear_texture(const render_device_texture_2d& _texture, math::vec4u _color);
-		void clear_texture(const render_device_texture_2d& _texture, math::vec4f _color);
-		void clear_texture(const render_device_texture_3d& _texture, math::vec4u _color);
-		void clear_texture(const render_device_texture_3d& _texture, math::vec4f _color);
+		void clear_texture(const render_device_texture_base& _texture, math::vec4u _color);
+		void clear_texture(const render_device_texture_base& _texture, math::vec4f _color);
 
 		void clear_buffer(const render_device_buffer& _buffer, uint32_t _value );
 		void clear_buffer(const render_device_buffer& _buffer, float _value );
@@ -136,7 +133,7 @@ namespace veer::display::render
 		void set_scissors(containers::span<rect> _scissor_rects);
 
 		void clear_render_target(render_device_texture_2d& _render_target_resource, math::vec4f _color);
-		void clear_depth_stencil(render_device_texture_3d& _render_target_resource, float _depth, uint8_t _stencil);
+		void clear_depth_stencil(render_device_texture_2d& _render_target_resource, float _depth, uint8_t _stencil);
 		// TODO : check if need more args for clear depth stencil
 
 		// TODO : we might need more complex types for view on buffers to have more control

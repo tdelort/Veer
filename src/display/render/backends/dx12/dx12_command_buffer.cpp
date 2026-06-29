@@ -79,14 +79,14 @@ namespace veer::display::render
 		// m_command_list_handle.Reset();
 	}
 
-	void command_buffer::transition_barrier(render_device_resource& _resource, render_device_resource_sync_state _from_state, render_device_resource_sync_state _to_state)
+	void command_buffer::transition_barrier(render_device_resource& _resource, render_device_resource_sync_state _to_state)
 	{
 		D3D12_RESOURCE_BARRIER barrier = {};
 		barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
 		barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
 		barrier.Transition.pResource = _resource.get_api_handle();
 		barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-		barrier.Transition.StateBefore = display::render::s_convert(_from_state);
+		barrier.Transition.StateBefore = display::render::s_convert(_resource.get_sync_state_tracking().get_resource_state());
 		barrier.Transition.StateAfter = display::render::s_convert(_to_state);
 		get_api_handle()->ResourceBarrier(1, &barrier);
 
@@ -112,7 +112,7 @@ namespace veer::display::render
 	{
 	}
 
-	void copy_command_buffer::copy_texture(const render_device_texture_2d& _dst, const render_device_texture_2d& _src)
+	void copy_command_buffer::copy_texture(const render_device_texture_base& _dst, const render_device_texture_base& _src)
 	{
 		(void)_dst;
 		(void)_src;
@@ -152,28 +152,14 @@ namespace veer::display::render
 		get_api_handle()->SetGraphicsRootSignature(dx12_technique.get_root_signature());
 	}
 
-	void compute_command_buffer::clear_texture(const render_device_texture_2d& _texture, math::vec4u _color)
+	void compute_command_buffer::clear_texture(const render_device_texture_base& _texture, math::vec4u _color)
 	{
 		(void)_texture;
 		(void)_color;
 		VEER_ASSERT(false, "Not implemented");
 	}
 
-	void compute_command_buffer::clear_texture(const render_device_texture_2d& _texture, math::vec4f _color)
-	{
-		(void)_texture;
-		(void)_color;
-		VEER_ASSERT(false, "Not implemented");
-	}
-
-	void compute_command_buffer::clear_texture(const render_device_texture_3d& _texture, math::vec4u _color)
-	{
-		(void)_texture;
-		(void)_color;
-		VEER_ASSERT(false, "Not implemented");
-	}
-
-	void compute_command_buffer::clear_texture(const render_device_texture_3d& _texture, math::vec4f _color)
+	void compute_command_buffer::clear_texture(const render_device_texture_base& _texture, math::vec4f _color)
 	{
 		(void)_texture;
 		(void)_color;
@@ -293,7 +279,7 @@ namespace veer::display::render
 		get_api_handle()->ClearRenderTargetView(_render_target_resource.get_render_target_view().m_handle, arr, 0, nullptr);
 	}
 
-	void graphics_command_buffer::clear_depth_stencil(render_device_texture_3d& _render_target_resource, float _depth, uint8_t _stencil)
+	void graphics_command_buffer::clear_depth_stencil(render_device_texture_2d& _render_target_resource, float _depth, uint8_t _stencil)
 	{
 		(void)_render_target_resource, _depth, _stencil;
 		VEER_ASSERT(false, "Not implemented");

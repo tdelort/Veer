@@ -78,7 +78,7 @@ namespace veer::display::render
 			upload_alloc->GetResource()->Unmap(0u, nullptr);
 		}
 
-		_upload_buffer.transition_barrier(*this, get_sync_state_tracking().get_resource_state(), render_device_resource_sync_state::CopyDest);
+		_upload_buffer.transition_barrier(*this, render_device_resource_sync_state::CopyDest);
 
 		// TODO : use common code
 		// _upload_buffer.copy_texture(const render_device_texture_2d &_dst, const render_device_texture_2d &_src)->CopyResource(dx12_resource.get_api_handle(), upload_alloc->GetResource());

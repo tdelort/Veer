@@ -94,8 +94,6 @@ namespace veer
 			graphics_command_queue.signal(fence_values);
 		}
 
-		// TODO : abstractize
-
 		std::unique_ptr<veer::display::render::graphics_technique> fullscreen_uv_technique = nullptr;
 
 		{
@@ -227,8 +225,8 @@ namespace veer
 				vertex_buffer->upload(*upload_command_buffer);
 
 				// not needed when everything is abstracted
-				upload_command_buffer->transition_barrier(*index_buffer, index_buffer->get_sync_state_tracking().get_resource_state(), veer::display::render::render_device_resource_sync_state::IndexBuffer);
-				upload_command_buffer->transition_barrier(*vertex_buffer, vertex_buffer->get_sync_state_tracking().get_resource_state(), veer::display::render::render_device_resource_sync_state::VertexAndConstantBuffer);
+				upload_command_buffer->transition_barrier(*index_buffer, veer::display::render::render_device_resource_sync_state::IndexBuffer);
+				upload_command_buffer->transition_barrier(*vertex_buffer, veer::display::render::render_device_resource_sync_state::VertexAndConstantBuffer);
 
 				m_render_service->close_command_buffer(*upload_command_buffer);
 			}
@@ -265,7 +263,7 @@ namespace veer
 
 			const veer::math::vec2u this_frame_win_size = window->get_size();
 			// TODO : improve vec
-			if ( this_frame_win_size[0] != current_win_size[0] || this_frame_win_size[1] != current_win_size[1] )
+			if ( this_frame_win_size.x() != current_win_size.x() || this_frame_win_size.y() != current_win_size.y() )
 			{
 				// Wait for all previous work
 				fence_values++;
@@ -287,7 +285,7 @@ namespace veer
 				m_render_service->open_command_buffer(*test_frame_command_buffer);
 
 				// Transition RT to RenderTarget state (needed for Clear call)
-				test_frame_command_buffer->transition_barrier(backbuffer_resource, backbuffer_resource.get_sync_state_tracking().get_resource_state(), veer::display::render::render_device_resource_sync_state::RenderTarget);
+				test_frame_command_buffer->transition_barrier(backbuffer_resource, veer::display::render::render_device_resource_sync_state::RenderTarget);
  
 				// Clear RT
 				// veer::math::vec4f clear_color( 0.4f, 0.6f, 0.9f, 1.0f );
@@ -362,7 +360,7 @@ namespace veer
 				}
 
 				// Transition RT to Present state (needed for Present call)
-				test_frame_command_buffer->transition_barrier(backbuffer_resource, backbuffer_resource.get_sync_state_tracking().get_resource_state(), veer::display::render::render_device_resource_sync_state::Present);
+				test_frame_command_buffer->transition_barrier(backbuffer_resource, veer::display::render::render_device_resource_sync_state::Present);
 
 				m_render_service->close_command_buffer(*test_frame_command_buffer);
 			}
