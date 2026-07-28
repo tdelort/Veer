@@ -4,6 +4,10 @@ protected:
 
 public:
 	const dx12_descriptor& get_render_target_view() const;
+	const dx12_descriptor& get_depth_stencil_view() const;
 
 protected:
-	dx12_descriptor m_render_target_cpu_descriptor{};
+	dx12_descriptor m_rtv_cpu_descriptor{};
+	dx12_descriptor m_dsv_cpu_descriptor{};
+	dx12_descriptor m_srv_cpu_descriptor{};
+	dx12_descriptor m_uav_cpu_descriptor{};

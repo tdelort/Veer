@@ -9,6 +9,7 @@
 
 #include <core/math/vec.h>
 #include <display/render/technique.h>
+#include <display/render/constant_buffer.h>
 #include <display/render/base_types.h>
 
 #if defined(D3D12_RENDER_BACKEND)
@@ -107,7 +108,7 @@ namespace veer::display::render
 		void clear_buffer(const render_device_buffer& _buffer, uint32_t _value );
 		void clear_buffer(const render_device_buffer& _buffer, float _value );
 
-		// TODO : maybe add "set constant buffer"
+		void set_constant_buffer(const render_device_buffer& _buffer, constant_buffer_type _type);
 
 		void dispatch(size_t _x, size_t _y, size_t _z);
 		// TODO : void dispatch_indirect(const render_device_buffer& _buffer, size_t _arg_index);
@@ -140,6 +141,8 @@ namespace veer::display::render
 		// Like for example one buffer with multiple view on it because it contains/interleaves index and vertex data
 		void set_index_buffer(const render_device_buffer& _index_buffer);
 		void set_vertex_buffer(const render_device_buffer& _vertex_buffer);
+
+		void set_constant_buffer(const render_device_buffer& _buffer, constant_buffer_type _type);
 	
 		void draw_instanced(size_t _vertex_count, size_t _instance_count);
 		void draw_indexed_instanced(size_t _index_count, size_t _instance_count );

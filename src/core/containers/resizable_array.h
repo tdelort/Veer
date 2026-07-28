@@ -18,6 +18,7 @@ namespace veer::containers
 
 	public:
 		resizable_array();
+		~resizable_array();
 
 		resizable_array(const resizable_array& _other);
 		resizable_array& operator=(const resizable_array& _other);
@@ -53,6 +54,11 @@ namespace veer::containers
 		template<typename... ARGS>
 		reference emplace_back(ARGS&&... _args);
 
+		void insert(iterator _pos, const T& _elem);
+
+		template<typename INPUT_ITERATOR> 
+		void insert(iterator _pos, INPUT_ITERATOR _first, INPUT_ITERATOR _last);
+
 		iterator erase(iterator _it);
 
 		void reserve(size_t _new_capacity);
@@ -63,7 +69,8 @@ namespace veer::containers
 
 	private:
 		void grow();
-		void alloc( size_t _new_capacity );
+		void grow(size_t _min_capacity_needed);
+		void alloc(size_t _new_capacity);
 
 	private:
 		T* m_data{nullptr};

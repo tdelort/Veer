@@ -1,6 +1,6 @@
 #include "glfw_window.h"
-
-#include <application/application.h>
+#include "GLFW/glfw3.h"
+#include "core/math/vec.h"
 
 #define GLFW_EXPOSE_NATIVE_WIN32
 //#define GLFW_EXPOSE_NATIVE_WGL
@@ -28,21 +28,22 @@ namespace veer::display::window
 #endif // 0
 
 	// Window
-	glfw_window::glfw_window( veer::math::vec2u _size )
+	glfw_window::glfw_window( math::vec2u _size )
 	{
 		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 		// TODO : handle resizable window
 		glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
+        VEER_LOG("glfwCreateWindow");
 		GLFWwindow* api_handle = glfwCreateWindow( _size[0], _size[1], "VEER window", nullptr, nullptr);
 		m_api_handle = api_handle;
 
 		//glfwSetFramebufferSizeCallback( m_api_handle, s_glfw_on_frame_buffer_size_changed_callback );
 
-		veer::math::vec2i frame_buffer_size;
+		math::vec2i frame_buffer_size;
 		glfwGetFramebufferSize(m_api_handle, &frame_buffer_size[0], &frame_buffer_size[1]);
 
 		// TODO : improve vec
-		m_window_to_frame_buffer_size_ratio = veer::math::vec2f( _size[0] == 0 ? 1.f : frame_buffer_size[0] / _size[0], _size[1] == 0 ? 1.f :frame_buffer_size[1] / _size[1]);
+		m_window_to_frame_buffer_size_ratio = math::vec2f( _size[0] == 0 ? 1.f : frame_buffer_size[0] / _size[0], _size[1] == 0 ? 1.f :frame_buffer_size[1] / _size[1]);
 	}
 
 	bool glfw_window::is_open() const
@@ -62,21 +63,28 @@ namespace veer::display::window
 		glfwPollEvents();
 	}
 
-	veer::math::vec2u glfw_window::get_size() const
+	math::vec2u glfw_window::get_size() const
 	{
 		int w, h;
 		glfwGetFramebufferSize(m_api_handle, &w, &h);
-		return veer::math::vec2u((unsigned int)std::max(0, w), (unsigned int)std::max(0, h));
+		return math::vec2u((unsigned int)std::max(0, w), (unsigned int)std::max(0, h));
 	}
 
-	void glfw_window::set_size(veer::math::vec2u _size) &
+	void glfw_window::set_size(math::vec2u _size) &
 	{
 
+	}
+
+	math::vec2f glfw_window::get_mouse_position() const
+	{
+		double x, y;
+		glfwGetCursorPos(m_api_handle, &x, &y);
+		return math::vec2f(static_cast<float>(x), static_cast<float>(y));
 	}
 
 	glfw_window::~glfw_window()
 	{
-		glfwDestroyWindow( m_api_handle );
+		glfwDestroyWindow(m_api_handle);
 		m_api_handle = nullptr;
 	}
 }

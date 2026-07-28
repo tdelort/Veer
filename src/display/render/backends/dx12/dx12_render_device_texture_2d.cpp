@@ -1,5 +1,10 @@
 #include <display/render/render_device_texture_2d.h>
 
+#include "core/debug.h"
+#include "display/render/backends/dx12/dx12_descriptor_heap.h"
+#include "display/render/backends/dx12/dx12_render_device_data_format.h"
+#include "display/render/render_device_resource.h"
+#include "display/render/render_device_texture_base.h"
 #include "dx12_pch.h"
 #include "dx12_render_device.h"
 #include "dx12_render_device_data_format.h"
@@ -14,37 +19,12 @@ namespace veer::display::render
 	
 	render_device_texture_2d::~render_device_texture_2d()
 	{
-		// TODO
-		// release views, allocs
 		dx12_render_device& dx12_device = static_cast<dx12_render_device&>(m_device);
-		if ( m_render_target_cpu_descriptor.is_valid() )
-			dx12_device.get_rtv_descriptor_heap().release_descriptor(m_render_target_cpu_descriptor);
-	}
-	
-	void render_device_texture_2d::upload(copy_command_buffer& _upload_buffer)
-	{
-		// alloc
-		if (flags::get(m_upload_flags, upload_flags::dirty_alloc))
-		{
-			alloc();
 
-			flags::unset(m_upload_flags, upload_flags::dirty_alloc);
-		}
-
-		// upload data
-		if (flags::get(m_upload_flags, upload_flags::dirty_data))
-		{
-			// TODO : handle textures
-			// copy_to_gpu(_upload_buffer, get_data<byte_t>());
-			VEER_ASSERT(false, "Not implemented")
-
-			flags::unset(m_upload_flags, upload_flags::dirty_data);
-		}
-
-		if (flags::none(m_upload_flags))
-		{
-			update_views();
-		}
+		dx12_device.get_rtv_descriptor_heap().release_descriptor(m_rtv_cpu_descriptor);
+		dx12_device.get_dsv_descriptor_heap().release_descriptor(m_dsv_cpu_descriptor); 
+		dx12_device.get_srv_uav_cbv_descriptor_heap().release_descriptor(m_srv_cpu_descriptor); 
+		dx12_device.get_srv_uav_cbv_descriptor_heap().release_descriptor(m_uav_cpu_descriptor);
 	}
 
 	D3D12_RESOURCE_DESC render_device_texture_2d::get_resource_desc() const
@@ -71,28 +51,104 @@ namespace veer::display::render
 		return dx12_desc;
 	}
 
+	// TODO : at one point, I will probably need to make different views on the same texture
+	// I could keep them here (for example for views on each mips, this is easy)
+	// BUT I will also probably need to create views of different types.
+	// When this happens, I can simply add a way to request a new view on an existing texture, and keep the default views below
+	// something like "std::unique_ptr<render_device_texture_2d_view> create_view(render_device_texture_2d_view_desc _desc)"
 	void render_device_texture_2d::update_views()
 	{
 		dx12_render_device& dx12_device = static_cast<dx12_render_device&>( m_device );
 
 		const texture_2d_desc& texture_desc = desc();
-		if ( flags::get(texture_desc.m_flags, texture_desc::usage_flags::render_target) )
+
 		{
-			dx12_descriptor_heap& rtv_heap = dx12_device.get_rtv_descriptor_heap();
+			dx12_descriptor_heap& srv_uav_cbv_heap = dx12_device.get_srv_uav_cbv_descriptor_heap();
 
-			m_render_target_cpu_descriptor = rtv_heap.acquire_descriptor();
+			{
+				dx12_device.get_srv_uav_cbv_descriptor_heap().release_descriptor(m_srv_cpu_descriptor);
 
-			// TODO : nullptr desc arg
-			dx12_device.get_api_handle()->CreateRenderTargetView(get_api_handle(), nullptr, m_render_target_cpu_descriptor.m_handle );
+				D3D12_SHADER_RESOURCE_VIEW_DESC srv_desc = {};
+				srv_desc.Format = display::render::s_convert(texture_desc.m_format);
+				srv_desc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+				srv_desc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+				srv_desc.Texture2D.MostDetailedMip = 0u; // see comment above function when views on mips are needed
+				srv_desc.Texture2D.MipLevels = 1u; // TODO : add support for mips
+				srv_desc.Texture2D.PlaneSlice = 0u;
+				srv_desc.Texture2D.ResourceMinLODClamp = 0.f;
+
+				m_srv_cpu_descriptor = srv_uav_cbv_heap.acquire_descriptor();
+				dx12_device.get_api_handle()->CreateShaderResourceView(get_api_handle(), &srv_desc, m_srv_cpu_descriptor.m_handle);
+			}
+
+			if (flags::get(texture_desc.m_flags, texture_desc::usage_flags::storage))
+			{
+				dx12_device.get_srv_uav_cbv_descriptor_heap().release_descriptor(m_uav_cpu_descriptor);
+
+				D3D12_UNORDERED_ACCESS_VIEW_DESC uav_desc = {};
+				uav_desc.Format = display::render::s_convert(texture_desc.m_format);
+				uav_desc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2D;
+				uav_desc.Texture2D.MipSlice = 0u; // see comment above function when views on other mips are needed
+				uav_desc.Texture2D.PlaneSlice = 0u;
+
+				m_uav_cpu_descriptor = srv_uav_cbv_heap.acquire_descriptor();
+				dx12_device.get_api_handle()->CreateUnorderedAccessView(get_api_handle(), nullptr, &uav_desc, m_uav_cpu_descriptor.m_handle);
+			}
 		}
 
-		// TODO other views
+		if (flags::get(texture_desc.m_flags, texture_desc::usage_flags::render_target))
+		{
+			dx12_device.get_rtv_descriptor_heap().release_descriptor(m_rtv_cpu_descriptor);
+
+			D3D12_RENDER_TARGET_VIEW_DESC rtv_desc = {};
+			rtv_desc.Format = display::render::s_convert(texture_desc.m_format);
+			rtv_desc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
+			rtv_desc.Texture2D.MipSlice = 0u; // see comment above function when views on other mips are needed
+			rtv_desc.Texture2D.PlaneSlice = 0u;
+
+			dx12_descriptor_heap& rtv_heap = dx12_device.get_rtv_descriptor_heap();
+			m_rtv_cpu_descriptor = rtv_heap.acquire_descriptor();
+			dx12_device.get_api_handle()->CreateRenderTargetView(get_api_handle(), &rtv_desc, m_rtv_cpu_descriptor.m_handle);
+		}
+
+		if (flags::get(texture_desc.m_flags, texture_desc::usage_flags::depth_stencil))
+		{
+			dx12_device.get_dsv_descriptor_heap().release_descriptor(m_dsv_cpu_descriptor);
+
+			D3D12_DEPTH_STENCIL_VIEW_DESC dsv_desc = {};
+			dsv_desc.Format = display::render::s_convert(texture_desc.m_format);
+			dsv_desc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
+			dsv_desc.Flags = D3D12_DSV_FLAG_NONE; // D3D12_DSV_FLAG_READ_ONLY_DEPTH | D3D12_DSV_FLAG_READ_ONLY_STENCIL
+			dsv_desc.Texture2D.MipSlice = 0u; // see comment above function when views on other mips are needed
+
+			dx12_descriptor_heap& dsv_heap = dx12_device.get_dsv_descriptor_heap();
+			m_dsv_cpu_descriptor = dsv_heap.acquire_descriptor();
+			dx12_device.get_api_handle()->CreateDepthStencilView(get_api_handle(), &dsv_desc, m_dsv_cpu_descriptor.m_handle );
+		}
 	}
 
 	const dx12_descriptor& render_device_texture_2d::get_render_target_view() const
 	{
-		return m_render_target_cpu_descriptor;
+		return m_rtv_cpu_descriptor;
 	}
 
-	
+	const dx12_descriptor& render_device_texture_2d::get_depth_stencil_view() const
+	{
+		return m_dsv_cpu_descriptor;
+	}
+
+	render_device_resource::bindless_id render_device_texture_2d::get_bindless_id(render_device_resource_heap_type _heap_type) const
+	{
+		switch (_heap_type) 
+		{
+			case render_device_resource_heap_type::srv:
+				return static_cast<bindless_id>(m_srv_cpu_descriptor.m_index);
+			case render_device_resource_heap_type::uav:
+				return static_cast<bindless_id>(m_uav_cpu_descriptor.m_index);
+			default:
+				VEER_ASSERT(false, "Texture 2D only supports SRV and UAV heap types for get_bindless_id");
+        }
+
+		return s_invalid_bindless_id;
+	}
 }

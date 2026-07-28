@@ -1,6 +1,5 @@
 #pragma once
 
-#include "core/containers/resizable_array.h"
 #include "core/containers/span.h"
 #include "resource_desc.h"
 #include "render_device_resource.h"
@@ -17,23 +16,41 @@ namespace veer::display::render
     class render_device_buffer : public render_device_resource
     {
     public:
+        struct memory_mapping
+        {
+            memory_mapping(render_device_buffer& _buffer)
+                : m_buffer{_buffer}, m_ptr{nullptr}
+            {
+                m_ptr = _buffer.map();
+                VEER_ASSERT(m_ptr != nullptr, "Failed to Map buffer");
+            }
+
+            byte_t* ptr() { return m_ptr; }
+
+            ~memory_mapping()
+            {
+                m_buffer.unmap();
+            }
+        private:
+            render_device_buffer& m_buffer;
+            byte_t* m_ptr;
+        };
+
+    public:
         render_device_buffer(render_device& _device, const buffer_desc& _desc);
-        virtual ~render_device_buffer() override;
+        virtual ~render_device_buffer();
 
         const buffer_desc& desc() const { return m_desc; }
-
-    public:
-        void upload(copy_command_buffer& _upload_buffer) override;
-
-    public:
-        template<typename T>
-        void set_data(containers::span<T> _data);
-
-        template<typename T>
-        containers::span<const T> get_data() const;
 		
+		bindless_id get_bindless_id(render_device_resource_heap_type _heap_type) const override;
+	public:
+		virtual void upload(copy_command_buffer& _upload_command_buffer, upload_flags _upload_flags) override;
+
     private:
-        containers::resizable_array<byte_t> m_data;
+        byte_t* map();
+        void unmap();
+
+    private:
         buffer_desc m_desc;
 
 #if defined(D3D12_RENDER_BACKEND)
@@ -44,21 +61,4 @@ namespace veer::display::render
 // #include "backends/metal/mtl_render_device_buffer.inl"
 #endif 
     };
-
-
-
-    template<typename T>
-    void render_device_buffer::set_data(containers::span<T> _data)
-    {
-        m_data.clear();
-        const size_t new_size = _data.size() * sizeof(T) / sizeof(byte_t); 
-        m_data.resize(new_size);
-        std::memcpy(m_data.data(), _data.data(), new_size);
-    }
-
-    template<typename T>
-    containers::span<const T> render_device_buffer::get_data() const
-    {
-        return containers::span<const T>(static_cast<const T*>(m_data.data()), ( m_data.size() / sizeof(T) ) * sizeof(byte_t) );
-    }
 }

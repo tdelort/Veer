@@ -18,9 +18,7 @@ namespace veer::display::render
 
         const texture_3d_desc& desc() const { return m_desc; }
 
-    public:
-        void upload(copy_command_buffer& _upload_buffer) override;
-
+		bindless_id get_bindless_id(render_device_resource_heap_type _heap_type) const override;
     private:
         texture_3d_desc m_desc{};
 

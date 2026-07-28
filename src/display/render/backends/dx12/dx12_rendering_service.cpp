@@ -17,14 +17,14 @@ namespace veer::display::render
 			ComPtr<ID3D12Device2> device_handle = device->get_api_handle();
 			for (size_t i = 0; i < swap_chain::s_swap_chain_buffer_count; ++i)
 			{
+				VEER_LOG("CreateCommandAllocator");
 				device_handle->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&m_command_allocators[i]));
 			}
 		}
-		m_device = std::move( device );
+		m_device = std::move(device);
 
 		std::unique_ptr<dx12_shader_compiler> shader_compiler = std::make_unique<dx12_shader_compiler>();
-		m_shader_compiler = std::move( shader_compiler );
-
+		m_shader_compiler = std::move(shader_compiler);
 
 		m_current_frame_index = 0;
 	}

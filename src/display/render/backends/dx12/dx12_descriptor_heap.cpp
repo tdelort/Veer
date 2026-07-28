@@ -11,7 +11,8 @@ namespace veer::display::render
         D3D12_DESCRIPTOR_HEAP_DESC heap_desc = {};
         heap_desc.NumDescriptors = (UINT)_size;
         heap_desc.Type = _type;
-        heap_desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
+        heap_desc.Flags = _flags;
+        VEER_LOG("CreateDescriptorHeap");
 		HRESULT hr = _device.get_api_handle()->CreateDescriptorHeap(&heap_desc, IID_PPV_ARGS(&m_api_handle));
 		VEER_ASSERT(SUCCEEDED(hr), "Failed to create RTV descriptor heap (" << hr << ")");
 
@@ -27,6 +28,7 @@ namespace veer::display::render
 
     dx12_descriptor dx12_descriptor_heap::acquire_descriptor()
     {
+        VEER_LOG("acquire_descriptor");
         size_t index = m_first_available_descriptor_index;
 
         if (!m_free_indices.empty())
@@ -57,5 +59,10 @@ namespace veer::display::render
             return;
 
         m_free_indices.push_back(index);
+    }
+
+    ID3D12DescriptorHeap* dx12_descriptor_heap::get_api_handle()
+    {
+        return m_api_handle.Get();
     }
 }

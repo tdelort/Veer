@@ -21,7 +21,7 @@ namespace veer::display::render
 	class dx12_swap_chain : public veer::display::render::swap_chain 
 	{
 	public:
-		dx12_swap_chain( dx12_render_device& _device, veer::display::window::window& _window, veer::math::vec2u _window_size );
+		dx12_swap_chain(dx12_render_device& _device, veer::display::window::window& _window);
 		virtual ~dx12_swap_chain();
 
 		void present(size_t _sync_intervals) override;

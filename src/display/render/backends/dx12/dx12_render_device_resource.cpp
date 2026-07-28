@@ -1,5 +1,6 @@
 #include <display/render/render_device_resource.h>
 
+#include "display/render/render_device_resource_sync_state.h"
 #include "dx12_pch.h"
 #include "dx12_render_device.h"
 #include "dx12_render_device_resource_sync_state.h"
@@ -7,8 +8,8 @@
 namespace veer::display::render
 {
 	render_device_resource::render_device_resource( render_device& _device )
-		: m_device( _device )
-		, m_upload_flags( render_device_resource::upload_flags::dirty_all )
+		: m_device(_device)
+		, m_upload_flags(render_device_resource::upload_flags::dirty_alloc)
 	{
 		
 	}
@@ -16,17 +17,17 @@ namespace veer::display::render
 	render_device_resource::~render_device_resource()
 	{
 		set_api_handle(nullptr);
-		if ( m_resource_alloc != nullptr)
+		if (m_resource_alloc != nullptr)
 		{
 			m_resource_alloc->Release();	
 			m_resource_alloc = nullptr;
 		}
 	}
 
-	void render_device_resource::alloc()
+	void render_device_resource::alloc(D3D12_HEAP_TYPE _heap, D3D12_RESOURCE_STATES _state)
 	{	
 		set_api_handle(nullptr);
-		if ( m_resource_alloc != nullptr)
+		if (m_resource_alloc != nullptr)
 		{
 			m_resource_alloc->Release();	
 			m_resource_alloc = nullptr;
@@ -39,20 +40,36 @@ namespace veer::display::render
 		HRESULT hr;
 
 		D3D12MA::ALLOCATION_DESC default_alloc_desc = {};
-		default_alloc_desc.HeapType = D3D12_HEAP_TYPE_DEFAULT;
+		default_alloc_desc.HeapType = _heap;
 
-		// TODO : resource default state
-		render_device_resource_sync_state default_state = render_device_resource_sync_state::Common;
+		D3D12_CLEAR_VALUE clear_value = {};
+		D3D12_CLEAR_VALUE* clear_value_arg = nullptr;
+		if ((resource_desc.Flags & D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL) != 0)
+		{
+			clear_value.Format = resource_desc.Format;
+			clear_value.DepthStencil.Depth = 0.f; 
+			clear_value.DepthStencil.Stencil = 0; 
+			clear_value_arg = &clear_value;
+		}
+		else if ((resource_desc.Flags & D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET) != 0)
+		{
+			clear_value.Format = resource_desc.Format;
+			clear_value.Color[0] = 0.f; 
+			clear_value.Color[1] = 0.f; 
+			clear_value.Color[2] = 0.f; 
+			clear_value.Color[3] = 0.f; 
+			clear_value_arg = &clear_value;
+		}
 
 		D3D12MA::Allocation* resource_alloc;
-		hr = dx12_device.get_allocator()->CreateResource( &default_alloc_desc, &resource_desc, display::render::s_convert(default_state), NULL, &m_resource_alloc, IID_NULL, NULL);
+		VEER_LOG("CreateResource");
+		hr = dx12_device.get_allocator()->CreateResource(&default_alloc_desc, &resource_desc, _state, clear_value_arg, &m_resource_alloc, IID_NULL, NULL);
 		VEER_ASSERT(SUCCEEDED(hr), "Failed to create D3D12 resource. Error (" << hr << ")");
 		
 		set_api_handle(m_resource_alloc->GetResource());
-		get_sync_state_tracking().set_resource_state(default_state);
 	}
 
-	void render_device_resource::copy_to_gpu(copy_command_buffer& _upload_buffer, veer::containers::span<const byte_t> _data)
+	void render_device_resource::upload_data_to_default_heap(copy_command_buffer& _upload_buffer, veer::containers::span<const byte_t> _data)
 	{
 		dx12_render_device& dx12_device = static_cast<dx12_render_device&>(get_render_device());
 
@@ -65,6 +82,7 @@ namespace veer::display::render
 
 
 		D3D12MA::Allocation* upload_alloc;
+		VEER_LOG("CreateResource");
 		hr = dx12_device.get_allocator()->CreateResource(&upload_alloc_desc, &resource_desc, D3D12_RESOURCE_STATE_GENERIC_READ, NULL, &upload_alloc, IID_NULL, NULL);
 		VEER_ASSERT(SUCCEEDED(hr), "Failed to create upload resource. Error (" << hr << ")");
 
@@ -72,9 +90,9 @@ namespace veer::display::render
 		_upload_buffer.do_after_execution([upload_alloc](){ upload_alloc->Release(); });
 
 		{
-			uint8_t* data_vertex;
-			upload_alloc->GetResource()->Map(0u, nullptr, reinterpret_cast<void**>(&data_vertex));
-			memcpy(data_vertex, _data.data(), _data.size());
+			uint8_t* gpu_data;
+			upload_alloc->GetResource()->Map(0u, nullptr, reinterpret_cast<void**>(&gpu_data));
+			memcpy(gpu_data, _data.data(), _data.size());
 			upload_alloc->GetResource()->Unmap(0u, nullptr);
 		}
 
@@ -85,6 +103,13 @@ namespace veer::display::render
 		_upload_buffer.get_api_handle()->CopyResource(get_api_handle(), upload_alloc->GetResource());
 	}
 
+	void render_device_resource::upload_data_to_upload_heap(veer::containers::span<const byte_t> _data)
+	{
+		uint8_t* gpu_data;
+		get_api_handle()->Map(0u, nullptr, reinterpret_cast<void**>(&gpu_data));
+		memcpy(gpu_data, _data.data(), _data.size());
+		get_api_handle()->Unmap(0u, nullptr);
+	}
 
 	D3D12_RESOURCE_FLAGS render_device_resource::s_convert(buffer_desc::usage_flags _states)
 	{

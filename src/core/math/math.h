@@ -11,7 +11,7 @@ namespace veer::math
 
     // fold version for any number of args
 	template<typename T, typename... ARGS>
-    constexpr T min(T&& _arg0, ARGS&&... _args) requires veer::greater<sizeof...(ARGS), 1>
+    constexpr T min(const T& _arg0, const ARGS&... _args) requires veer::greater<sizeof...(ARGS), 1>
     {
         T accum = _arg0;
         ((accum = min(_args, accum)),...);
@@ -27,7 +27,7 @@ namespace veer::math
 
     // fold version for any number of args
 	template<typename T, typename... ARGS>
-    constexpr T max(T&& _arg0, ARGS&&... _args) requires veer::greater<sizeof...(ARGS), 1>
+    constexpr T max(const T& _arg0, const ARGS&... _args) requires veer::greater<sizeof...(ARGS), 1>
     {
         T accum = _arg0;
         ((accum = max(_args, accum)),...);

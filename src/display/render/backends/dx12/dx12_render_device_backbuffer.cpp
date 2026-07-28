@@ -16,8 +16,8 @@ namespace veer::display::render
 	{
 	}
 
-	void dx12_render_device_backbuffer::upload(copy_command_buffer& _upload_buffer)
+	void dx12_render_device_backbuffer::upload(copy_command_buffer& _upload_buffer, upload_flags _upload_flags)
 	{
-		// override to explicitly do nothing here since we got the resource from the OS
+		// explicitly do nothing here since we got the resource from the OS
 	}
 }

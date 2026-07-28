@@ -14,9 +14,9 @@ namespace veer::display::window
 		glfw_windowing_service();
 		virtual ~glfw_windowing_service() override;
 
-		window* create_window(veer::math::vec2u _dims) override;
+		window& create_window(veer::math::vec2u _dims) override;
 
-		window* get_window(size_t _index) const override;
+		window& get_window(size_t _index) const override;
 		size_t get_window_count() override;
 
 		void destroy_window(size_t _index) override;

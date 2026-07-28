@@ -20,9 +20,11 @@ namespace veer::containers
 		const_pointer data() const { return m_data; }
 
 		iterator begin() { return m_data; }
+		const_iterator begin() const { return m_data; }
 		const_iterator cbegin() const { return m_data; }
 
 		iterator end() { return m_data + m_size; }
+		const_iterator end() const { return m_data + m_size; }
 		const_iterator cend() const { return m_data + m_size; }
 
 		constexpr size_t size() const { return m_size; }

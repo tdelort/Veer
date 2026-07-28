@@ -17,8 +17,10 @@
 
 namespace veer::display::render
 {
-	static constexpr size_t s_rtv_descriptor_heap_size = 4096u;
-	static constexpr size_t s_srv_descriptor_heap_size = 4096u;
+	static constexpr size_t s_rtv_descriptor_heap_size = 1024u;
+	static constexpr size_t s_dsv_descriptor_heap_size = s_rtv_descriptor_heap_size;
+	static constexpr size_t s_srv_uav_cbv_descriptor_heap_size = 4096u;
+	static constexpr size_t s_sampler_descriptor_heap_size = 64u;
 
 	dx12_render_device::dx12_render_device()
 	{
@@ -45,6 +47,7 @@ namespace veer::display::render
 		}
 #endif // defined(_DEBUG)
 
+		VEER_LOG("CreateDXGIFactory2");
 		HRESULT hr = CreateDXGIFactory2(factory_flags, IID_PPV_ARGS(&m_dxgi_factory));
 		VEER_ASSERT(SUCCEEDED(hr), "Failed to create DXGIFactory4, which is required for DX12! (" << hr << ")");
 
@@ -67,6 +70,7 @@ namespace veer::display::render
 
 			// Check to see if the adapter supports Direct3D 12,
 			// but don't create the actual device yet.
+
 			if (SUCCEEDED(
 				D3D12CreateDevice(adapter.Get(), D3D_FEATURE_LEVEL_11_0,
 					_uuidof(ID3D12Device), nullptr)))
@@ -77,6 +81,7 @@ namespace veer::display::render
 
 		m_adapter = adapter;
 		ComPtr<ID3D12Device2> d3d12_device_2;
+		VEER_LOG("D3D12CreateDevice");
 		hr = D3D12CreateDevice(m_adapter.Get(), D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&d3d12_device_2));
 		VEER_ASSERT(SUCCEEDED(hr), "Failed to create D3D12 Device (" << hr << ")");
 
@@ -136,8 +141,9 @@ namespace veer::display::render
 	void dx12_render_device::create_descriptor_heaps()
 	{
 		m_rtv_descriptor_heap = std::make_unique<dx12_descriptor_heap>(*this, D3D12_DESCRIPTOR_HEAP_TYPE_RTV, D3D12_DESCRIPTOR_HEAP_FLAG_NONE, s_rtv_descriptor_heap_size);
-		m_srv_descriptor_heap = std::make_unique<dx12_descriptor_heap>(*this, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE, s_srv_descriptor_heap_size);
-		// m_sampler_descriptor_heap = std::make_unique<dx12_descriptor_heap>(*this, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER, D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE, s_rtv_descriptor_heap_size);
+		m_dsv_descriptor_heap = std::make_unique<dx12_descriptor_heap>(*this, D3D12_DESCRIPTOR_HEAP_TYPE_DSV, D3D12_DESCRIPTOR_HEAP_FLAG_NONE, s_dsv_descriptor_heap_size);
+		m_srv_uav_cbv_descriptor_heap = std::make_unique<dx12_descriptor_heap>(*this, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE, s_srv_uav_cbv_descriptor_heap_size);
+		m_sampler_descriptor_heap = std::make_unique<dx12_descriptor_heap>(*this, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER, D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE, s_sampler_descriptor_heap_size);
 	}
 
 	void dx12_render_device::create_allocator()
@@ -148,6 +154,7 @@ namespace veer::display::render
 		allocator_desc.pAdapter = m_adapter.Get();
 		allocator_desc.Flags = D3D12MA::ALLOCATOR_FLAGS( D3D12MA::ALLOCATOR_FLAG_MSAA_TEXTURES_ALWAYS_COMMITTED | D3D12MA::ALLOCATOR_FLAG_DEFAULT_POOLS_NOT_ZEROED );
 
+		VEER_LOG("CreateAllocator");
 		HRESULT hr = D3D12MA::CreateAllocator(&allocator_desc, &m_allocator);
 		VEER_ASSERT(SUCCEEDED(hr), "Failed to create D3D12MA Allocator");
 	}
@@ -157,8 +164,12 @@ namespace veer::display::render
 		// release all before live objects reporting :)
 		m_graphics_queue.reset();
 		m_dxgi_factory.Reset();
+
 		m_rtv_descriptor_heap.reset();
-		m_srv_descriptor_heap.reset();
+		m_dsv_descriptor_heap.reset();
+		m_srv_uav_cbv_descriptor_heap.reset();
+		m_sampler_descriptor_heap.reset();
+
 		m_allocator->Release();
 		m_api_device_handle.Reset();
 
@@ -186,9 +197,9 @@ namespace veer::display::render
 
 
 
-	std::unique_ptr<swap_chain> dx12_render_device::alloc_internal( veer::display::window::window& _window, veer::math::vec2u _size)
+	std::unique_ptr<swap_chain> dx12_render_device::alloc_internal(veer::display::window::window& _window)
 	{
-		return std::make_unique<dx12_swap_chain>( *this, _window, _size);
+		return std::make_unique<dx12_swap_chain>(*this, _window);
 	}
 
 	std::unique_ptr<graphics_technique> dx12_render_device::alloc_internal(const shader_stage_source_container_t& _source_code, const shader_signature& _signature, const shader_render_state& _render_state)
@@ -261,7 +272,19 @@ namespace veer::display::render
 		}
 		m_info_queue->ClearStoredMessages(DXGI_DEBUG_ALL);
 
-#endif // _GAMING_XBOX_SCARLETT
+	#if 0
+		{
+			D3D12MA::Budget localBudget;
+			m_allocator->GetBudget(&localBudget, NULL);
+			
+			VEER_LOG(
+				"My GPU memory currently has " << localBudget.Stats.AllocationCount << " allocations taking " << localBudget.Stats.AllocationBytes << " B,"
+				"allocated out of " << localBudget.Stats.BlockCount << " D3D12 memory heaps taking " << localBudget.Stats.BlockBytes << " B,"
+				"D3D12 reports total usage " << localBudget.UsageBytes << " B with budget " << localBudget.BudgetBytes << " B.\n"
+			);
+		}
+	#endif // 0
+#endif
 	}
 
 
@@ -272,6 +295,7 @@ namespace veer::display::render
 
 	D3D12MA::Allocator* dx12_render_device::get_allocator() const
 	{
+		VEER_LOG("get_allocator");
 		return m_allocator;
 	}
 
@@ -285,8 +309,18 @@ namespace veer::display::render
 		return *m_rtv_descriptor_heap;
 	}
 
-	dx12_descriptor_heap& dx12_render_device::get_srv_descriptor_heap() const
+	dx12_descriptor_heap& dx12_render_device::get_dsv_descriptor_heap() const
 	{
-		return *m_srv_descriptor_heap;
+		return *m_dsv_descriptor_heap;
+	}
+
+	dx12_descriptor_heap& dx12_render_device::get_srv_uav_cbv_descriptor_heap() const
+	{
+		return *m_srv_uav_cbv_descriptor_heap;
+	}
+
+	dx12_descriptor_heap& dx12_render_device::get_sampler_descriptor_heap() const
+	{
+		return *m_sampler_descriptor_heap;
 	}
 }

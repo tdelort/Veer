@@ -5,9 +5,10 @@ protected:
 public:
 	const D3D12_INDEX_BUFFER_VIEW& get_index_buffer_view() const;
 	const D3D12_VERTEX_BUFFER_VIEW& get_vertex_buffer_view() const;
-	const dx12_descriptor& get_constant_buffer_view() const;
 
-private:
+protected:
+	dx12_descriptor m_srv_cpu_descriptor{};
+	dx12_descriptor m_uav_cpu_descriptor{};
+	dx12_descriptor m_cbv_cpu_descriptor{};
 	D3D12_INDEX_BUFFER_VIEW m_index_buffer_view{};
 	D3D12_VERTEX_BUFFER_VIEW m_vertex_buffer_view{};
-	dx12_descriptor m_constant_buffer_cpu_descriptor{};

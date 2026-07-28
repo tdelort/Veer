@@ -77,3 +77,27 @@ class
     
 };
 ```
+
+## Different Resource alloc schemes
+
+First thing to do will be to create specialization on the "buffer" type to handle all of these buffer allocs  
+
+### Structured Buffers  
+
+### Constant Buffers  
+
+Allocate constant buffers as part of larger buffers allocated in the UPLOAD heap (see https://therealmjp.github.io/posts/gpu-memory-pool/#should-we-upload-buffers). Basically a simple linear allocation scheme and add chunks whenever we run out.  
+One such buffer per backbuffer frame to ensure we don't update data being used by the GPU.  
+
+### Vertex and Index Buffers  
+
+These could also be set on the UPLOAD heap as mentioned in the MJP article above, but they won't be updated a lot so let's be consistent with the usual texture alloc scheme.  
+
+### Textures
+
+Already V0 done, alloc both in default and upload, update upload and copy to default. Then release upload when fence is waited.  
+
+
+### All  
+
+One nice improvements will be the proper usage of the copy queue.  

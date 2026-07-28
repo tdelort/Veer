@@ -31,7 +31,7 @@ namespace veer::display::render
 
 	protected:
 		// alloc only viable candidates
-		virtual std::unique_ptr<swap_chain> alloc_internal(veer::display::window::window& _window, veer::math::vec2u _size) = 0;
+		virtual std::unique_ptr<swap_chain> alloc_internal(veer::display::window::window& _window) = 0;
         virtual std::unique_ptr<graphics_technique> alloc_internal(const shader_stage_source_container_t& _source_code, const shader_signature& _signature, const shader_render_state& _render_state) = 0;
         virtual std::unique_ptr<compute_technique> alloc_internal(const shader_stage_source_container_t& _source_code) = 0;
 	};

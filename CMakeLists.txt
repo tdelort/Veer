@@ -14,15 +14,14 @@ set_target_properties(
     CMAKE_CXX_STANDARD_REQUIRED TRUE
     CMAKE_CXX_SCAN_FOR_MODULES ON
     CMAKE_CXX_EXTENSIONS OFF
+
+    DEBUG_POSTFIX "d"
 )
 
-target_compile_options(${PROJECT_NAME}
-    PRIVATE
-#         -Od
-#         -Zi
-    -O0
-    -g
-    -gdwarf
+add_compile_definitions(_DEBUG)
+
+add_link_options(
+    -DEBUG
 )
 
 # GLFW build 
@@ -72,5 +71,4 @@ target_link_libraries(${PROJECT_NAME}
         d3d12.lib
         dxgi.lib
         dxguid.lib
-        d3dcompiler.lib
 )

@@ -24,6 +24,7 @@
 #include <ostream>
 #include <iostream>
 #include <sstream>
+#include <fstream>
 #include <ios>
 #include <stdexcept>
 #include <memory>
@@ -41,6 +42,8 @@
 #include <mutex>
 #include <cstdint>
 #include <functional>
+#include <memory>
+#include <stdlib.h>
 
 
 #define VEER_MAKE_STMT(_expr) do { _expr } while(0)

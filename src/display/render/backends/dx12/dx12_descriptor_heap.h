@@ -22,9 +22,14 @@ namespace veer::display::render
 		bool is_valid() const { return m_index != s_invalid_index; }
 
 		D3D12_CPU_DESCRIPTOR_HANDLE m_handle;
+		// TODO : If at any point I NEED to implement UAV Clear without using a simple custom shader 
+		// I'll need both handles
+		// D3D12_CPU_DESCRIPTOR_HANDLE m_cpu_handle;
+		// D3D12_GPU_DESCRIPTOR_HANDLE m_gpu_handle;
+
+		size_t m_index;
 
 	private:
-		size_t m_index;
 		friend class dx12_descriptor_heap;
 	};
 
@@ -35,8 +40,9 @@ namespace veer::display::render
 		~dx12_descriptor_heap();
 
 		dx12_descriptor acquire_descriptor();
-		void release_descriptor( dx12_descriptor _descriptor );
+		void release_descriptor(dx12_descriptor _descriptor);
 
+		ID3D12DescriptorHeap* get_api_handle();
 	private:
 		ComPtr<ID3D12DescriptorHeap> m_api_handle;
 		UINT m_increment_size;

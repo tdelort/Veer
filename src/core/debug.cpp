@@ -11,7 +11,7 @@ namespace veer
         if(!_condition)
         {
             print(log_level::error, _message, _file, _function, _line );
-            throw assert_error(_message.data());
+            // throw assert_error(_message.data());
         }
     }
 
@@ -36,6 +36,6 @@ namespace veer
                 prefix = "\033[0;36m[LOG] ";
         }
 
-        os << prefix << _file << ":" << _line << " in " << _function << " : " << _message << "\033[0m" << std::endl;
+        os << prefix /*<< _file*/ << ":" << _line << " in " << _function << " : " << _message << "\033[0m" << std::endl;
     }
 } // namespace veer

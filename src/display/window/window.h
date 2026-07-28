@@ -16,6 +16,9 @@ namespace veer::display::window
 		virtual veer::math::vec2u get_size() const = 0;
 		virtual void set_size( veer::math::vec2u _size ) & = 0;
 
+		// TODO : inputs should be more generic
+		virtual veer::math::vec2f get_mouse_position() const = 0;
+
 #if defined( VEER_OS_WINDOWS )
 		using os_window_handle = HWND;
 #endif // defined( _PC )

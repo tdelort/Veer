@@ -1,9 +1,12 @@
 #include <display/render/command_buffer.h>
 
+#include "core/containers/static_array.h"
 #include "core/debug.h"
 #include "core/math/math.h"
+#include "display/render/constant_buffer.h"
 #include "display/render/render_device_resource.h"
 #include "display/render/resource_desc.h"
+#include "display/render/technique.h"
 #include "dx12_render_device_resource_sync_state.h"
 #include "dx12_render_device.h"
 
@@ -42,6 +45,7 @@ namespace veer::display::render
 
 		if (m_command_list_handle == nullptr)
 		{
+			VEER_LOG("CreateCommandList");
 			const HRESULT hr = _device.get_api_handle()->CreateCommandList(0, dx12_type, _command_allocator.Get(), nullptr, IID_PPV_ARGS(&m_command_list_handle));
 			VEER_ASSERT(SUCCEEDED(hr), "Failed to create command list (" << hr << ")");
 		}
@@ -49,6 +53,13 @@ namespace veer::display::render
 		{
 			m_command_list_handle->Reset(_command_allocator.Get(), nullptr);
 		}
+
+		// needs to be set on each command list once before most calls (at least before setting root signatures)
+		containers::static_array<ID3D12DescriptorHeap*, 2> shader_visible_heaps;
+		shader_visible_heaps[0] = _device.get_srv_uav_cbv_descriptor_heap().get_api_handle();
+		shader_visible_heaps[1] = _device.get_sampler_descriptor_heap().get_api_handle();
+
+		get_api_handle()->SetDescriptorHeaps(2u, shader_visible_heaps.data());
 	}
 
 	void command_buffer::close()
@@ -81,6 +92,9 @@ namespace veer::display::render
 
 	void command_buffer::transition_barrier(render_device_resource& _resource, render_device_resource_sync_state _to_state)
 	{
+		if (_resource.get_sync_state_tracking().get_resource_state() == _to_state)
+			return;
+
 		D3D12_RESOURCE_BARRIER barrier = {};
 		barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
 		barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
@@ -114,17 +128,14 @@ namespace veer::display::render
 
 	void copy_command_buffer::copy_texture(const render_device_texture_base& _dst, const render_device_texture_base& _src)
 	{
-		(void)_dst;
-		(void)_src;
-		VEER_ASSERT(false, "Not implemented");
+		// TODO : implement other args of CopyTextureRegion if needed
+		get_api_handle()->CopyResource(_dst.get_api_handle(), _src.get_api_handle());
 	}
 
 	void copy_command_buffer::copy_buffer(const render_device_buffer& _dst, const render_device_buffer& _src, uint64_t _num_bytes)
 	{
-		(void)_dst;
-		(void)_src;
-		(void)_num_bytes;
-		VEER_ASSERT(false, "Not implemented");
+		// TODO : implement other args if needed
+		get_api_handle()->CopyBufferRegion(_dst.get_api_handle(), 0u, _src.get_api_handle(), 0u, _num_bytes);
 	}
 
 // --- compute_command_buffer ---
@@ -147,15 +158,23 @@ namespace veer::display::render
 
 	void compute_command_buffer::set_technique(compute_technique& _technique)
 	{
+		// TODO : For compute command buffers to make sense, there is more work to do
+		//  a graphics command list can call compute root signature and compute specific code but it needs to do it when a compute_technique has been set
+		//	to avoid problems when handling command lists, I should implement submit contexts
+		//	add compute/graphics technique wrapper classes handling arguments (by having an internal constant buffer)
+		//		For the argument part to make sense, I probably need a material structure (for example containing a constant buffer / structured buffer of material params)
+		//		Then the submit context sets the root descriptors (or just pass args as root constants if not too many ?) for the frame CBV and the material CBV
+		VEER_ASSERT(false, "Not implemented");
 		dx12_compute_technique& dx12_technique = static_cast<dx12_compute_technique&>(_technique);
 		get_api_handle()->SetPipelineState(dx12_technique.get_pipeline_state_object());
-		get_api_handle()->SetGraphicsRootSignature(dx12_technique.get_root_signature());
+		get_api_handle()->SetComputeRootSignature(dx12_technique.get_root_signature());
 	}
 
 	void compute_command_buffer::clear_texture(const render_device_texture_base& _texture, math::vec4u _color)
 	{
 		(void)_texture;
 		(void)_color;
+		// TODO : maybe won't implement
 		VEER_ASSERT(false, "Not implemented");
 	}
 
@@ -178,6 +197,11 @@ namespace veer::display::render
 		(void)_buffer;
 		(void)_value;
 		VEER_ASSERT(false, "Not implemented");
+	}
+
+	void compute_command_buffer::set_constant_buffer(const render_device_buffer& _buffer, constant_buffer_type _type)
+	{
+		get_api_handle()->SetComputeRootConstantBufferView(veer::display::render::s_get_root_param_index(_type), _buffer.get_api_handle()->GetGPUVirtualAddress());
 	}
 
 	void compute_command_buffer::dispatch(size_t _x, size_t _y, size_t _z)
@@ -270,7 +294,6 @@ namespace veer::display::render
 		}
 
 		get_api_handle()->RSSetScissorRects(dx12_rects.size(), dx12_rects.data());
-
 	}
 
 	void graphics_command_buffer::clear_render_target(render_device_texture_2d& _render_target_resource, math::vec4f _color)
@@ -281,8 +304,7 @@ namespace veer::display::render
 
 	void graphics_command_buffer::clear_depth_stencil(render_device_texture_2d& _render_target_resource, float _depth, uint8_t _stencil)
 	{
-		(void)_render_target_resource, _depth, _stencil;
-		VEER_ASSERT(false, "Not implemented");
+		get_api_handle()->ClearDepthStencilView(_render_target_resource.get_render_target_view().m_handle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, _depth, _stencil, 0, nullptr);
 	}
 
 	void graphics_command_buffer::set_index_buffer(const render_device_buffer& _index_buffer)
@@ -295,6 +317,11 @@ namespace veer::display::render
 		get_api_handle()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 		get_api_handle()->IASetVertexBuffers(0 /*first index*/, 1 /*vertex buffer count*/, &_vertex_buffer.get_vertex_buffer_view());
 
+	}
+
+	void graphics_command_buffer::set_constant_buffer(const render_device_buffer& _buffer, constant_buffer_type _type)
+	{
+		get_api_handle()->SetGraphicsRootConstantBufferView(s_get_root_param_index(_type), _buffer.get_api_handle()->GetGPUVirtualAddress());
 	}
 
 	void graphics_command_buffer::draw_instanced(size_t _vertex_count, size_t _instance_count)

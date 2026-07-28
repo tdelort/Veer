@@ -16,7 +16,7 @@ namespace veer::display::render
 
 	void command_queue::execute_command_buffers( veer::containers::span<command_buffer*> _command_buffers )
 	{
-		for(command_buffer* buffer : _command_buffers )
+		for(command_buffer* buffer : _command_buffers)
 			m_executed_buffers.emplace_back( m_last_signaled_fence_value, buffer );
 	}
 
@@ -29,7 +29,7 @@ namespace veer::display::render
 	{
 		for(containers::resizable_array<executed_buffer>::iterator it = m_executed_buffers.begin(); it != m_executed_buffers.end(); /*left blank intentionally*/)
 		{
-			if ( it->m_fence_value_execution < _value )
+			if (it->m_fence_value_execution < _value)
 			{
 				it->m_buffer->on_execution();
 				it = m_executed_buffers.erase(it);

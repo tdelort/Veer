@@ -5,6 +5,7 @@ target_sources(${PROJECT_NAME}
         dx12_descriptor_heap.cpp
         dx12_render_device_resource.cpp
         dx12_render_device_buffer.cpp
+        dx12_render_device_texture_base.cpp
         dx12_render_device_texture_2d.cpp
         dx12_render_device_texture_3d.cpp
         dx12_render_device_backbuffer.cpp

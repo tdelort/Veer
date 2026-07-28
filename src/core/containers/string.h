@@ -1,6 +1,5 @@
 #pragma once
 
-#include "resizable_array.h"
 #include <core/core.h>
 
 namespace veer::containers
@@ -19,39 +18,63 @@ namespace veer::containers
 		using const_iterator = const T*;
 
 	public:
+		base_string();
+		~base_string();
+
+		base_string(const base_string& _other);
+		base_string& operator=(const base_string& _other);
+		base_string(base_string&& _other);
+		base_string& operator=(base_string&& _other);
 
 		// getters / setters
-		char* str() { m_long_data.data(); }
+		char* str() { return m_data; }
+		const char* c_str() const { return m_data; }
 
-		T* begin() { return m_long_data.begin(); }
-		const T* cbegin() const { return m_long_data.begin(); }
+		T* begin() { return m_data; }
+		const T* cbegin() const { return m_data; }
 
-		T* end() { return m_long_data.end(); }
-		const T* cend() const { return m_long_data.end(); }
+		T* end() { return m_data + size(); }
+		const T* cend() const { return m_data + size(); }
 
-		size_t size() const { return m_long_data.size(); }
-		bool empty() const { return m_long_data.empty(); }
+		size_t size() const { return m_size; }
+		bool empty() const { return size() == 0u; }
+		size_t capacity() const { return m_capacity; }
 
-		T& operator[](size_t _i) { return m_long_data[_i]; }
-		const T& operator[](size_t _i) const { return m_long_data[_i]; }
+		T& operator[](size_t _i) { return m_data[_i]; }
+		const T& operator[](size_t _i) const { return m_data[_i]; }
 
-		T& back() { return m_long_data.back(); }
-		const T& back() const { return m_long_data.back(); }
+		T& back();
+		const T& back() const;
 
 		// change size
-		void push_back(const T& _val) { m_long_data.push_back( _val ); }
-		void push_back(T&& _val) { m_long_data.push_back( std::forward<T&&>( _val ) ); }
-		void pop_back() { m_long_data.push_back(); }
+		void push_back(const T& _val);
+		void push_back(T&& _val);
+		void pop_back();
 
-		void clear() { m_long_data.clear(); }
-		void destroy() { m_long_data.destroy(); }
+		void insert(iterator _pos, const T& _elem);
+
+		template<typename INPUT_ITERATOR> 
+		void insert(iterator _pos, INPUT_ITERATOR _first, INPUT_ITERATOR _last);
+
+		template<typename CHAR_TYPE>
+		void append(CHAR_TYPE* _str);
+
+		void clear();
+		void destroy();
 
 	private:
-		// TODO : implement short string optimization (for now, it's just a dumb passthrough)
-		resizable_array<T> m_long_data;
+		void grow();
+		void grow(size_t _min_capacity_needed);
+		void alloc(size_t _new_capacity);
+
+	private:
+		size_t m_size{0u};
+		size_t m_capacity{0u};
+		T* m_data{nullptr};
 	};
 
 	using string = base_string<char>;
+	using wstring = base_string<wchar_t>;
 }
 
 

@@ -16,16 +16,16 @@ namespace veer::display::window
 		glfwTerminate();	
 	}
 
-	window* glfw_windowing_service::create_window( veer::math::vec2u _dims )
+	window& glfw_windowing_service::create_window(veer::math::vec2u _dims)
 	{
-		std::unique_ptr<glfw_window> win_ptr =  std::make_unique<glfw_window>( _dims );
-		std::unique_ptr<window>& win_ptr_ref = m_windows.emplace_back( std::move( win_ptr ) );
-		return win_ptr_ref.get();
+		std::unique_ptr<glfw_window> win_ptr = std::make_unique<glfw_window>(_dims);
+		std::unique_ptr<window>& win_ptr_ref = m_windows.emplace_back(std::move(win_ptr));
+		return *win_ptr_ref;
 	}
 
-	window* glfw_windowing_service::get_window( size_t _index ) const
+	window& glfw_windowing_service::get_window(size_t _index) const
 	{
-		return m_windows[_index].get();
+		return *m_windows[_index];
 	}
 
 	size_t glfw_windowing_service::get_window_count()
@@ -33,11 +33,11 @@ namespace veer::display::window
 		return m_windows.size();
 	}
 
-	void glfw_windowing_service::destroy_window( size_t _index )
+	void glfw_windowing_service::destroy_window(size_t _index)
 	{
 		auto it = m_windows.begin();
 		std::advance(it, _index);
 		// TODO Assert it != end
-		m_windows.erase( it );
+		m_windows.erase(it);
 	}
 }

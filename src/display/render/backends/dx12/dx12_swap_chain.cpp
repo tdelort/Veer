@@ -9,7 +9,7 @@
 
 namespace veer::display::render
 {
-	dx12_swap_chain::dx12_swap_chain(dx12_render_device& _device, veer::display::window::window& _window, veer::math::vec2u _window_size )
+	dx12_swap_chain::dx12_swap_chain(dx12_render_device& _device, veer::display::window::window& _window)
 		: veer::display::render::swap_chain()
     {
 		
@@ -28,12 +28,13 @@ namespace veer::display::render
 		
 		// get hwnd from window
 		HWND windows_window_handle = _window.get_os_window_handle();
+		math::vec2u window_size = _window.get_size();
 
 		// Create swap chain
 		{
 			DXGI_SWAP_CHAIN_DESC1 swap_chain_desc = {};
-			swap_chain_desc.Width = _window_size[0];
-			swap_chain_desc.Height = _window_size[1];
+			swap_chain_desc.Width = window_size.x();
+			swap_chain_desc.Height = window_size.y();
 			swap_chain_desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 			swap_chain_desc.Stereo = FALSE;
 			swap_chain_desc.SampleDesc = { 1, 0 };
@@ -48,6 +49,7 @@ namespace veer::display::render
 			dx12_command_queue& command_queue = static_cast<dx12_command_queue&>( _device.get_command_queue(command_buffer::type::graphics) );
 
 			ComPtr<IDXGISwapChain1> swap_chain1;
+			VEER_LOG("CreateSwapChainForHwnd");
 			HRESULT hr = factory4->CreateSwapChainForHwnd(command_queue.get_api_handle().Get(), windows_window_handle, &swap_chain_desc, nullptr, nullptr, &swap_chain1);
 			VEER_ASSERT(SUCCEEDED(hr), "Failed to create swap chain (" << hr << ")");
 
@@ -72,7 +74,7 @@ namespace veer::display::render
 				VEER_ASSERT(back_buffer_resource.Get() != nullptr, "Retrieved swap chain back buffer resource is nullptr");
 
 				texture_2d_desc backbuffer_desc;
-				backbuffer_desc.m_size = _window_size;
+				backbuffer_desc.m_size = window_size;
 				backbuffer_desc.m_flags = texture_desc::usage_flags::render_target;
 				backbuffer_desc.m_format = render_device_data_format::r8g8b8a8_unorm;
 		 

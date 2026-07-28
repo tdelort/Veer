@@ -2,7 +2,6 @@
 
 #include "display/render/shader_source.h"
 #include "dx12_pch.h"
-#include <cstring>
 
 namespace veer::display::render
 {
@@ -13,6 +12,7 @@ namespace veer::display::render
 
     shader_code_memory_blob_t dx12_shader_compiler::compile(veer::containers::span<const char> _source, const char* _entry_point, const char* _debug_name, shader_stage_type _stage_type)
     {
+#if 0
 #if defined(_DEBUG)
         // Enable better shader debugging with the graphics debugging tools.
         UINT compileFlags = D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
@@ -22,9 +22,9 @@ namespace veer::display::render
 
         veer::containers::static_array<const char*, static_cast<size_t>(shader_stage_type::COUNT)> s_targets =
         {
-            "vs_5_0", // vertex 
-            "ps_5_0", // pixel
-            "cs_5_0"  // compute
+            "vs_6_0", // vertex 
+            "ps_6_0", // pixel
+            "cs_6_0"  // compute
         };
         static_assert(static_cast<size_t>(shader_stage_type::COUNT) == 3u, "You need to update s_targets array");
 
@@ -49,5 +49,7 @@ namespace veer::display::render
         }
 
         return shader_code;
+#endif // 0
+        return shader_code_memory_blob_t();
     }
 }

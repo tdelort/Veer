@@ -20,9 +20,11 @@ namespace veer::display::render
 		desc.NodeMask = 0;
 
 		ComPtr<ID3D12Device2> dx12_device = _device.get_api_handle();
+		VEER_LOG("CreateCommandQueue")
 		HRESULT hr = dx12_device->CreateCommandQueue(&desc, IID_PPV_ARGS(&m_command_queue_api_handle));
 		VEER_ASSERT(SUCCEEDED(hr), "Failed to create command queue (" << hr << ")");
 
+		VEER_LOG("CreateFence")
 		hr = dx12_device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&m_fence));
 		VEER_ASSERT(SUCCEEDED(hr), "Failed to create command queue fence (" << hr << ")");
 	}
@@ -40,7 +42,6 @@ namespace veer::display::render
 			dx12_command_lists.push_back(command_buffer->get_api_handle());
 		}
 
-		VEER_LOG( "ExecuteCommandLists( " << dx12_command_lists.size() << ",  )" );
 		m_command_queue_api_handle->ExecuteCommandLists((UINT)dx12_command_lists.size(), dx12_command_lists.data());
 
 		command_queue::execute_command_buffers(_command_buffers);

@@ -26,6 +26,8 @@ namespace veer::display::window
 		veer::math::vec2u get_size() const override;
 		void set_size( veer::math::vec2u _size ) & override;
 
+		math::vec2f get_mouse_position() const override;
+
 		os_window_handle get_os_window_handle() override;
 	private:
 

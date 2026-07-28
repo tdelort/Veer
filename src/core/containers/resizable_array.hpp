@@ -2,8 +2,10 @@
 
 #include "resizable_array.h"
 
+#include <core/math/math.h>
 #include <core/debug.h>
 #include <core/core.h>
+#include <vector>
 
 namespace veer::containers
 {
@@ -12,6 +14,12 @@ namespace veer::containers
 		: m_data{nullptr}, m_size{0u}, m_capacity{0u}
 	{
 
+	}
+	
+	template<typename T>
+	resizable_array<T>::~resizable_array()
+	{
+		destroy();
 	}
 
 	template<typename T>
@@ -26,13 +34,14 @@ namespace veer::containers
 		clear(); // also resets m_size to 0
 
 		if ( m_capacity < _other.m_capacity )
-			alloc( _other.m_capacity );
+			alloc(_other.m_capacity);
 
 		// copy data
-		for(size_t i = 0; i < _other.m_size; ++i)
-			push_back(_other[i]);
+        insert(begin(), _other.cbegin(), _other.cend());
 
 		m_size = _other.m_size;
+
+		return *this;
 	}
 
 	template<typename T>
@@ -90,13 +99,13 @@ namespace veer::containers
 	template<typename T>
 	void resizable_array<T>::push_back(const T& _val)
 	{
-		emplace_back(_val);
+		insert(end(), _val);
 	}
 
 	template<typename T>
 	void resizable_array<T>::push_back(T&& _val)
 	{
-		emplace_back(std::forward<T&&>(_val));
+		insert(end(), std::forward<T&&>(_val));
 	}
 
 	template<typename T>
@@ -113,18 +122,66 @@ namespace veer::containers
 	}
 
 	template<typename T>
+    void resizable_array<T>::insert(iterator _pos, const T& _elem) 
+    {
+		const size_t index = _pos - begin(); 
+
+		if (size() + 1 > capacity())
+			grow(size() + 1);
+
+		if (size() > 0u)
+		{
+			// move all elems after insert 'count' elems to the right 
+			for (size_t i = size() - 1; i >= index + 1; --i)
+				m_data[i + 1] = std::move(m_data[i]);
+		}
+
+		// add new elem  
+        m_data[index] = _elem;
+		m_size++;
+    }
+
+	template<typename T>
+	template<typename INPUT_ITERATOR> 
+	void resizable_array<T>::insert(iterator _pos, INPUT_ITERATOR _first, INPUT_ITERATOR _last)
+	{
+		const size_t index = _pos - begin(); 
+		const size_t count = _last - _first;
+
+		if (count == 0u)
+			return;
+
+		if (size() + count > capacity())
+			grow(size() + count);
+
+		if (size() > 0u)
+		{
+			// move all elems after insert 'count' elems to the right 
+			for (size_t i = size() - 1; i >= index + count; --i)
+				m_data[i + count] = std::move(m_data[i]);
+		}
+
+		// add all new elems  
+		for (size_t i = index; i < index + count; ++i)
+		{
+			m_data[i] = *_first;
+			_first++;
+		}
+
+		m_size = size() + count;
+	}
+
+	template<typename T>
 	resizable_array<T>::iterator resizable_array<T>::erase(iterator _it)
 	{
 		VEER_ASSERT(_it >= begin() && _it < end() && size() != 0u, "Iterator out of bounds");
 		VEER_ASSERT(_it != nullptr, "Iterator is invalid");
 
-		size_t index = ( _it - begin() ) / sizeof(T); 
+		const size_t index = _it - begin();
 		std::destroy_at(m_data + index);
 
 		for(size_t i = index; i < size() - 1; ++i)
-		{
-			m_data[i] = m_data[i + 1];
-		}
+			m_data[i] = std::move(m_data[i + 1]);
 
 		m_size--;
 
@@ -155,10 +212,22 @@ namespace veer::containers
 
 
 	template<typename T>
+	void resizable_array<T>::grow(size_t _min_capacity_needed)
+	{
+		// TODO : replace with the analytic version
+		size_t new_capacity = math::max(m_capacity, 8ull);
+		while(new_capacity < _min_capacity_needed)
+			new_capacity *= 2;
+
+		alloc(new_capacity);
+	}
+
+	template<typename T>
 	void resizable_array<T>::grow()
 	{
-		const size_t new_capacity = m_capacity == 0u ? 8u : 2 * m_capacity;
-		alloc( new_capacity );
+		grow(m_capacity + 1);
+		// const size_t new_capacity = m_capacity == 0u ? 8u : 2 * m_capacity;
+		// alloc(new_capacity);
 	}
 
 	template<typename T>
@@ -166,6 +235,7 @@ namespace veer::containers
 	{
 		VEER_ASSERT(_new_capacity > m_size, "resizable_array::alloc call with new_capacity (" << _new_capacity << ") smaller than size " << m_size << " !");
 		T* new_data = static_cast<T*>(std::malloc(_new_capacity * sizeof(T)));
+
 
 		if ( m_data != nullptr )
 		{
@@ -177,6 +247,7 @@ namespace veer::containers
 
 		m_data = new_data; 
 		m_capacity = _new_capacity;
+
 	}
 
 	template<typename T>
@@ -193,7 +264,9 @@ namespace veer::containers
 	{
 		clear();
 
-		if ( m_data != nullptr )
+		if (m_data != nullptr)
+		{
 			std::free(m_data);
+		}
 	}
 }

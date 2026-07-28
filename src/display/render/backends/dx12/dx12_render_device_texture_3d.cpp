@@ -14,44 +14,17 @@ namespace veer::display::render
 	
 	render_device_texture_3d::~render_device_texture_3d()
 	{
-		// TODO
-		// release views, allocs
 		dx12_render_device& dx12_device = static_cast<dx12_render_device&>(m_device);
-		if ( m_render_target_cpu_descriptor.is_valid() )
-			dx12_device.get_rtv_descriptor_heap().release_descriptor(m_render_target_cpu_descriptor);
-	}
-	
-	void render_device_texture_3d::upload(copy_command_buffer& _upload_buffer)
-	{
-		// alloc
-		if (flags::get(m_upload_flags, upload_flags::dirty_alloc))
-		{
-			alloc();
 
-			flags::unset(m_upload_flags, upload_flags::dirty_alloc);
-		}
-
-		// upload data
-		if (flags::get(m_upload_flags, upload_flags::dirty_data))
-		{
-			// TODO : handle textures
-			// copy_to_gpu(_upload_buffer, get_data<byte_t>());
-			VEER_ASSERT(false, "Not implemented")
-
-			flags::unset(m_upload_flags, upload_flags::dirty_data);
-		}
-
-		if (flags::none(m_upload_flags))
-		{
-			update_views();
-		}
+		dx12_device.get_srv_uav_cbv_descriptor_heap().release_descriptor(m_srv_cpu_descriptor); 
+		dx12_device.get_srv_uav_cbv_descriptor_heap().release_descriptor(m_uav_cpu_descriptor);
 	}
 
 	D3D12_RESOURCE_DESC render_device_texture_3d::get_resource_desc() const
 	{
 		D3D12_RESOURCE_DESC dx12_desc{};
 
-		dx12_desc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+		dx12_desc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE3D;
 
 		dx12_desc.Alignment = 0u; // use default. TODO : add support for small textures
 		dx12_desc.SampleDesc.Count = 1u;
@@ -76,23 +49,52 @@ namespace veer::display::render
 		dx12_render_device& dx12_device = static_cast<dx12_render_device&>( m_device );
 
 		const texture_3d_desc& texture_desc = desc();
-		if ( flags::get(texture_desc.m_flags, texture_desc::usage_flags::render_target) )
+
+		dx12_descriptor_heap& srv_uav_cbv_heap = dx12_device.get_srv_uav_cbv_descriptor_heap();
+
 		{
-			dx12_descriptor_heap& rtv_heap = dx12_device.get_rtv_descriptor_heap();
+			dx12_device.get_srv_uav_cbv_descriptor_heap().release_descriptor(m_srv_cpu_descriptor); 
 
-			m_render_target_cpu_descriptor = rtv_heap.acquire_descriptor();
+			D3D12_SHADER_RESOURCE_VIEW_DESC srv_desc = {};
+			srv_desc.Format = display::render::s_convert(texture_desc.m_format);
+			srv_desc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE3D;
+			srv_desc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+			srv_desc.Texture3D.MostDetailedMip = 0u; // see comment above function when views on mips are needed
+			srv_desc.Texture3D.MipLevels = 1u; // TODO : add support for mips
+			srv_desc.Texture3D.ResourceMinLODClamp = 0.f;
 
-			// TODO : nullptr desc arg
-			dx12_device.get_api_handle()->CreateRenderTargetView(get_api_handle(), nullptr, m_render_target_cpu_descriptor.m_handle );
+			m_srv_cpu_descriptor = srv_uav_cbv_heap.acquire_descriptor();
+			dx12_device.get_api_handle()->CreateShaderResourceView(get_api_handle(), &srv_desc, m_srv_cpu_descriptor.m_handle);
 		}
 
-		// TODO other views
+		if (flags::get(texture_desc.m_flags, texture_desc::usage_flags::storage))
+		{
+			dx12_device.get_srv_uav_cbv_descriptor_heap().release_descriptor(m_uav_cpu_descriptor);
+
+			D3D12_UNORDERED_ACCESS_VIEW_DESC uav_desc = {};
+			uav_desc.Format = display::render::s_convert(texture_desc.m_format);
+			uav_desc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE3D;
+			uav_desc.Texture3D.MipSlice = 0u; // see comment above function when views on other mips are needed
+			uav_desc.Texture3D.FirstWSlice = 0u;
+			uav_desc.Texture3D.WSize = -1; // -1 means all
+
+			m_uav_cpu_descriptor = srv_uav_cbv_heap.acquire_descriptor();
+			dx12_device.get_api_handle()->CreateUnorderedAccessView(get_api_handle(), nullptr, &uav_desc, m_uav_cpu_descriptor.m_handle);
+		}
 	}
 
-	const dx12_descriptor& render_device_texture_3d::get_render_target_view() const
+	render_device_resource::bindless_id render_device_texture_3d::get_bindless_id(render_device_resource_heap_type _heap_type) const
 	{
-		return m_render_target_cpu_descriptor;
-	}
+		switch (_heap_type) 
+		{
+			case render_device_resource_heap_type::srv:
+				return static_cast<bindless_id>(m_srv_cpu_descriptor.m_index);
+			case render_device_resource_heap_type::uav:
+				return static_cast<bindless_id>(m_uav_cpu_descriptor.m_index);
+			default:
+				VEER_ASSERT(false, "Texture 3D only supports SRV and UAV heap types for get_bindless_id");
+        }
 
-	
+		return s_invalid_bindless_id;
+	}
 }
