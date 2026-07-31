@@ -1,6 +1,7 @@
 #include "core/containers/resizable_array.h"
 #include "core/containers/static_array.h"
 #include "core/debug.h"
+#include "core/unique_ptr.h"
 #include "dx12_pch.h"
 #include "dx12_render_device.h"
 
@@ -130,9 +131,9 @@ namespace veer::display::render
 
 		// Now create needed command queues
 
-		m_graphics_queue = std::make_unique<dx12_command_queue>(*this, command_buffer::type::graphics);
-		//m_compute_queue = std::unique_ptr<dx12_command_queue>(new dx12_command_queue( this, command_buffer::type::Compute ));
-		//m_copy_queue = std::unique_ptr<dx12_command_queue>(new dx12_command_queue( this, command_buffer::type::Copy ));
+		m_graphics_queue = unique_ptr<dx12_command_queue>::make(*this, command_buffer::type::graphics);
+		//m_compute_queue = unique_ptr<dx12_command_queue>::make(new dx12_command_queue( this, command_buffer::type::Compute ));
+		//m_copy_queue = unique_ptr<dx12_command_queue>::make(new dx12_command_queue( this, command_buffer::type::Copy ));
 
 		create_allocator();
 		create_descriptor_heaps();
@@ -140,10 +141,10 @@ namespace veer::display::render
 
 	void dx12_render_device::create_descriptor_heaps()
 	{
-		m_rtv_descriptor_heap = std::make_unique<dx12_descriptor_heap>(*this, D3D12_DESCRIPTOR_HEAP_TYPE_RTV, D3D12_DESCRIPTOR_HEAP_FLAG_NONE, s_rtv_descriptor_heap_size);
-		m_dsv_descriptor_heap = std::make_unique<dx12_descriptor_heap>(*this, D3D12_DESCRIPTOR_HEAP_TYPE_DSV, D3D12_DESCRIPTOR_HEAP_FLAG_NONE, s_dsv_descriptor_heap_size);
-		m_srv_uav_cbv_descriptor_heap = std::make_unique<dx12_descriptor_heap>(*this, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE, s_srv_uav_cbv_descriptor_heap_size);
-		m_sampler_descriptor_heap = std::make_unique<dx12_descriptor_heap>(*this, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER, D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE, s_sampler_descriptor_heap_size);
+		m_rtv_descriptor_heap = unique_ptr<dx12_descriptor_heap>::make(*this, D3D12_DESCRIPTOR_HEAP_TYPE_RTV, D3D12_DESCRIPTOR_HEAP_FLAG_NONE, s_rtv_descriptor_heap_size);
+		m_dsv_descriptor_heap = unique_ptr<dx12_descriptor_heap>::make(*this, D3D12_DESCRIPTOR_HEAP_TYPE_DSV, D3D12_DESCRIPTOR_HEAP_FLAG_NONE, s_dsv_descriptor_heap_size);
+		m_srv_uav_cbv_descriptor_heap = unique_ptr<dx12_descriptor_heap>::make(*this, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE, s_srv_uav_cbv_descriptor_heap_size);
+		m_sampler_descriptor_heap = unique_ptr<dx12_descriptor_heap>::make(*this, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER, D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE, s_sampler_descriptor_heap_size);
 	}
 
 	void dx12_render_device::create_allocator()
@@ -197,19 +198,19 @@ namespace veer::display::render
 
 
 
-	std::unique_ptr<swap_chain> dx12_render_device::alloc_internal(veer::display::window::window& _window)
+	unique_ptr<swap_chain> dx12_render_device::alloc_internal(veer::display::window::window& _window)
 	{
-		return std::make_unique<dx12_swap_chain>(*this, _window);
+		return unique_ptr<dx12_swap_chain>::make(*this, _window);
 	}
 
-	std::unique_ptr<graphics_technique> dx12_render_device::alloc_internal(const shader_stage_source_container_t& _source_code, const shader_signature& _signature, const shader_render_state& _render_state)
+	unique_ptr<graphics_technique> dx12_render_device::alloc_internal(const shader_stage_source_container_t& _source_code, const shader_signature& _signature, const shader_render_state& _render_state)
 	{
-		return std::make_unique<dx12_graphics_technique>(*this, _source_code, _signature, _render_state);
+		return unique_ptr<dx12_graphics_technique>::make(*this, _source_code, _signature, _render_state);
 	}
 
-	std::unique_ptr<compute_technique> dx12_render_device::alloc_internal(const shader_stage_source_container_t& _source_code)
+	unique_ptr<compute_technique> dx12_render_device::alloc_internal(const shader_stage_source_container_t& _source_code)
 	{
-		return std::make_unique<dx12_compute_technique>(*this, _source_code);
+		return unique_ptr<dx12_compute_technique>::make(*this, _source_code);
 	}
 
 

@@ -19,4 +19,11 @@ namespace veer
 
     template <typename T> 
     concept floating_point = std::is_floating_point_v<T>;
+    
+    template<typename T>
+    concept allocator = requires(T a, T::size_type n, T::pointer p)
+    {
+        { a.allocate(n) } -> std::same_as<typename T::pointer>;
+        { a.deallocate(p) };
+    }; 
 }

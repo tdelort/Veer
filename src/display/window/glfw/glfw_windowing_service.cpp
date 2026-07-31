@@ -18,8 +18,8 @@ namespace veer::display::window
 
 	window& glfw_windowing_service::create_window(veer::math::vec2u _dims)
 	{
-		std::unique_ptr<glfw_window> win_ptr = std::make_unique<glfw_window>(_dims);
-		std::unique_ptr<window>& win_ptr_ref = m_windows.emplace_back(std::move(win_ptr));
+		unique_ptr<glfw_window> win_ptr = unique_ptr<glfw_window>::make(_dims);
+		unique_ptr<window>& win_ptr_ref = m_windows.emplace_back(std::move(win_ptr));
 		return *win_ptr_ref;
 	}
 

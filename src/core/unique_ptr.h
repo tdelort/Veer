@@ -1,0 +1,63 @@
+#pragma once
+
+#include <core/concepts.h>
+#include <core/basic_allocator.h>
+
+namespace veer
+{
+    template<typename T, allocator ALLOCATOR = basic_allocator>
+    class unique_ptr
+    {
+		using pointer = T*;
+		using const_pointer = const T*;
+		using reference = T&;
+		using const_reference = const T&;
+		using value_type = T;
+
+    public:
+        unique_ptr();
+        unique_ptr(T* _ptr);
+
+		unique_ptr(const unique_ptr& _other) = delete;
+		unique_ptr& operator=(const unique_ptr& _other) = delete;
+
+        template<typename U>
+		unique_ptr(unique_ptr<U,ALLOCATOR> && _other);
+        template<typename U>
+		unique_ptr& operator=(unique_ptr<U,ALLOCATOR>&& _other);
+
+        ~unique_ptr();
+
+        template<typename ...ARGS>
+        static unique_ptr<T, ALLOCATOR> make(ARGS&&... _args);
+
+        pointer get() const;
+
+        reference operator*() const;
+
+        pointer operator->() const;
+
+        void reset();
+        pointer release();
+
+        // Not a big fan
+        // bool operator()() const;
+    private:
+        T* m_ptr{nullptr};
+    };
+
+
+    template<typename T, allocator ALLOCATOR>
+    bool operator==(const unique_ptr<T, ALLOCATOR>& _ptr, nullptr_t _null_ptr);
+
+    template<typename T, allocator ALLOCATOR>
+    bool operator==(nullptr_t _null_ptr, unique_ptr<T, ALLOCATOR> _ptr);
+
+    template<typename T, allocator ALLOCATOR>
+    bool operator!=(const unique_ptr<T, ALLOCATOR>& _ptr, nullptr_t _null_ptr);
+
+    template<typename T, allocator ALLOCATOR>
+    bool operator!=(nullptr_t _null_ptr, unique_ptr<T, ALLOCATOR> _ptr);
+}
+
+#include "unique_ptr.hpp"

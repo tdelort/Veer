@@ -1,7 +1,6 @@
 #include "dx12_pch.h"
 #include "dx12_rendering_service.h"
 #include "dx12_render_device.h"
-#include "dx12_shader_compiler.h"
 
 using namespace Microsoft::WRL;
 
@@ -10,7 +9,7 @@ namespace veer::display::render
 	dx12_rendering_service::dx12_rendering_service()
 	{
 		// Device is created :3
-		std::unique_ptr<dx12_render_device> device = std::make_unique<dx12_render_device>();
+		unique_ptr<dx12_render_device> device = unique_ptr<dx12_render_device>::make();
 
 		// TODO : move to rendering_thread api
 		{
@@ -22,9 +21,6 @@ namespace veer::display::render
 			}
 		}
 		m_device = std::move(device);
-
-		std::unique_ptr<dx12_shader_compiler> shader_compiler = std::make_unique<dx12_shader_compiler>();
-		m_shader_compiler = std::move(shader_compiler);
 
 		m_current_frame_index = 0;
 	}

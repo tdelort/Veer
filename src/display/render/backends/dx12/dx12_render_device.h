@@ -32,24 +32,24 @@ namespace veer::display::render
 		void check_errors();
 	protected:
 		// factory part
-		std::unique_ptr<swap_chain> alloc_internal(veer::display::window::window& _window) override;
-		std::unique_ptr<graphics_technique> alloc_internal(const shader_stage_source_container_t& _source_code, const shader_signature& _signature, const shader_render_state& _render_state) override;
-		std::unique_ptr<compute_technique> alloc_internal(const shader_stage_source_container_t& _source_code) override;
+		unique_ptr<swap_chain> alloc_internal(veer::display::window::window& _window) override;
+		unique_ptr<graphics_technique> alloc_internal(const shader_stage_source_container_t& _source_code, const shader_signature& _signature, const shader_render_state& _render_state) override;
+		unique_ptr<compute_technique> alloc_internal(const shader_stage_source_container_t& _source_code) override;
 
 	private:
 		void create_descriptor_heaps();
 		void create_allocator();
 
-		std::unique_ptr<dx12_command_queue> m_graphics_queue;
+		unique_ptr<dx12_command_queue> m_graphics_queue{nullptr};
 
 		ComPtr<ID3D12Device2> m_api_device_handle;
 		ComPtr<IDXGIAdapter1> m_adapter;
 		ComPtr<IDXGIFactory4> m_dxgi_factory;
 
-		std::unique_ptr<dx12_descriptor_heap> m_rtv_descriptor_heap;
-		std::unique_ptr<dx12_descriptor_heap> m_dsv_descriptor_heap;
-		std::unique_ptr<dx12_descriptor_heap> m_srv_uav_cbv_descriptor_heap;
-		std::unique_ptr<dx12_descriptor_heap> m_sampler_descriptor_heap;
+		unique_ptr<dx12_descriptor_heap> m_rtv_descriptor_heap{nullptr};
+		unique_ptr<dx12_descriptor_heap> m_dsv_descriptor_heap{nullptr};
+		unique_ptr<dx12_descriptor_heap> m_srv_uav_cbv_descriptor_heap{nullptr};
+		unique_ptr<dx12_descriptor_heap> m_sampler_descriptor_heap{nullptr};
 
 		D3D12MA::Allocator* m_allocator;
 #if defined(_DEBUG)

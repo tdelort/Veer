@@ -1,5 +1,7 @@
 #include "rendering_service.h"
 
+#include <core/unique_ptr.h>
+
 namespace veer::display::render
 {	
 	rendering_service::~rendering_service()
@@ -21,11 +23,5 @@ namespace veer::display::render
 		// TODO: checks for thread safety here
 		VEER_ASSERT(m_device != nullptr, "Render device wasn't allocated" );
 		return *m_device;
-	}
-
-	shader_compiler& rendering_service::get_shader_compiler() const 
-	{
-		VEER_ASSERT(m_shader_compiler != nullptr, "Render device wasn't allocated" );
-		return *m_shader_compiler;
 	}
 }

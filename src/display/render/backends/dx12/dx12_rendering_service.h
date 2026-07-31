@@ -2,15 +2,13 @@
 
 #include "dx12_pch.h"
 
-#include <core/service.h>
-
 #include <display/render/rendering_service.h>
 #include <display/render/command_buffer.h>
 #include <display/render/swap_chain.h>
 
 namespace veer::display::render
 {
-	class dx12_rendering_service : public service_generic<rendering_service>
+	class dx12_rendering_service : public rendering_service
 	{
 	public:
 		dx12_rendering_service();

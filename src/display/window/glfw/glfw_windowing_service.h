@@ -8,7 +8,7 @@ struct GLFWwindow;
 
 namespace veer::display::window
 {
-	class glfw_windowing_service : public service_generic<windowing_service>
+	class glfw_windowing_service : public windowing_service
 	{
 	public:
 		glfw_windowing_service();

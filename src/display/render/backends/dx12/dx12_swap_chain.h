@@ -31,6 +31,6 @@ namespace veer::display::render
 		ComPtr<IDXGISwapChain4> m_api_swap_chain_handle;
 		ComPtr<ID3D12DescriptorHeap> m_back_buffers_descritor_heap;
 
-		std::unique_ptr<dx12_render_device_backbuffer> m_back_buffers_resources[s_swap_chain_buffer_count];
+		containers::static_array<unique_ptr<dx12_render_device_backbuffer>, s_swap_chain_buffer_count> m_back_buffers_resources = {};
 	};
 }

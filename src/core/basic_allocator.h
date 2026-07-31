@@ -6,37 +6,43 @@
 
 namespace veer
 {
-	template<typename T>
 	class basic_allocator
 	{
-		using value_type = T;
+	public:
+		using pointer = void*;
+		using const_pointer = const void*;
+		using size_type = size_t;
 
 		// TODO implement Allocator concept
 
 		basic_allocator() = default;
  
-		template<class U>
-		constexpr basic_allocator(const basic_allocator<U>&) noexcept {}
+		constexpr basic_allocator(const basic_allocator&) noexcept {}
 	 
-		[[nodiscard]] T* allocate( size_t _n )
+		template<typename T>
+		[[nodiscard]] pointer allocate(size_type _count)
 		{
-			VEER_ASSERT( _n <= ( std::numeric_limits<size_t>::max() / sizeof(T) ), "Alloc size way too big" );
+			return allocate(_count * sizeof(T));
+		}
 
-			T* ptr = static_cast<T*>(std::malloc(_n * sizeof(T)));
-			VEER_ASSERT( ptr != nullptr, "Alloc Failed" );
+		[[nodiscard]] pointer allocate(size_type _size_in_bytes)
+		{
+			pointer ptr = static_cast<pointer>(std::malloc(_size_in_bytes));
+			VEER_ASSERT(ptr != nullptr, "Alloc Failed");
 
-#if defined( VEER_LOG_ALLOCS )
-			VEER_LOG( "[ALLOC] " << _n << " elems at " << ptr );
+#if defined(VEER_LOG_ALLOCS)
+			VEER_LOG("[ALLOC] " << _size_in_bytes << " bytes at " << ptr);
 #endif // defined( VEER_LOG_ALLOCS )
+
 			return ptr;
 		}
 	 
-		void deallocate(T* _ptr, size_t _n) noexcept
+		void deallocate(pointer _ptr) noexcept
 		{
-#if defined( VEER_LOG_ALLOCS )
-			VEER_LOG( "[DEALLOC] " << _n << " elems from " << _ptr );
+#if defined(VEER_LOG_ALLOCS)
+			VEER_LOG("[DEALLOC] from " << _ptr);
 #endif // defined( VEER_LOG_ALLOCS )
-			std::free( _ptr );
+			std::free(_ptr);
 		}
 	};
 }

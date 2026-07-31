@@ -2,13 +2,13 @@
 
 #include "window.h"
 
-#include <core/service.h>
 #include <core/math/vec.h>
+#include <core/unique_ptr.h>
 #include <core/containers/resizable_array.h>
 
 namespace veer::display::window
 {
-	class windowing_service : public service_interface
+	class windowing_service
 	{
 	public:
 		virtual ~windowing_service() = 0;
@@ -21,6 +21,6 @@ namespace veer::display::window
 		virtual void destroy_window( size_t _index ) = 0;
 
 	protected:
-		veer::containers::resizable_array<std::unique_ptr<window>> m_windows;
+		veer::containers::resizable_array<unique_ptr<window>> m_windows;
 	};
 }

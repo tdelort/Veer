@@ -55,7 +55,7 @@ namespace veer::display::render
 	// I could keep them here (for example for views on each mips, this is easy)
 	// BUT I will also probably need to create views of different types.
 	// When this happens, I can simply add a way to request a new view on an existing texture, and keep the default views below
-	// something like "std::unique_ptr<render_device_texture_2d_view> create_view(render_device_texture_2d_view_desc _desc)"
+	// something like "unique_ptr<render_device_texture_2d_view> create_view(render_device_texture_2d_view_desc _desc)"
 	void render_device_texture_2d::update_views()
 	{
 		dx12_render_device& dx12_device = static_cast<dx12_render_device&>( m_device );

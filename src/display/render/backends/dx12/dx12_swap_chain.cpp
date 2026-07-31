@@ -78,7 +78,7 @@ namespace veer::display::render
 				backbuffer_desc.m_flags = texture_desc::usage_flags::render_target;
 				backbuffer_desc.m_format = render_device_data_format::r8g8b8a8_unorm;
 		 
-				m_back_buffers_resources[i] = std::make_unique<dx12_render_device_backbuffer>(_device, backbuffer_desc, back_buffer_resource.Get());
+				m_back_buffers_resources[i] = unique_ptr<dx12_render_device_backbuffer>::make(_device, backbuffer_desc, back_buffer_resource.Get());
 			}
 		}
     }
@@ -87,7 +87,7 @@ namespace veer::display::render
 	{
 		for (size_t i = 0; i < s_swap_chain_buffer_count; ++i)
 		{
-			m_back_buffers_resources[i] = nullptr;
+			m_back_buffers_resources[i].reset();
 		}
 		m_api_swap_chain_handle.Reset();
 	}
