@@ -1,10 +1,12 @@
 #pragma once
 
 #include <core/core.h>
+#include <core/concepts.h>
+#include <core/basic_allocator.h>
 
 namespace veer::containers
 {
-	template<typename T>
+    template<typename T, allocator ALLOCATOR = veer::basic_allocator>
 	class resizable_array
 	{
 	public:
@@ -76,6 +78,8 @@ namespace veer::containers
 		T* m_data{nullptr};
 		size_t m_size{0u};
 		size_t m_capacity{0u};
+
+		ALLOCATOR m_allocator;
 	};
 }
 

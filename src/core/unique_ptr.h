@@ -16,7 +16,8 @@ namespace veer
 
     public:
         unique_ptr();
-        unique_ptr(T* _ptr);
+        unique_ptr(nullptr_t);
+        unique_ptr(T* _ptr, ALLOCATOR&& _allocator);
 
 		unique_ptr(const unique_ptr& _other) = delete;
 		unique_ptr& operator=(const unique_ptr& _other) = delete;
@@ -44,20 +45,21 @@ namespace veer
         // bool operator()() const;
     private:
         T* m_ptr{nullptr};
+        ALLOCATOR m_allocator{};
     };
 
 
     template<typename T, allocator ALLOCATOR>
-    bool operator==(const unique_ptr<T, ALLOCATOR>& _ptr, nullptr_t _null_ptr);
+    bool operator==(const unique_ptr<T, ALLOCATOR>& _ptr, nullptr_t);
 
     template<typename T, allocator ALLOCATOR>
-    bool operator==(nullptr_t _null_ptr, unique_ptr<T, ALLOCATOR> _ptr);
+    bool operator==(nullptr_t, unique_ptr<T, ALLOCATOR> _ptr);
 
     template<typename T, allocator ALLOCATOR>
-    bool operator!=(const unique_ptr<T, ALLOCATOR>& _ptr, nullptr_t _null_ptr);
+    bool operator!=(const unique_ptr<T, ALLOCATOR>& _ptr, nullptr_t);
 
     template<typename T, allocator ALLOCATOR>
-    bool operator!=(nullptr_t _null_ptr, unique_ptr<T, ALLOCATOR> _ptr);
+    bool operator!=(nullptr_t, unique_ptr<T, ALLOCATOR> _ptr);
 }
 
 #include "unique_ptr.hpp"

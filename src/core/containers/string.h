@@ -1,11 +1,13 @@
 #pragma once
 
 #include <core/core.h>
+#include <core/concepts.h>
+#include <core/basic_allocator.h>
 
 namespace veer::containers
 {
 	// not a specialization (using private inheritance) of resizable_array since I plan to implement short string optimisation)
-	template<typename T>
+    template<typename T, allocator ALLOCATOR = veer::basic_allocator>
 	class base_string
 	{
 	public:
@@ -71,6 +73,8 @@ namespace veer::containers
 		size_t m_size{0u};
 		size_t m_capacity{0u};
 		T* m_data{nullptr};
+
+		ALLOCATOR m_allocator;
 	};
 
 	using string = base_string<char>;

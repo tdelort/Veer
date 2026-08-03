@@ -9,27 +9,27 @@
 
 namespace veer::containers
 {
-	template<typename T>
-	resizable_array<T>::resizable_array()
-		: m_data{nullptr}, m_size{0u}, m_capacity{0u}
+	template<typename T, allocator ALLOCATOR>
+	resizable_array<T,ALLOCATOR>::resizable_array()
+		: m_data{nullptr}, m_size{0u}, m_capacity{0u}, m_allocator()
 	{
 
 	}
 	
-	template<typename T>
-	resizable_array<T>::~resizable_array()
+	template<typename T, allocator ALLOCATOR>
+	resizable_array<T,ALLOCATOR>::~resizable_array()
 	{
 		destroy();
 	}
 
-	template<typename T>
-	resizable_array<T>::resizable_array(const resizable_array<T>& _other)
+	template<typename T, allocator ALLOCATOR>
+	resizable_array<T,ALLOCATOR>::resizable_array(const resizable_array<T,ALLOCATOR>& _other)
 	{
 		*this = _other; 
 	}
 
-	template<typename T>
-	resizable_array<T>& resizable_array<T>::operator=(const resizable_array<T>& _other)
+	template<typename T, allocator ALLOCATOR>
+	resizable_array<T,ALLOCATOR>& resizable_array<T,ALLOCATOR>::operator=(const resizable_array<T,ALLOCATOR>& _other)
 	{
 		clear(); // also resets m_size to 0
 
@@ -44,14 +44,14 @@ namespace veer::containers
 		return *this;
 	}
 
-	template<typename T>
-	resizable_array<T>::resizable_array(resizable_array<T>&& _other)
+	template<typename T, allocator ALLOCATOR>
+	resizable_array<T,ALLOCATOR>::resizable_array(resizable_array<T,ALLOCATOR>&& _other)
 	{
 		*this = std::move(_other);
 	}
 
-	template<typename T>
-	resizable_array<T>& resizable_array<T>::operator=(resizable_array<T>&& _other)
+	template<typename T, allocator ALLOCATOR>
+	resizable_array<T,ALLOCATOR>& resizable_array<T,ALLOCATOR>::operator=(resizable_array<T,ALLOCATOR>&& _other)
 	{
 		// clean self
 		destroy();
@@ -69,24 +69,24 @@ namespace veer::containers
 		return *this;
 	}
 
-	template<typename T>
-	T& resizable_array<T>::back()
+	template<typename T, allocator ALLOCATOR>
+	T& resizable_array<T,ALLOCATOR>::back()
 	{
 		VEER_ASSERT(!empty(), "");
 		const size_t last_index = size() - 1u;
 		return m_data[last_index];
 	}
 
-	template<typename T>
-	const T& resizable_array<T>::back() const
+	template<typename T, allocator ALLOCATOR>
+	const T& resizable_array<T,ALLOCATOR>::back() const
 	{
 		VEER_ASSERT(!empty(), "");
 		const size_t last_index = size() - 1u;
 		return m_data[last_index];
 	}
 
-	template<typename T>
-	void resizable_array<T>::pop_back()
+	template<typename T, allocator ALLOCATOR>
+	void resizable_array<T,ALLOCATOR>::pop_back()
 	{
 		if (empty())
 			return;
@@ -96,21 +96,21 @@ namespace veer::containers
 		m_size--;
 	}
 
-	template<typename T>
-	void resizable_array<T>::push_back(const T& _val)
+	template<typename T, allocator ALLOCATOR>
+	void resizable_array<T,ALLOCATOR>::push_back(const T& _val)
 	{
 		insert(end(), _val);
 	}
 
-	template<typename T>
-	void resizable_array<T>::push_back(T&& _val)
+	template<typename T, allocator ALLOCATOR>
+	void resizable_array<T,ALLOCATOR>::push_back(T&& _val)
 	{
 		insert(end(), std::forward<T&&>(_val));
 	}
 
-	template<typename T>
+	template<typename T, allocator ALLOCATOR>
 	template<typename... ARGS>
-	resizable_array<T>::reference resizable_array<T>::emplace_back(ARGS&&... _args)
+	resizable_array<T,ALLOCATOR>::reference resizable_array<T,ALLOCATOR>::emplace_back(ARGS&&... _args)
 	{
 		if ( size() + 1 > capacity() )
 			grow();
@@ -121,8 +121,8 @@ namespace veer::containers
 		return *ptr;
 	}
 
-	template<typename T>
-    void resizable_array<T>::insert(iterator _pos, const T& _elem) 
+	template<typename T, allocator ALLOCATOR>
+    void resizable_array<T,ALLOCATOR>::insert(iterator _pos, const T& _elem) 
     {
 		const size_t index = _pos - begin(); 
 
@@ -141,9 +141,9 @@ namespace veer::containers
 		m_size++;
     }
 
-	template<typename T>
+	template<typename T, allocator ALLOCATOR>
 	template<typename INPUT_ITERATOR> 
-	void resizable_array<T>::insert(iterator _pos, INPUT_ITERATOR _first, INPUT_ITERATOR _last)
+	void resizable_array<T,ALLOCATOR>::insert(iterator _pos, INPUT_ITERATOR _first, INPUT_ITERATOR _last)
 	{
 		const size_t index = _pos - begin(); 
 		const size_t count = _last - _first;
@@ -171,8 +171,8 @@ namespace veer::containers
 		m_size = size() + count;
 	}
 
-	template<typename T>
-	resizable_array<T>::iterator resizable_array<T>::erase(iterator _it)
+	template<typename T, allocator ALLOCATOR>
+	resizable_array<T,ALLOCATOR>::iterator resizable_array<T,ALLOCATOR>::erase(iterator _it)
 	{
 		VEER_ASSERT(_it >= begin() && _it < end() && size() != 0u, "Iterator out of bounds");
 		VEER_ASSERT(_it != nullptr, "Iterator is invalid");
@@ -188,15 +188,15 @@ namespace veer::containers
 		return begin() + index;
 	}
 
-	template<typename T>
-	void resizable_array<T>::reserve(size_t _new_capacity)
+	template<typename T, allocator ALLOCATOR>
+	void resizable_array<T,ALLOCATOR>::reserve(size_t _new_capacity)
 	{
 		if (_new_capacity != 0)
 			alloc(_new_capacity);
 	}
 
-	template<typename T>
-	void resizable_array<T>::resize(size_t _new_size, const_reference _new_values /*= T()*/)
+	template<typename T, allocator ALLOCATOR>
+	void resizable_array<T,ALLOCATOR>::resize(size_t _new_size, const_reference _new_values /*= T()*/)
 	{
 		for (size_t i = _new_size; i < m_size; ++i)
 			std::destroy_at( m_data + i );
@@ -211,8 +211,8 @@ namespace veer::containers
 	}
 
 
-	template<typename T>
-	void resizable_array<T>::grow(size_t _min_capacity_needed)
+	template<typename T, allocator ALLOCATOR>
+	void resizable_array<T,ALLOCATOR>::grow(size_t _min_capacity_needed)
 	{
 		// TODO : replace with the analytic version
 		size_t new_capacity = math::max(m_capacity, 8ull);
@@ -222,19 +222,19 @@ namespace veer::containers
 		alloc(new_capacity);
 	}
 
-	template<typename T>
-	void resizable_array<T>::grow()
+	template<typename T, allocator ALLOCATOR>
+	void resizable_array<T,ALLOCATOR>::grow()
 	{
 		grow(m_capacity + 1);
 		// const size_t new_capacity = m_capacity == 0u ? 8u : 2 * m_capacity;
 		// alloc(new_capacity);
 	}
 
-	template<typename T>
-	void resizable_array<T>::alloc(size_t _new_capacity)
+	template<typename T, allocator ALLOCATOR>
+	void resizable_array<T,ALLOCATOR>::alloc(size_t _new_capacity)
 	{
 		VEER_ASSERT(_new_capacity > m_size, "resizable_array::alloc call with new_capacity (" << _new_capacity << ") smaller than size " << m_size << " !");
-		T* new_data = static_cast<T*>(std::malloc(_new_capacity * sizeof(T)));
+		T* new_data = static_cast<T*>(m_allocator.allocate(_new_capacity * sizeof(T)));
 
 
 		if ( m_data != nullptr )
@@ -242,7 +242,7 @@ namespace veer::containers
 			for (size_t i = 0; i < m_size; ++i)
 				new_data[i] = std::move(m_data[i]);
 
-			std::free(m_data);
+			m_allocator.deallocate(m_data);
 		}
 
 		m_data = new_data; 
@@ -250,8 +250,8 @@ namespace veer::containers
 
 	}
 
-	template<typename T>
-	void resizable_array<T>::clear()
+	template<typename T, allocator ALLOCATOR>
+	void resizable_array<T,ALLOCATOR>::clear()
 	{
 		for(size_t i = 0; i < m_size; ++i)
 			std::destroy_at( m_data + i );
@@ -259,14 +259,14 @@ namespace veer::containers
 		m_size = 0u;
 	}
 
-	template<typename T>
-	void resizable_array<T>::destroy()
+	template<typename T, allocator ALLOCATOR>
+	void resizable_array<T,ALLOCATOR>::destroy()
 	{
 		clear();
 
 		if (m_data != nullptr)
 		{
-			std::free(m_data);
+			m_allocator.deallocate(m_data);
 		}
 	}
 }
