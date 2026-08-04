@@ -35,9 +35,6 @@ namespace veer::display::window
 
 	void glfw_windowing_service::destroy_window(size_t _index)
 	{
-		auto it = m_windows.begin();
-		std::advance(it, _index);
-		// TODO Assert it != end
-		m_windows.erase(it);
+		m_windows.erase(m_windows.begin() + _index);
 	}
 }

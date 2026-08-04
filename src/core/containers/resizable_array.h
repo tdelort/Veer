@@ -81,6 +81,9 @@ namespace veer::containers
 
 		ALLOCATOR m_allocator;
 	};
+
+	template<typename ITERATOR, typename T>
+	ITERATOR find(ITERATOR _from, ITERATOR _to, const T& _value);
 }
 
 #include "resizable_array.hpp"

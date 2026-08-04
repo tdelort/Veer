@@ -8,7 +8,6 @@
 #include <display/render/blend_state.h>
 #include <display/render/rasterizer_state.h>
 #include <display/render/render_device_data_format.h>
-#include <memory>
 
 namespace veer::display::render
 {

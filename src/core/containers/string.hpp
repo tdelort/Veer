@@ -66,6 +66,22 @@ namespace veer::containers
 		return *this;
 	}
 
+	template<typename T, allocator ALLOCATOR>
+	template<typename CHAR_TYPE>
+	base_string<T,ALLOCATOR>& base_string<T,ALLOCATOR>::operator=(CHAR_TYPE* _other)
+	{
+		clear();
+		append(_other);
+		return *this;
+	}
+
+	template<typename T, allocator ALLOCATOR>
+	template<typename CHAR_TYPE>
+	base_string<T,ALLOCATOR>& base_string<T,ALLOCATOR>::operator+=(CHAR_TYPE* _other)
+	{
+		append(_other);
+		return *this;
+	}
 
 	template<typename T, allocator ALLOCATOR>
     T& base_string<T,ALLOCATOR>::back()
@@ -104,7 +120,7 @@ namespace veer::containers
 	template<typename T, allocator ALLOCATOR>
     void base_string<T,ALLOCATOR>::insert(iterator _pos, const T& _elem) 
     {
-		const size_t index = (_pos - begin()) / sizeof(T); 
+		const size_t index = _pos - begin();
 
 		if (size() + 1 > capacity())
 			grow(size() + 1);
@@ -125,14 +141,17 @@ namespace veer::containers
     template<typename INPUT_ITERATOR> 
     void base_string<T,ALLOCATOR>::insert(iterator _pos, INPUT_ITERATOR _first, INPUT_ITERATOR _last) 
     { 
-		const size_t index = (_pos - begin()) / sizeof(T); 
-		const size_t count = (_last - _first) / sizeof(T);
+		const size_t index = _pos - begin();
+		const size_t count = _last - _first;
 
 		if (count == 0u)
 			return;
 
 		if (size() + count > capacity())
+		{
 			grow(size() + count);
+			_pos = begin() + index;
+		}
 
 		if (size() > 0u)
 		{

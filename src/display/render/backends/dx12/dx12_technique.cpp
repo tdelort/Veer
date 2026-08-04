@@ -9,7 +9,6 @@
 #include "dx12_pch.h"
 #include "dx12_render_device.h"
 #include "dx12_render_device_data_format.h"
-#include <exception>
 
 
 #define VEER_DX12_BINDLESS_TABLE_SIZE 1024u
@@ -143,11 +142,13 @@ namespace veer::display::render
         return static_cast<size_t>(_constant_buffer);
     }
 
-	inline std::string HrToString(HRESULT hr)
+	inline containers::string HrToString(HRESULT hr)
 	{
 		char s_str[64] = {};
 		sprintf_s(s_str, "HRESULT of 0x%08X", static_cast<UINT>(hr));
-		return std::string(s_str);
+		containers::string output;
+        output = s_str;
+        return output;
 	}
 
     // TODO : this will be almost the same everywhere, reuse 
@@ -302,7 +303,8 @@ namespace veer::display::render
         HRESULT hr = _device.get_api_handle()->CreateGraphicsPipelineState(&pso_desc, IID_PPV_ARGS(&m_pso));
         if (!SUCCEEDED(hr))
         {
-            VEER_LOG_ERROR("Failed to create PSO. Error (" << HrToString( hr ) << ")");
+            containers::string hr_string = HrToString(hr);
+            VEER_LOG_ERROR("Failed to create PSO. Error (" << hr_string.c_str() << ")");
         }
     }
 
@@ -333,7 +335,8 @@ namespace veer::display::render
 
         VEER_LOG("CreateComputePipelineState");
         HRESULT hr = _device.get_api_handle()->CreateComputePipelineState(&pso_desc, IID_PPV_ARGS(&m_pso));
-        VEER_ASSERT(SUCCEEDED(hr), "Failed to create PSO. Error (" << HrToString( hr ) << ")");
+        containers::string hr_string = HrToString(hr);
+        VEER_ASSERT(SUCCEEDED(hr), "Failed to create PSO. Error (" << hr_string.c_str() << ")");
     }
 
     dx12_compute_technique::~dx12_compute_technique()

@@ -37,7 +37,7 @@ namespace veer::display::render
             m_free_indices.pop_back();
         }
 
-        m_first_available_descriptor_index = std::max( index + 1, m_first_available_descriptor_index );
+        m_first_available_descriptor_index = math::max(index + 1, m_first_available_descriptor_index);
 
 		D3D12_CPU_DESCRIPTOR_HANDLE handle = m_api_handle->GetCPUDescriptorHandleForHeapStart();
         handle.ptr += m_increment_size * index;
@@ -54,7 +54,7 @@ namespace veer::display::render
             return;
         
         // slower checks last
-        veer::containers::resizable_array<size_t>::const_iterator it = std::find( m_free_indices.cbegin(), m_free_indices.cend(), index );
+        veer::containers::resizable_array<size_t>::const_iterator it = containers::find(m_free_indices.cbegin(), m_free_indices.cend(), index);
         if( it == m_free_indices.cend() )
             return;
 

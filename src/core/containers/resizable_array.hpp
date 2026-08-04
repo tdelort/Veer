@@ -5,7 +5,6 @@
 #include <core/math/math.h>
 #include <core/debug.h>
 #include <core/core.h>
-#include <vector>
 
 namespace veer::containers
 {
@@ -269,4 +268,22 @@ namespace veer::containers
 			m_allocator.deallocate(m_data);
 		}
 	}
+
+	template<typename ITERATOR, typename T>
+	ITERATOR find(ITERATOR _from, ITERATOR _to, const T& _value)
+	{
+		VEER_ASSERT(_to >= _from, "Iterator _from and _to swapped");
+		VEER_ASSERT((_from == nullptr) == (_to == nullptr), "Iterator _from or _to is invalid");
+
+		while(_from != _to)
+		{
+			if (*_from == _value)
+				return _from;
+
+			_from++;
+		}
+    
+		return _to;
+	}
+
 }

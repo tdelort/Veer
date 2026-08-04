@@ -6,12 +6,6 @@ namespace veer
 {
 	class debug
 	{
-		class assert_error : public std::runtime_error
-		{
-		public:
-			assert_error(std::string const & _message);
-		};
-
 	public:
 		enum class log_level : uint8_t
 		{
@@ -20,8 +14,8 @@ namespace veer
 			warn,
 			error
 		};
-		static void assert_if( bool _condition, std::string_view const _message , const char* _file, const char* _function, int _line );
-		static void print( log_level _level, std::string_view const _message , const char* _file, const char* _function, int _line );
+		static void assert_if( bool _condition, const char* _message , const char* _file, const char* _function, int _line );
+		static void print( log_level _level, const char* _message , const char* _file, const char* _function, int _line );
 	};
 } // namespace veer
 
@@ -34,7 +28,7 @@ namespace veer
 {												\
 	std::stringstream VEER_ASSERT_INTERNAL__ss;	\
 	VEER_ASSERT_INTERNAL__ss << _msg;				\
-	debug::assert_if( ( _test ), VEER_ASSERT_INTERNAL__ss.str(), __FILE__, VEER_PRETTY_FUNCTION, __LINE__ ); \
+	debug::assert_if( ( _test ), VEER_ASSERT_INTERNAL__ss.str().c_str(), __FILE__, VEER_PRETTY_FUNCTION, __LINE__ ); \
 }
 
 #define VEER_ASSERT(_test, _msg) VEER_ASSERT_INTERNAL( _test, _msg );
@@ -43,7 +37,7 @@ namespace veer
 {											\
 	std::stringstream VEER_LOG_INTERNAL__ss;	\
 	VEER_LOG_INTERNAL__ss << _msg;			\
-	veer::debug::print( _level, VEER_LOG_INTERNAL__ss.str(), __FILE__, VEER_PRETTY_FUNCTION, __LINE__ ); \
+	veer::debug::print( _level, VEER_LOG_INTERNAL__ss.str().c_str(), __FILE__, VEER_PRETTY_FUNCTION, __LINE__ ); \
 }
 
 #define VEER_LOG_ERROR(_msg) VEER_LOG_INTERNAL(veer::debug::log_level::error, _msg );

@@ -67,7 +67,7 @@ namespace veer::display::window
 	{
 		int w, h;
 		glfwGetFramebufferSize(m_api_handle, &w, &h);
-		return math::vec2u((unsigned int)std::max(0, w), (unsigned int)std::max(0, h));
+		return math::vec2u((unsigned int)math::max(0, w), (unsigned int)math::max(0, h));
 	}
 
 	void glfw_window::set_size(math::vec2u _size) &

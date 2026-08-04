@@ -20,31 +20,77 @@
 // TODO : remove them one by one by implementing your own version (we are here to make an apple pie,
 // and to make an apple pie, one first need to invent the universe)
 // Containers should be the easiest
-// Use #include.*<[^.]*> to find their usages
-#include <ostream>
-#include <iostream>
-#include <sstream>
-#include <fstream>
-#include <ios>
-#include <stdexcept>
-#include <memory>
-#include <string>
-#include <string_view>
-#include <chrono>
-#include <cmath>
-#include <algorithm>
-#include <iterator>
-#include <initializer_list>
-#include <set>
-#include <unordered_map>
-#include <typeindex>
-#include <type_traits>
-#include <mutex>
-#include <cstdint>
-#include <functional>
-#include <memory>
-#include <stdlib.h>
+// Use #include.*<[^.]*> or std:: to find their usages
 
+/*
+ *      std::move, std::forward, std::pair
+ */
+#include <utility>
+
+/*
+ *  core/basic_allocator
+ *      std::malloc, std::free
+ */
+#include <cstdlib>
+
+/*
+ *  resizable_array string unique_ptr
+ *      std::destroy_at
+ */
+#include <memory>
+
+/*
+ *  core/concepts, core/unique_ptr
+ *      std::same_as
+ */
+#include <concepts>
+
+/*
+ *  core/concepts
+ *      std::is_arithmetic_v, std::is_integral_v, std::is_floating_point_v
+ *  core/core
+ *      std::underlying_type_t
+ *  core/unique_ptr
+ *      std::is_base_of_v, std::is_array_v
+ *  core/math/vec
+ *      std::is_constant_evaluated, std::enable_if
+ */
+#include <type_traits>
+
+/*
+ *  core/math/vec
+ *      std::sqrt
+ */
+#include <cmath>
+
+/*
+ *  containers/string
+ *      std::char_traits
+ */
+#include <string>
+
+/*
+ *      std::memcpy
+ */
+#include <cstring>
+
+/*
+ *  display/render/command_buffer
+ *      std::function
+ */
+#include <functional>
+
+/*
+ *  core/debug
+ *      std::stringstream
+ */
+#include <sstream>
+
+/*
+ *  core/debug
+ *      std::ostream, std::cerr, std::cout, std::endl
+ */
+#include <iostream>
 
 #define VEER_MAKE_STMT(_expr) do { _expr } while(0)
 #define VEER_FLOAT_EPSILON FLT_EPSILON

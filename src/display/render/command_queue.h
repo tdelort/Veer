@@ -3,7 +3,6 @@
 #include "core/containers/resizable_array.h"
 #include <core/containers/span.h>
 
-#include <cstdint>
 #include <display/render/command_buffer.h>
 
 namespace veer::display::render

@@ -45,6 +45,12 @@ namespace veer::containers
 		T& operator[](size_t _i) { return m_data[_i]; }
 		const T& operator[](size_t _i) const { return m_data[_i]; }
 
+		template<typename CHAR_TYPE>
+		base_string& operator=(CHAR_TYPE* _other);
+
+		template<typename CHAR_TYPE>
+		base_string& operator+=(CHAR_TYPE* _other);
+
 		T& back();
 		const T& back() const;
 
