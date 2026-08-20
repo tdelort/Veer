@@ -5,7 +5,7 @@ public:
 	ID3D12GraphicsCommandList* get_api_handle();
 
 	// TODO : maybe other implems will need something similar
-	void open(dx12_render_device& _device, ComPtr<ID3D12CommandAllocator>& _command_allocator);
+	void open(const render_device& _device, ComPtr<ID3D12CommandAllocator>& _command_allocator);
 	void close();
 
 protected:

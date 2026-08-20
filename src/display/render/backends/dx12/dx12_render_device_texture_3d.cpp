@@ -1,8 +1,9 @@
 #include <display/render/render_device_texture_3d.h>
 
 #include "dx12_pch.h"
-#include "dx12_render_device.h"
-#include "dx12_render_device_data_format.h"
+
+#include <display/render/render_device.h>
+#include <display/render/backends/dx12/dx12_render_device_data_format.h>
 
 namespace veer::display::render 
 {
@@ -14,10 +15,8 @@ namespace veer::display::render
 	
 	render_device_texture_3d::~render_device_texture_3d()
 	{
-		dx12_render_device& dx12_device = static_cast<dx12_render_device&>(m_device);
-
-		dx12_device.get_srv_uav_cbv_descriptor_heap().release_descriptor(m_srv_cpu_descriptor); 
-		dx12_device.get_srv_uav_cbv_descriptor_heap().release_descriptor(m_uav_cpu_descriptor);
+		m_device.get_srv_uav_cbv_descriptor_heap().release_descriptor(m_srv_cpu_descriptor); 
+		m_device.get_srv_uav_cbv_descriptor_heap().release_descriptor(m_uav_cpu_descriptor);
 	}
 
 	D3D12_RESOURCE_DESC render_device_texture_3d::get_resource_desc() const
@@ -46,14 +45,12 @@ namespace veer::display::render
 
 	void render_device_texture_3d::update_views()
 	{
-		dx12_render_device& dx12_device = static_cast<dx12_render_device&>( m_device );
-
 		const texture_3d_desc& texture_desc = desc();
 
-		dx12_descriptor_heap& srv_uav_cbv_heap = dx12_device.get_srv_uav_cbv_descriptor_heap();
+		dx12_descriptor_heap& srv_uav_cbv_heap = m_device.get_srv_uav_cbv_descriptor_heap();
 
 		{
-			dx12_device.get_srv_uav_cbv_descriptor_heap().release_descriptor(m_srv_cpu_descriptor); 
+			m_device.get_srv_uav_cbv_descriptor_heap().release_descriptor(m_srv_cpu_descriptor); 
 
 			D3D12_SHADER_RESOURCE_VIEW_DESC srv_desc = {};
 			srv_desc.Format = display::render::s_convert(texture_desc.m_format);
@@ -64,12 +61,12 @@ namespace veer::display::render
 			srv_desc.Texture3D.ResourceMinLODClamp = 0.f;
 
 			m_srv_cpu_descriptor = srv_uav_cbv_heap.acquire_descriptor();
-			dx12_device.get_api_handle()->CreateShaderResourceView(get_api_handle(), &srv_desc, m_srv_cpu_descriptor.m_handle);
+			m_device.get_api_handle()->CreateShaderResourceView(get_api_handle(), &srv_desc, m_srv_cpu_descriptor.m_handle);
 		}
 
 		if (flags::get(texture_desc.m_flags, texture_desc::usage_flags::storage))
 		{
-			dx12_device.get_srv_uav_cbv_descriptor_heap().release_descriptor(m_uav_cpu_descriptor);
+			m_device.get_srv_uav_cbv_descriptor_heap().release_descriptor(m_uav_cpu_descriptor);
 
 			D3D12_UNORDERED_ACCESS_VIEW_DESC uav_desc = {};
 			uav_desc.Format = display::render::s_convert(texture_desc.m_format);
@@ -79,7 +76,7 @@ namespace veer::display::render
 			uav_desc.Texture3D.WSize = -1; // -1 means all
 
 			m_uav_cpu_descriptor = srv_uav_cbv_heap.acquire_descriptor();
-			dx12_device.get_api_handle()->CreateUnorderedAccessView(get_api_handle(), nullptr, &uav_desc, m_uav_cpu_descriptor.m_handle);
+			m_device.get_api_handle()->CreateUnorderedAccessView(get_api_handle(), nullptr, &uav_desc, m_uav_cpu_descriptor.m_handle);
 		}
 	}
 

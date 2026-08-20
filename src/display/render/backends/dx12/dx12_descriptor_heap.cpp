@@ -1,12 +1,13 @@
 #include "dx12_descriptor_heap.h"
-#include "dx12_render_device.h"
 
 #include <core/core.h>
 #include <core/debug.h>
 
+#include <display/render/render_device.h>
+
 namespace veer::display::render
 {
-    dx12_descriptor_heap::dx12_descriptor_heap(dx12_render_device& _device, D3D12_DESCRIPTOR_HEAP_TYPE _type, D3D12_DESCRIPTOR_HEAP_FLAGS _flags, size_t _size)
+    dx12_descriptor_heap::dx12_descriptor_heap(render_device& _device, D3D12_DESCRIPTOR_HEAP_TYPE _type, D3D12_DESCRIPTOR_HEAP_FLAGS _flags, size_t _size)
     {
         D3D12_DESCRIPTOR_HEAP_DESC heap_desc = {};
         heap_desc.NumDescriptors = (UINT)_size;

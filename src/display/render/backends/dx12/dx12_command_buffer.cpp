@@ -1,16 +1,17 @@
 #include <display/render/command_buffer.h>
 
-#include "core/containers/static_array.h"
-#include "core/debug.h"
-#include "core/math/math.h"
-#include "display/render/constant_buffer.h"
-#include "display/render/render_device_resource.h"
-#include "display/render/resource_desc.h"
-#include "display/render/technique.h"
-#include "dx12_render_device_resource_sync_state.h"
-#include "dx12_render_device.h"
+#include <core/debug.h>
+#include <core/math/math.h>
 
-#include "dx12_technique.h"
+#include <core/containers/static_array.h>
+#include <display/render/constant_buffer.h>
+#include <display/render/render_device_resource.h>
+#include <display/render/resource_desc.h>
+#include <display/render/technique.h>
+#include <display/render/render_device.h>
+
+#include <display/render/backends/dx12/dx12_render_device_resource_sync_state.h>
+#include <display/render/backends/dx12/dx12_technique.h>
 
 namespace veer::display::render
 {
@@ -38,7 +39,7 @@ namespace veer::display::render
 		return dx12_type;
 	}
 
-	void command_buffer::open(dx12_render_device& _device, ComPtr<ID3D12CommandAllocator>& _command_allocator)
+	void command_buffer::open(const render_device& _device, ComPtr<ID3D12CommandAllocator>& _command_allocator)
 	{
 		// TODO : actually use real command list type
 		const D3D12_COMMAND_LIST_TYPE dx12_type = D3D12_COMMAND_LIST_TYPE_DIRECT; // s_convert(m_type);

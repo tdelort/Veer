@@ -2,12 +2,12 @@
 
 #include "dx12_pch.h"
 
-#include "dx12_render_device.h"
-#include "dx12_render_device_backbuffer.h"
-
+#include <core/unique_ptr.h>
 #include <core/math/vec.h>
 
 #include <display/render/swap_chain.h>
+#include <display/render/backends/dx12/dx12_render_device_backbuffer.h>
+
 
 namespace veer::display::window
 {
@@ -16,12 +16,12 @@ namespace veer::display::window
 
 namespace veer::display::render
 {
-	class dx12_rendering_service;
+	class render_device;
 
 	class dx12_swap_chain : public veer::display::render::swap_chain 
 	{
 	public:
-		dx12_swap_chain(dx12_render_device& _device, veer::display::window::window& _window);
+		dx12_swap_chain(render_device& _device, veer::display::window::window& _window);
 		virtual ~dx12_swap_chain();
 
 		void present(size_t _sync_intervals) override;

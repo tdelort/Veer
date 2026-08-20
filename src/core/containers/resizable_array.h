@@ -2,11 +2,11 @@
 
 #include <core/core.h>
 #include <core/concepts.h>
-#include <core/basic_allocator.h>
+#include <core/veer_system_allocator.h>
 
 namespace veer::containers
 {
-    template<typename T, allocator ALLOCATOR = veer::basic_allocator>
+    template<typename T, system_allocator ALLOCATOR = veer::veer_system_allocator>
 	class resizable_array
 	{
 	public:

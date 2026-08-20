@@ -7,7 +7,7 @@
 
 namespace veer::display::render
 {
-	class dx12_render_device;
+	class render_device;
 
 	struct dx12_descriptor
 	{
@@ -36,7 +36,7 @@ namespace veer::display::render
 	class dx12_descriptor_heap
 	{
 	public:
-		dx12_descriptor_heap( dx12_render_device& _device, D3D12_DESCRIPTOR_HEAP_TYPE _type, D3D12_DESCRIPTOR_HEAP_FLAGS _flags, size_t _size);
+		dx12_descriptor_heap(render_device& _device, D3D12_DESCRIPTOR_HEAP_TYPE _type, D3D12_DESCRIPTOR_HEAP_FLAGS _flags, size_t _size);
 		~dx12_descriptor_heap();
 
 		dx12_descriptor acquire_descriptor();

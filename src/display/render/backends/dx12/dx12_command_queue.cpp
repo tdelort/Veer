@@ -1,17 +1,16 @@
-#include "dx12_command_queue.h"
-
-#include "display/render/command_queue.h"
-#include "dx12_render_device.h"
+#include <display/render/command_queue.h>
 
 #include <core/debug.h>
 #include <core/core.h>
 #include <core/containers/resizable_array.h>
 
+#include <display/render/render_device.h>
+
 
 namespace veer::display::render
 {
-	dx12_command_queue::dx12_command_queue(dx12_render_device& _device, command_buffer::type _type)
-		: command_queue(_type)
+
+	command_queue::command_queue(render_device& _device, command_buffer::type _type)
 	{
 		D3D12_COMMAND_QUEUE_DESC desc = {};
 		desc.Type = command_buffer::s_convert(_type);
@@ -19,21 +18,19 @@ namespace veer::display::render
 		desc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
 		desc.NodeMask = 0;
 
-		ComPtr<ID3D12Device2> dx12_device = _device.get_api_handle();
-		VEER_LOG("CreateCommandQueue")
-		HRESULT hr = dx12_device->CreateCommandQueue(&desc, IID_PPV_ARGS(&m_command_queue_api_handle));
+		HRESULT hr = _device.get_api_handle()->CreateCommandQueue(&desc, IID_PPV_ARGS(&m_command_queue_api_handle));
 		VEER_ASSERT(SUCCEEDED(hr), "Failed to create command queue (" << hr << ")");
 
-		VEER_LOG("CreateFence")
-		hr = dx12_device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&m_fence));
+		hr = _device.get_api_handle()->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&m_fence));
 		VEER_ASSERT(SUCCEEDED(hr), "Failed to create command queue fence (" << hr << ")");
 	}
 
-	dx12_command_queue::~dx12_command_queue()
+	command_queue::~command_queue()
 	{
+		// m_fence and m_command_queue_api_handle are ComPtr
 	}
 
-	void dx12_command_queue::execute_command_buffers(veer::containers::span<command_buffer*> _command_buffers)
+	void command_queue::execute_command_buffers(veer::containers::span<command_buffer*> _command_buffers)
 	{
 		veer::containers::resizable_array<ID3D12CommandList*> dx12_command_lists;
 		dx12_command_lists.reserve(_command_buffers.size());
@@ -44,21 +41,21 @@ namespace veer::display::render
 
 		m_command_queue_api_handle->ExecuteCommandLists((UINT)dx12_command_lists.size(), dx12_command_lists.data());
 
-		command_queue::execute_command_buffers(_command_buffers);
+		command_queue_base::execute_command_buffers(_command_buffers);
 	}
 
 	// TODO : . Ping pong between backbuffer index (given as a parameter) for m_fence_value
-	void dx12_command_queue::signal(uint64_t _value)
+	void command_queue::signal(uint64_t _value)
 	{
 		VEER_ASSERT(_value > m_last_signaled_fence_value, "Trying to signal a fence value (" << _value << ") lower than last signaled value (" << m_last_signaled_fence_value << ")");
 
 		HRESULT hr = m_command_queue_api_handle->Signal(m_fence.Get(), _value);
 		VEER_ASSERT(SUCCEEDED(hr), "Failed to signal command queue fence (" << hr << ")");
 
-		command_queue::signal(_value);
+		command_queue_base::signal(_value);
 	}
 
-	void dx12_command_queue::wait_for_value(uint64_t _value)
+	void command_queue::wait_for_value(uint64_t _value)
 	{
 		// Wait until the GPU has completed commands up to this fence point.
 		if(m_fence->GetCompletedValue() < _value)
@@ -74,12 +71,59 @@ namespace veer::display::render
 			CloseHandle(event);
 		}
 
-		command_queue::wait_for_value(_value);
+		command_queue_base::wait_for_value(_value);
 	}
 
-	ComPtr<ID3D12CommandQueue> dx12_command_queue::get_api_handle()
+	ComPtr<ID3D12CommandQueue> command_queue::get_api_handle()
 	{
 		return m_command_queue_api_handle;
 	}
 
+
+	copy_command_queue::copy_command_queue(render_device& _device)
+		: command_queue(_device, command_buffer::type::copy)
+	{
+
+	}
+
+	copy_command_queue::copy_command_queue(render_device& _device, command_buffer::type _type)
+		: command_queue(_device, _type)
+	{
+
+	}
+
+	copy_command_queue::~copy_command_queue()
+	{
+
+	}
+
+
+	compute_command_queue::compute_command_queue(render_device& _device)
+		: copy_command_queue(_device, command_buffer::type::compute)
+	{
+
+	}
+
+	compute_command_queue::compute_command_queue(render_device& _device, command_buffer::type _type)
+		: copy_command_queue(_device, _type)
+	{
+
+	}
+
+	compute_command_queue::~compute_command_queue()
+	{
+
+	}
+
+
+	graphics_command_queue::graphics_command_queue(render_device& _device)
+		: compute_command_queue(_device, command_buffer::type::graphics)
+	{
+
+	}
+
+	graphics_command_queue::~graphics_command_queue()
+	{
+
+	}
 }

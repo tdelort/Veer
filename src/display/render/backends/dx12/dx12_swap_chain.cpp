@@ -1,15 +1,17 @@
 #include "dx12_swap_chain.h"
 
-#include "display/render/render_device_data_format.h"
-#include "dx12_descriptor_heap.h"
-#include "dx12_render_device_backbuffer.h"
-
-#include <display/render/rendering_service.h>
+#include <display/render/render_device_data_format.h>
+#include <display/render/command_queue.h>
+#include <display/render/render_device.h>
 #include <display/window/window.h>
+
+#include <display/render/backends/dx12/dx12_descriptor_heap.h>
+#include <display/render/backends/dx12/dx12_render_device_backbuffer.h>
+
 
 namespace veer::display::render
 {
-	dx12_swap_chain::dx12_swap_chain(dx12_render_device& _device, veer::display::window::window& _window)
+	dx12_swap_chain::dx12_swap_chain(render_device& _device, veer::display::window::window& _window)
 		: veer::display::render::swap_chain()
     {
 		
@@ -46,7 +48,7 @@ namespace veer::display::render
 			// It is recommended to always allow tearing if tearing support is available.
 			swap_chain_desc.Flags = m_tearing_allowed ? DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING : 0;
 
-			dx12_command_queue& command_queue = static_cast<dx12_command_queue&>( _device.get_command_queue(command_buffer::type::graphics) );
+			graphics_command_queue& command_queue = _device.get_graphics_command_queue();
 
 			ComPtr<IDXGISwapChain1> swap_chain1;
 			VEER_LOG("CreateSwapChainForHwnd");

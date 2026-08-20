@@ -3,6 +3,6 @@ add_subdirectory(math)
 
 target_sources(${PROJECT_NAME}
 	PRIVATE
-        basic_allocator.cpp
+        veer_system_allocator.cpp
         debug.cpp
 )

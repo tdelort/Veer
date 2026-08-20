@@ -1,11 +1,11 @@
 #pragma once
 
 #include <core/concepts.h>
-#include <core/basic_allocator.h>
+#include <core/veer_system_allocator.h>
 
 namespace veer
 {
-    template<typename T, allocator ALLOCATOR = basic_allocator>
+    template<typename T, system_allocator ALLOCATOR = veer_system_allocator>
     class unique_ptr
     {
 		using pointer = T*;
@@ -13,6 +13,7 @@ namespace veer
 		using reference = T&;
 		using const_reference = const T&;
 		using value_type = T;
+		using allocator_type = ALLOCATOR;
 
     public:
         unique_ptr();
@@ -49,16 +50,16 @@ namespace veer
     };
 
 
-    template<typename T, allocator ALLOCATOR>
+    template<typename T, system_allocator ALLOCATOR>
     bool operator==(const unique_ptr<T, ALLOCATOR>& _ptr, nullptr_t);
 
-    template<typename T, allocator ALLOCATOR>
+    template<typename T, system_allocator ALLOCATOR>
     bool operator==(nullptr_t, unique_ptr<T, ALLOCATOR> _ptr);
 
-    template<typename T, allocator ALLOCATOR>
+    template<typename T, system_allocator ALLOCATOR>
     bool operator!=(const unique_ptr<T, ALLOCATOR>& _ptr, nullptr_t);
 
-    template<typename T, allocator ALLOCATOR>
+    template<typename T, system_allocator ALLOCATOR>
     bool operator!=(nullptr_t, unique_ptr<T, ALLOCATOR> _ptr);
 }
 

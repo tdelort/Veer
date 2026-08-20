@@ -1,7 +1,8 @@
 #include <display/render/render_device_buffer.h>
 
 #include "dx12_pch.h"
-#include "dx12_render_device.h"
+
+#include <display/render/render_device.h>
 
 namespace veer::display::render 
 {
@@ -13,11 +14,9 @@ namespace veer::display::render
 	
 	render_device_buffer::~render_device_buffer()
 	{
-		dx12_render_device& dx12_device = static_cast<dx12_render_device&>(m_device);
-
-		dx12_device.get_srv_uav_cbv_descriptor_heap().release_descriptor(m_srv_cpu_descriptor);
-		dx12_device.get_srv_uav_cbv_descriptor_heap().release_descriptor(m_uav_cpu_descriptor);
-		dx12_device.get_srv_uav_cbv_descriptor_heap().release_descriptor(m_cbv_cpu_descriptor);
+		m_device.get_srv_uav_cbv_descriptor_heap().release_descriptor(m_srv_cpu_descriptor);
+		m_device.get_srv_uav_cbv_descriptor_heap().release_descriptor(m_uav_cpu_descriptor);
+		m_device.get_srv_uav_cbv_descriptor_heap().release_descriptor(m_cbv_cpu_descriptor);
 	}
 	
 	D3D12_RESOURCE_DESC render_device_buffer::get_resource_desc() const
@@ -107,11 +106,10 @@ namespace veer::display::render
 		}
 
 		{
-			dx12_render_device& dx12_device = static_cast<dx12_render_device&>( m_device );
-			dx12_descriptor_heap& srv_heap = dx12_device.get_srv_uav_cbv_descriptor_heap();
+			dx12_descriptor_heap& srv_heap = m_device.get_srv_uav_cbv_descriptor_heap();
 
 			{
-				dx12_device.get_srv_uav_cbv_descriptor_heap().release_descriptor(m_srv_cpu_descriptor);
+				m_device.get_srv_uav_cbv_descriptor_heap().release_descriptor(m_srv_cpu_descriptor);
 
 				D3D12_SHADER_RESOURCE_VIEW_DESC srv_desc = {};
 				srv_desc.Format = DXGI_FORMAT_UNKNOWN;
@@ -123,24 +121,24 @@ namespace veer::display::render
 				srv_desc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
 
 				m_srv_cpu_descriptor = srv_heap.acquire_descriptor();
-				dx12_device.get_api_handle()->CreateShaderResourceView(get_api_handle(), &srv_desc, m_srv_cpu_descriptor.m_handle);
+				m_device.get_api_handle()->CreateShaderResourceView(get_api_handle(), &srv_desc, m_srv_cpu_descriptor.m_handle);
 			}
 
 			if (flags::get(buffer_desc.m_flags, buffer_desc::usage_flags::constant))
 			{
-				dx12_device.get_srv_uav_cbv_descriptor_heap().release_descriptor(m_cbv_cpu_descriptor);
+				m_device.get_srv_uav_cbv_descriptor_heap().release_descriptor(m_cbv_cpu_descriptor);
 
 				D3D12_CONSTANT_BUFFER_VIEW_DESC cbv_desc = {};
 				cbv_desc.BufferLocation = location;
 				cbv_desc.SizeInBytes = size_in_bytes;
 
 				m_cbv_cpu_descriptor = srv_heap.acquire_descriptor();
-				dx12_device.get_api_handle()->CreateConstantBufferView(&cbv_desc, m_cbv_cpu_descriptor.m_handle);
+				m_device.get_api_handle()->CreateConstantBufferView(&cbv_desc, m_cbv_cpu_descriptor.m_handle);
 			}
 
 			if (flags::get(buffer_desc.m_flags, buffer_desc::usage_flags::storage))
 			{
-				dx12_device.get_srv_uav_cbv_descriptor_heap().release_descriptor(m_uav_cpu_descriptor);
+				m_device.get_srv_uav_cbv_descriptor_heap().release_descriptor(m_uav_cpu_descriptor);
 
 				D3D12_UNORDERED_ACCESS_VIEW_DESC uav_desc = {};
 				uav_desc.Format = DXGI_FORMAT_UNKNOWN;
@@ -152,7 +150,7 @@ namespace veer::display::render
 				uav_desc.Buffer.Flags = D3D12_BUFFER_UAV_FLAG_NONE;
 
 				m_uav_cpu_descriptor = srv_heap.acquire_descriptor();
-				dx12_device.get_api_handle()->CreateUnorderedAccessView(get_api_handle(), nullptr, &uav_desc, m_uav_cpu_descriptor.m_handle);
+				m_device.get_api_handle()->CreateUnorderedAccessView(get_api_handle(), nullptr, &uav_desc, m_uav_cpu_descriptor.m_handle);
 			}
 		}
 	}

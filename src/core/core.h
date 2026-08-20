@@ -28,7 +28,7 @@
 #include <utility>
 
 /*
- *  core/basic_allocator
+ *  core/veer_system_allocator
  *      std::malloc, std::free
  */
 #include <cstdlib>

@@ -1,14 +1,17 @@
 #include "dx12_technique.h"
 
-#include "core/containers/static_array.h"
-#include "core/core.h"
-#include "display/render/blend_state.h"
-#include "display/render/constant_buffer.h"
-#include "display/render/technique.h"
-#include "display/render/shader_source.h"
 #include "dx12_pch.h"
-#include "dx12_render_device.h"
-#include "dx12_render_device_data_format.h"
+
+#include <core/core.h>
+#include <core/containers/static_array.h>
+
+#include <display/render/render_device.h>
+#include <display/render/blend_state.h>
+#include <display/render/constant_buffer.h>
+#include <display/render/technique.h>
+#include <display/render/shader_source.h>
+
+#include <display/render/backends/dx12/dx12_render_device_data_format.h>
 
 
 #define VEER_DX12_BINDLESS_TABLE_SIZE 1024u
@@ -152,7 +155,7 @@ namespace veer::display::render
 	}
 
     // TODO : this will be almost the same everywhere, reuse 
-    ComPtr<ID3D12RootSignature> s_create_root_signature(dx12_render_device& _device)
+    ComPtr<ID3D12RootSignature> s_create_root_signature(render_device& _device)
     {
 #if 0
         // TODO : description could be brought up in the platform agnostic part 
@@ -238,7 +241,7 @@ namespace veer::display::render
 
 
 
-    dx12_graphics_technique::dx12_graphics_technique(dx12_render_device& _device, const shader_stage_source_container_t& _source_code, const shader_signature& _signature, const shader_render_state& _render_state)
+    dx12_graphics_technique::dx12_graphics_technique(render_device& _device, const shader_stage_source_container_t& _source_code, const shader_signature& _signature, const shader_render_state& _render_state)
         : graphics_technique(_source_code, _signature, _render_state)
     {
         // TODO : get from device instead of creating it each time since it will be the same for most techniques
@@ -323,7 +326,7 @@ namespace veer::display::render
     }
     
 
-    dx12_compute_technique::dx12_compute_technique(dx12_render_device& _device, const shader_stage_source_container_t& _source_code)
+    dx12_compute_technique::dx12_compute_technique(render_device& _device, const shader_stage_source_container_t& _source_code)
         : compute_technique(_source_code)
     {
 		m_root_signature = s_create_root_signature(_device);

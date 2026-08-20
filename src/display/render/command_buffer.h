@@ -1,6 +1,5 @@
 #pragma once
 
-#include "core/containers/static_array.h"
 // TODO use only texture_base whenever possible
 #include "display/render/render_device_texture_base.h"
 #include "display/render/render_device_texture_2d.h"
@@ -9,16 +8,12 @@
 
 #include <core/math/vec.h>
 #include <display/render/technique.h>
+#include <display/render/submit_context.h>
 #include <display/render/constant_buffer.h>
 #include <display/render/base_types.h>
 
 #if defined(D3D12_RENDER_BACKEND)
 #include "display/render/backends/dx12/dx12_pch.h"
-
-namespace veer::display::render
-{
-	class dx12_render_device; 
-};
 #endif // defined(D3D12_RENDER_BACKEND)
 
 namespace veer::display::render
@@ -77,10 +72,12 @@ namespace veer::display::render
 	{
 	public:
 		copy_command_buffer();
-		virtual ~copy_command_buffer();
 
 	protected:
 		copy_command_buffer(command_buffer::type _type);
+
+	public:
+		virtual ~copy_command_buffer();
 
 	public:
 		void copy_texture(const render_device_texture_base& _dst, const render_device_texture_base& _src);
@@ -94,10 +91,12 @@ namespace veer::display::render
 	{
 	public:
 		compute_command_buffer();
-		~compute_command_buffer();
 
 	protected:
 		compute_command_buffer(command_buffer::type _type);
+
+	public:
+		virtual ~compute_command_buffer();
 
 	public:
 		void set_technique(compute_technique& _technique);
@@ -116,9 +115,13 @@ namespace veer::display::render
 
 	class graphics_command_buffer : public compute_command_buffer
 	{
+		friend class command_queue_base;
+
 	public:
 		graphics_command_buffer();
-		~graphics_command_buffer();
+
+	public:
+		virtual ~graphics_command_buffer();
 
 	public:
 		void set_technique(graphics_technique& _technique);

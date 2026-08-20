@@ -1,20 +1,19 @@
-#include "core/containers/resizable_array.h"
-#include "core/containers/static_array.h"
-#include "core/debug.h"
-#include "core/unique_ptr.h"
-#include "dx12_pch.h"
-#include "dx12_render_device.h"
+#include <display/render/render_device.h>
 
-#include "dx12_technique.h"
-#include "dx12_swap_chain.h"
-#include "dx12_command_queue.h"
-#include "dx12_rendering_service.h"
+#include "dx12_pch.h"
+
+#include <core/containers/resizable_array.h>
+#include <core/containers/static_array.h>
+#include <core/debug.h>
+#include <core/unique_ptr.h>
+
+#include <display/render/backends/dx12/dx12_technique.h>
+#include <display/render/backends/dx12/dx12_swap_chain.h>
 
 #include <display/window/window.h>
 #include <display/render/swap_chain.h>
 #include <display/render/command_buffer.h>
-#include <display/render/rendering_service.h>
-#include <dxgidebug.h>
+#include <display/render/command_queue.h>
 
 namespace veer::display::render
 {
@@ -23,7 +22,7 @@ namespace veer::display::render
 	static constexpr size_t s_srv_uav_cbv_descriptor_heap_size = 4096u;
 	static constexpr size_t s_sampler_descriptor_heap_size = 64u;
 
-	dx12_render_device::dx12_render_device()
+	render_device::render_device()
 	{
 		UINT factory_flags = 0;
 
@@ -51,7 +50,6 @@ namespace veer::display::render
 		VEER_LOG("CreateDXGIFactory2");
 		HRESULT hr = CreateDXGIFactory2(factory_flags, IID_PPV_ARGS(&m_dxgi_factory));
 		VEER_ASSERT(SUCCEEDED(hr), "Failed to create DXGIFactory4, which is required for DX12! (" << hr << ")");
-
 
 
 		ComPtr<IDXGIAdapter1> adapter;
@@ -131,15 +129,15 @@ namespace veer::display::render
 
 		// Now create needed command queues
 
-		m_graphics_queue = unique_ptr<dx12_command_queue>::make(*this, command_buffer::type::graphics);
-		//m_compute_queue = unique_ptr<dx12_command_queue>::make(new dx12_command_queue( this, command_buffer::type::Compute ));
-		//m_copy_queue = unique_ptr<dx12_command_queue>::make(new dx12_command_queue( this, command_buffer::type::Copy ));
+		m_graphics_queue = unique_ptr<graphics_command_queue>::make(*this);
+		m_compute_queue = unique_ptr<compute_command_queue>::make(*this);
+		m_copy_queue = unique_ptr<copy_command_queue>::make(*this);
 
 		create_allocator();
 		create_descriptor_heaps();
 	}
 
-	void dx12_render_device::create_descriptor_heaps()
+	void render_device::create_descriptor_heaps()
 	{
 		m_rtv_descriptor_heap = unique_ptr<dx12_descriptor_heap>::make(*this, D3D12_DESCRIPTOR_HEAP_TYPE_RTV, D3D12_DESCRIPTOR_HEAP_FLAG_NONE, s_rtv_descriptor_heap_size);
 		m_dsv_descriptor_heap = unique_ptr<dx12_descriptor_heap>::make(*this, D3D12_DESCRIPTOR_HEAP_TYPE_DSV, D3D12_DESCRIPTOR_HEAP_FLAG_NONE, s_dsv_descriptor_heap_size);
@@ -147,7 +145,7 @@ namespace veer::display::render
 		m_sampler_descriptor_heap = unique_ptr<dx12_descriptor_heap>::make(*this, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER, D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE, s_sampler_descriptor_heap_size);
 	}
 
-	void dx12_render_device::create_allocator()
+	void render_device::create_allocator()
 	{
 		// Alloc and upload buffer resources
 		D3D12MA::ALLOCATOR_DESC allocator_desc = {};
@@ -160,10 +158,13 @@ namespace veer::display::render
 		VEER_ASSERT(SUCCEEDED(hr), "Failed to create D3D12MA Allocator");
 	}
 
-	dx12_render_device::~dx12_render_device()
+	render_device::~render_device()
 	{
 		// release all before live objects reporting :)
+		// explicit to control order (most if not all are actually ComPtr/unique_ptr)
 		m_graphics_queue.reset();
+		m_compute_queue.reset();
+		m_copy_queue.reset();
 		m_dxgi_factory.Reset();
 
 		m_rtv_descriptor_heap.reset();
@@ -188,33 +189,40 @@ namespace veer::display::render
 #endif // defined(_DEBUG)
 	}
 
-	command_queue& dx12_render_device::get_command_queue(command_buffer::type _corresponding_command_buffer_type)
+	copy_command_queue& render_device::get_copy_command_queue()
 	{
-		// TODO use arg when supporting more queues
-		(void)_corresponding_command_buffer_type;
+		return *m_copy_queue.get();
+	}
 
+	compute_command_queue& render_device::get_compute_command_queue()
+	{
+		return *m_compute_queue.get();
+	}
+
+	graphics_command_queue& render_device::get_graphics_command_queue()
+	{
 		return *m_graphics_queue.get();
 	}
 
 
 
-	unique_ptr<swap_chain> dx12_render_device::alloc_internal(veer::display::window::window& _window)
+	unique_ptr<swap_chain> render_device::alloc_internal(veer::display::window::window& _window)
 	{
 		return unique_ptr<dx12_swap_chain>::make(*this, _window);
 	}
 
-	unique_ptr<graphics_technique> dx12_render_device::alloc_internal(const shader_stage_source_container_t& _source_code, const shader_signature& _signature, const shader_render_state& _render_state)
+	unique_ptr<graphics_technique> render_device::alloc_internal(const shader_stage_source_container_t& _source_code, const shader_signature& _signature, const shader_render_state& _render_state)
 	{
 		return unique_ptr<dx12_graphics_technique>::make(*this, _source_code, _signature, _render_state);
 	}
 
-	unique_ptr<compute_technique> dx12_render_device::alloc_internal(const shader_stage_source_container_t& _source_code)
+	unique_ptr<compute_technique> render_device::alloc_internal(const shader_stage_source_container_t& _source_code)
 	{
 		return unique_ptr<dx12_compute_technique>::make(*this, _source_code);
 	}
 
 
-	void dx12_render_device::check_errors()
+	void render_device::check_errors()
 	{
 #if defined(_DEBUG)
 
@@ -289,38 +297,38 @@ namespace veer::display::render
 	}
 
 
-	ComPtr<ID3D12Device2> dx12_render_device::get_api_handle() const
+	ComPtr<ID3D12Device2> render_device::get_api_handle() const
 	{
 		return m_api_device_handle;
 	}
 
-	D3D12MA::Allocator* dx12_render_device::get_allocator() const
+	D3D12MA::Allocator* render_device::get_allocator() const
 	{
 		VEER_LOG("get_allocator");
 		return m_allocator;
 	}
 
-	ComPtr<IDXGIFactory4> dx12_render_device::get_dxgi_factory() const
+	ComPtr<IDXGIFactory4> render_device::get_dxgi_factory() const
 	{
 		return m_dxgi_factory;
 	}
 
-	dx12_descriptor_heap& dx12_render_device::get_rtv_descriptor_heap() const
+	dx12_descriptor_heap& render_device::get_rtv_descriptor_heap() const
 	{
 		return *m_rtv_descriptor_heap;
 	}
 
-	dx12_descriptor_heap& dx12_render_device::get_dsv_descriptor_heap() const
+	dx12_descriptor_heap& render_device::get_dsv_descriptor_heap() const
 	{
 		return *m_dsv_descriptor_heap;
 	}
 
-	dx12_descriptor_heap& dx12_render_device::get_srv_uav_cbv_descriptor_heap() const
+	dx12_descriptor_heap& render_device::get_srv_uav_cbv_descriptor_heap() const
 	{
 		return *m_srv_uav_cbv_descriptor_heap;
 	}
 
-	dx12_descriptor_heap& dx12_render_device::get_sampler_descriptor_heap() const
+	dx12_descriptor_heap& render_device::get_sampler_descriptor_heap() const
 	{
 		return *m_sampler_descriptor_heap;
 	}

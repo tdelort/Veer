@@ -1,12 +1,13 @@
 #pragma once
 
 #include "debug.h"
+#include <core/concepts.h>
 
 #define VEER_LOG_ALLOCS
 
 namespace veer
 {
-	class basic_allocator
+	class veer_system_allocator
 	{
 	public:
 		using pointer = void*;
@@ -15,9 +16,9 @@ namespace veer
 
 		// TODO implement Allocator concept
 
-		basic_allocator() = default;
+		veer_system_allocator() = default;
  
-		constexpr basic_allocator(const basic_allocator&) noexcept {}
+		constexpr veer_system_allocator(const veer_system_allocator&) noexcept {}
 	 
 		template<typename T>
 		[[nodiscard]] pointer allocate(size_type _count)
@@ -45,4 +46,6 @@ namespace veer
 			std::free(_ptr);
 		}
 	};
+
+	static_assert(system_allocator<veer_system_allocator>, "veer_system_allocator does not satifies system_allocator concept");
 }

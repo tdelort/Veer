@@ -1,38 +1,74 @@
 #pragma once
 
-#include "core/containers/resizable_array.h"
+#include <core/unique_ptr.h>
 #include <core/containers/span.h>
 
+#include <display/render/command_queue_base.h>
 #include <display/render/command_buffer.h>
+
+
+#if defined(D3D12_RENDER_BACKEND)
+#include <display/render/backends/dx12/dx12_pch.h>
+#endif // defined(D3D12_RENDER_BACKEND)
 
 namespace veer::display::render
 {
-	class command_queue
+	// different implementation for all backends, still abstract
+	class command_queue : public command_queue_base
 	{
 	public:
+		command_queue(render_device& _device, command_buffer::type _type);
 
-		command_queue( command_buffer::type _type);
+		void execute_command_buffers(veer::containers::span<command_buffer*> _command_buffers);
 
-		virtual void execute_command_buffers( veer::containers::span<command_buffer*> _command_buffers );
-
-		virtual void signal(uint64_t _value);
-		virtual void wait_for_value(uint64_t _value);
+		void signal(uint64_t _value);
+		void wait_for_value(uint64_t _value);
 
 		virtual ~command_queue() = 0;
-	protected:
+	
+#if defined(D3D12_RENDER_BACKEND)
+#include "backends/dx12/dx12_command_queue.inl"
+// #elif defined(VULKAN_RENDER_BACKEND)
+// #include "backends/vulkan/vk_command_queue.inl"
+// #elif defined(METAL_RENDER_BACKEND)
+// #include "backends/metal/mtl_command_queue.inl"
+#endif 
+	};
+
+	template<typename T>
+	class command_buffer_factory
+	{
+	public:
+		// ptr, do whatever you want with it
+		template<typename U>
+		unique_ptr<T> get_command_buffer();
+	};
+
+		
+	class copy_command_queue : public command_queue
+	{
+	public:
+		copy_command_queue(render_device& _device);
+		~copy_command_queue();
 
 	protected:
-		// Type of command buffer the queue is made to execute
-		command_buffer::type m_type;
-		uint64_t m_last_signaled_fence_value{0u};
+		copy_command_queue(render_device& _device, command_buffer::type _type);
+	};
 
-	private:
-		struct executed_buffer
-		{
-			uint64_t m_fence_value_execution;
-			command_buffer* m_buffer;
-		};
+	class compute_command_queue : public copy_command_queue
+	{
+	public:
+		compute_command_queue(render_device& _device);
+		~compute_command_queue();
 
-		containers::resizable_array<executed_buffer> m_executed_buffers;
+	protected:
+		compute_command_queue(render_device& _device, command_buffer::type _type);
+	};
+
+	class graphics_command_queue : public compute_command_queue
+	{
+	public:
+		graphics_command_queue(render_device& _device);
+		~graphics_command_queue();
 	};
 }

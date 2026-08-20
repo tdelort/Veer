@@ -8,26 +8,26 @@
 
 namespace veer::containers
 {
-    template<typename T, allocator ALLOCATOR>
+    template<typename T, system_allocator ALLOCATOR>
 	base_string<T,ALLOCATOR>::base_string()
 		: m_data{nullptr}, m_size{0u}, m_capacity{0u}, m_allocator()
 	{
 
 	}
 
-	template<typename T, allocator ALLOCATOR>
+	template<typename T, system_allocator ALLOCATOR>
 	base_string<T,ALLOCATOR>::~base_string()
 	{
 		destroy();
 	}
 
-	template<typename T, allocator ALLOCATOR>
+	template<typename T, system_allocator ALLOCATOR>
 	base_string<T,ALLOCATOR>::base_string(const base_string<T,ALLOCATOR>& _other)
 	{
 		*this = _other; 
 	}
 
-	template<typename T, allocator ALLOCATOR>
+	template<typename T, system_allocator ALLOCATOR>
 	base_string<T,ALLOCATOR>& base_string<T,ALLOCATOR>::operator=(const base_string<T,ALLOCATOR>& _other)
 	{
 		clear(); // also resets m_size to 0
@@ -41,13 +41,13 @@ namespace veer::containers
 		return *this;
 	}
 
-	template<typename T, allocator ALLOCATOR>
+	template<typename T, system_allocator ALLOCATOR>
 	base_string<T,ALLOCATOR>::base_string(base_string<T,ALLOCATOR>&& _other)
 	{
 		*this = std::move(_other);
 	}
 
-	template<typename T, allocator ALLOCATOR>
+	template<typename T, system_allocator ALLOCATOR>
 	base_string<T,ALLOCATOR>& base_string<T,ALLOCATOR>::operator=(base_string<T,ALLOCATOR>&& _other)
 	{
 		// clean self
@@ -66,7 +66,7 @@ namespace veer::containers
 		return *this;
 	}
 
-	template<typename T, allocator ALLOCATOR>
+	template<typename T, system_allocator ALLOCATOR>
 	template<typename CHAR_TYPE>
 	base_string<T,ALLOCATOR>& base_string<T,ALLOCATOR>::operator=(CHAR_TYPE* _other)
 	{
@@ -75,7 +75,7 @@ namespace veer::containers
 		return *this;
 	}
 
-	template<typename T, allocator ALLOCATOR>
+	template<typename T, system_allocator ALLOCATOR>
 	template<typename CHAR_TYPE>
 	base_string<T,ALLOCATOR>& base_string<T,ALLOCATOR>::operator+=(CHAR_TYPE* _other)
 	{
@@ -83,7 +83,7 @@ namespace veer::containers
 		return *this;
 	}
 
-	template<typename T, allocator ALLOCATOR>
+	template<typename T, system_allocator ALLOCATOR>
     T& base_string<T,ALLOCATOR>::back()
     {
 		VEER_ASSERT(!empty(), "");
@@ -91,7 +91,7 @@ namespace veer::containers
 		return m_data[last_index];
     }
 
-	template<typename T, allocator ALLOCATOR>
+	template<typename T, system_allocator ALLOCATOR>
     const T& base_string<T,ALLOCATOR>::back() const
     {
 		VEER_ASSERT(!empty(), "");
@@ -99,13 +99,13 @@ namespace veer::containers
 		return m_data[last_index];
     }
 
-	template<typename T, allocator ALLOCATOR>
+	template<typename T, system_allocator ALLOCATOR>
     void base_string<T,ALLOCATOR>::push_back(const T& _val) 
     { 
         insert(end(), _val);
     }
 
-	template<typename T, allocator ALLOCATOR>
+	template<typename T, system_allocator ALLOCATOR>
     void base_string<T,ALLOCATOR>::pop_back()
     { 
         if (empty())
@@ -117,7 +117,7 @@ namespace veer::containers
 		m_size--;
     }
 
-	template<typename T, allocator ALLOCATOR>
+	template<typename T, system_allocator ALLOCATOR>
     void base_string<T,ALLOCATOR>::insert(iterator _pos, const T& _elem) 
     {
 		const size_t index = _pos - begin();
@@ -137,7 +137,7 @@ namespace veer::containers
 		m_size++;
     }
 
-	template<typename T, allocator ALLOCATOR>
+	template<typename T, system_allocator ALLOCATOR>
     template<typename INPUT_ITERATOR> 
     void base_string<T,ALLOCATOR>::insert(iterator _pos, INPUT_ITERATOR _first, INPUT_ITERATOR _last) 
     { 
@@ -170,14 +170,14 @@ namespace veer::containers
 		m_size = size() + count;
     }
 
-	template<typename T, allocator ALLOCATOR>
+	template<typename T, system_allocator ALLOCATOR>
     template<typename CHAR_TYPE>
     void base_string<T,ALLOCATOR>::append(CHAR_TYPE* _str) 
     { 
         insert(end(), _str, _str + std::char_traits<CHAR_TYPE>::length(_str)); 
     }
 
-	template<typename T, allocator ALLOCATOR>
+	template<typename T, system_allocator ALLOCATOR>
     void base_string<T,ALLOCATOR>::clear() 
     {
 		for(size_t i = 0; i < m_size; ++i)
@@ -189,7 +189,7 @@ namespace veer::containers
 		m_size = 0u;
     }
 
-	template<typename T, allocator ALLOCATOR>
+	template<typename T, system_allocator ALLOCATOR>
     void base_string<T,ALLOCATOR>::destroy() 
     {
 		clear();
@@ -198,7 +198,7 @@ namespace veer::containers
 			m_allocator.deallocate(m_data);
     }
 
-	template<typename T, allocator ALLOCATOR>
+	template<typename T, system_allocator ALLOCATOR>
     void base_string<T,ALLOCATOR>::grow(size_t _min_capacity_needed)
     {
 		size_t new_capacity = math::max(m_capacity, 8ull);
@@ -208,13 +208,13 @@ namespace veer::containers
 		alloc(new_capacity);
     }
 
-	template<typename T, allocator ALLOCATOR>
+	template<typename T, system_allocator ALLOCATOR>
     void base_string<T,ALLOCATOR>::grow()
     {
         grow(m_capacity + 1);
     }
 
-	template<typename T, allocator ALLOCATOR>
+	template<typename T, system_allocator ALLOCATOR>
     void base_string<T,ALLOCATOR>::alloc(size_t _new_capacity)
     {
 		VEER_ASSERT(_new_capacity > m_size, "base_string::alloc call with new_capacity (" << _new_capacity << ") smaller than size " << m_size << " !");

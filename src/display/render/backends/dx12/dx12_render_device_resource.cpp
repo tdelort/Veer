@@ -1,9 +1,10 @@
 #include <display/render/render_device_resource.h>
 
-#include "display/render/render_device_resource_sync_state.h"
 #include "dx12_pch.h"
-#include "dx12_render_device.h"
-#include "dx12_render_device_resource_sync_state.h"
+
+#include <display/render/render_device_resource_sync_state.h>
+#include <display/render/render_device.h>
+#include <display/render/command_buffer.h>
 
 namespace veer::display::render
 {
@@ -33,8 +34,6 @@ namespace veer::display::render
 			m_resource_alloc = nullptr;
 		}
 
-		dx12_render_device& dx12_device = static_cast<dx12_render_device&>(get_render_device());
-		
 		D3D12_RESOURCE_DESC resource_desc = get_resource_desc();
 		
 		HRESULT hr;
@@ -63,7 +62,7 @@ namespace veer::display::render
 
 		D3D12MA::Allocation* resource_alloc;
 		VEER_LOG("CreateResource");
-		hr = dx12_device.get_allocator()->CreateResource(&default_alloc_desc, &resource_desc, _state, clear_value_arg, &m_resource_alloc, IID_NULL, NULL);
+		hr = m_device.get_allocator()->CreateResource(&default_alloc_desc, &resource_desc, _state, clear_value_arg, &m_resource_alloc, IID_NULL, NULL);
 		VEER_ASSERT(SUCCEEDED(hr), "Failed to create D3D12 resource. Error (" << hr << ")");
 		
 		set_api_handle(m_resource_alloc->GetResource());
@@ -71,8 +70,6 @@ namespace veer::display::render
 
 	void render_device_resource::upload_data_to_default_heap(copy_command_buffer& _upload_buffer, veer::containers::span<const byte_t> _data)
 	{
-		dx12_render_device& dx12_device = static_cast<dx12_render_device&>(get_render_device());
-
 		D3D12_RESOURCE_DESC resource_desc = get_resource_desc();
 		
 		HRESULT hr;
@@ -83,7 +80,7 @@ namespace veer::display::render
 
 		D3D12MA::Allocation* upload_alloc;
 		VEER_LOG("CreateResource");
-		hr = dx12_device.get_allocator()->CreateResource(&upload_alloc_desc, &resource_desc, D3D12_RESOURCE_STATE_GENERIC_READ, NULL, &upload_alloc, IID_NULL, NULL);
+		hr = m_device.get_allocator()->CreateResource(&upload_alloc_desc, &resource_desc, D3D12_RESOURCE_STATE_GENERIC_READ, NULL, &upload_alloc, IID_NULL, NULL);
 		VEER_ASSERT(SUCCEEDED(hr), "Failed to create upload resource. Error (" << hr << ")");
 
 		// this alloc needs to be released after the upload command buffer is executed and waited for 

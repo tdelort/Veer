@@ -2,12 +2,12 @@
 
 #include <core/core.h>
 #include <core/concepts.h>
-#include <core/basic_allocator.h>
+#include <core/veer_system_allocator.h>
 
 namespace veer::containers
 {
 	// not a specialization (using private inheritance) of resizable_array since I plan to implement short string optimisation)
-    template<typename T, allocator ALLOCATOR = veer::basic_allocator>
+    template<typename T, system_allocator ALLOCATOR = veer::veer_system_allocator>
 	class base_string
 	{
 	public:
