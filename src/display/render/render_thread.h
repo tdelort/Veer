@@ -23,9 +23,7 @@ namespace veer::display::render
 		void start_frame(uint64_t _frame_index);
 		void end_frame();
 
-		void open_command_buffer(command_buffer& command_buffer);
-		void close_command_buffer(command_buffer& command_buffer);
-
+		const render_device& get_device() const { return m_device; }
 	private:
 		size_t m_current_frame_index;
 		const render_device& m_device;

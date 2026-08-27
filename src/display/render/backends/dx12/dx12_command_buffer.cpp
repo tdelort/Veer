@@ -6,6 +6,7 @@
 #include <core/containers/static_array.h>
 #include <display/render/constant_buffer.h>
 #include <display/render/render_device_resource.h>
+#include <display/render/render_thread.h>
 #include <display/render/resource_desc.h>
 #include <display/render/technique.h>
 #include <display/render/render_device.h>
@@ -35,60 +36,58 @@ namespace veer::display::render
 			VEER_ASSERT(false, "All command_buffer::type should be covered");
 			break;
 		}
-
-		return dx12_type;
-	}
-
-	void command_buffer::open(const render_device& _device, ComPtr<ID3D12CommandAllocator>& _command_allocator)
-	{
-		// TODO : actually use real command list type
-		const D3D12_COMMAND_LIST_TYPE dx12_type = D3D12_COMMAND_LIST_TYPE_DIRECT; // s_convert(m_type);
-
-		if (m_command_list_handle == nullptr)
-		{
-			VEER_LOG("CreateCommandList");
-			const HRESULT hr = _device.get_api_handle()->CreateCommandList(0, dx12_type, _command_allocator.Get(), nullptr, IID_PPV_ARGS(&m_command_list_handle));
-			VEER_ASSERT(SUCCEEDED(hr), "Failed to create command list (" << hr << ")");
-		}
-		else
-		{
-			m_command_list_handle->Reset(_command_allocator.Get(), nullptr);
-		}
-
-		// needs to be set on each command list once before most calls (at least before setting root signatures)
-		containers::static_array<ID3D12DescriptorHeap*, 2> shader_visible_heaps;
-		shader_visible_heaps[0] = _device.get_srv_uav_cbv_descriptor_heap().get_api_handle();
-		shader_visible_heaps[1] = _device.get_sampler_descriptor_heap().get_api_handle();
-
-		get_api_handle()->SetDescriptorHeaps(2u, shader_visible_heaps.data());
-	}
-
-	void command_buffer::close()
-	{
-		if (m_command_list_handle != nullptr)
-		{
-			const HRESULT hr = m_command_list_handle->Close();
-			VEER_ASSERT(SUCCEEDED(hr), "Failed to properly close command list (" << hr << ")");
-		}
+		// TODO Fix
+		return D3D12_COMMAND_LIST_TYPE_DIRECT;
+		//return dx12_type;
 	}
 
 	ID3D12GraphicsCommandList* command_buffer::get_api_handle()
 	{
-		return m_command_list_handle.Get();
+		return m_command_list_handle;
+	}
+
+	ID3D12GraphicsCommandList* command_buffer::release_handle()
+	{
+		ID3D12GraphicsCommandList* tmp = m_command_list_handle;
+		m_command_list_handle = nullptr;
+		return tmp;
 	}
 
 // --- command_buffer ---
 
-	command_buffer::command_buffer(command_buffer::type _type)
+	command_buffer::command_buffer(render_thread& _render_thread, command_buffer::type _type)
 		: m_type{ _type }
 	{
+		m_command_list_handle = _render_thread.alloc_api_command_list(s_convert(_type));
 
+		// needs to be set on each command list once before most calls (at least before setting root signatures)
+		containers::static_array<ID3D12DescriptorHeap*, 2> shader_visible_heaps;
+		shader_visible_heaps[0] = _render_thread.get_device().get_srv_uav_cbv_descriptor_heap().get_api_handle();
+		shader_visible_heaps[1] = _render_thread.get_device().get_sampler_descriptor_heap().get_api_handle();
+
+		get_api_handle()->SetDescriptorHeaps(2u, shader_visible_heaps.data());
+	}
+
+	command_buffer::command_buffer(command_buffer&& _other)
+	{
+		*this = std::move(_other);
+	}
+
+	command_buffer& command_buffer::operator=(command_buffer&& _other)
+	{
+		m_type = _other.m_type;
+
+		m_command_list_handle = _other.m_command_list_handle;
+		m_command_list_handle = nullptr;
+
+		m_after_execution_callbacks = std::move(_other.m_after_execution_callbacks);
+
+		return *this;
 	}
 
 	command_buffer::~command_buffer()
 	{
-		// Actually not needed since it's a magic ptr
-		// m_command_list_handle.Reset();
+		VEER_ASSERT(m_command_list_handle == nullptr, "command_buffer destroyed with actually being executed!!!");
 	}
 
 	void command_buffer::transition_barrier(render_device_resource& _resource, render_device_resource_sync_state _to_state)
@@ -111,14 +110,14 @@ namespace veer::display::render
 
 // --- copy_command_buffer ---
 
-	copy_command_buffer::copy_command_buffer()
-		: command_buffer(command_buffer::type::copy)
+	copy_command_buffer::copy_command_buffer(render_thread& _render_thread)
+		: command_buffer(_render_thread, command_buffer::type::copy)
 	{
 
 	}
 
-	copy_command_buffer::copy_command_buffer(command_buffer::type _type)
-		: command_buffer(_type)
+	copy_command_buffer::copy_command_buffer(render_thread& _render_thread, command_buffer::type _type)
+		: command_buffer(_render_thread,_type)
 	{
 
 	}
@@ -141,14 +140,14 @@ namespace veer::display::render
 
 // --- compute_command_buffer ---
 
-	compute_command_buffer::compute_command_buffer()
-		: copy_command_buffer(command_buffer::type::compute)
+	compute_command_buffer::compute_command_buffer(render_thread& _render_thread)
+		: copy_command_buffer(_render_thread, command_buffer::type::compute)
 	{
 
 	}
 
-	compute_command_buffer::compute_command_buffer(command_buffer::type _type)
-		: copy_command_buffer(_type)
+	compute_command_buffer::compute_command_buffer(render_thread& _render_thread, command_buffer::type _type)
+		: copy_command_buffer(_render_thread, _type)
 	{
 
 	}
@@ -214,8 +213,8 @@ namespace veer::display::render
 
 // --- graphics_command_buffer ---
 
-	graphics_command_buffer::graphics_command_buffer()
-		: compute_command_buffer(command_buffer::type::graphics)
+	graphics_command_buffer::graphics_command_buffer(render_thread& _render_thread)
+		: compute_command_buffer(_render_thread, command_buffer::type::graphics)
 	{
 
 	}

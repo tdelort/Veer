@@ -19,6 +19,7 @@
 namespace veer::display::render
 {
 	class render_device_resource;
+	class render_thread;
 
 	class command_buffer
 	{
@@ -33,7 +34,13 @@ namespace veer::display::render
 			copy,
 		};
 
-		command_buffer(command_buffer::type _type);
+		command_buffer(const command_buffer& _other) = delete;
+		command_buffer& operator=(const command_buffer& _other) = delete;
+
+		command_buffer(command_buffer&& _other);
+		command_buffer& operator=(command_buffer&& _other);
+
+		command_buffer(render_thread& _render_thread, command_buffer::type _type);
 		virtual ~command_buffer();
 
 		void transition_barrier(render_device_resource& _resource, render_device_resource_sync_state _to_state);
@@ -71,10 +78,10 @@ namespace veer::display::render
 	class copy_command_buffer : public command_buffer
 	{
 	public:
-		copy_command_buffer();
+		copy_command_buffer(render_thread& _render_thread);
 
 	protected:
-		copy_command_buffer(command_buffer::type _type);
+		copy_command_buffer(render_thread& _render_thread, command_buffer::type _type);
 
 	public:
 		virtual ~copy_command_buffer();
@@ -90,10 +97,10 @@ namespace veer::display::render
 	class compute_command_buffer : public copy_command_buffer
 	{
 	public:
-		compute_command_buffer();
+		compute_command_buffer(render_thread& _render_thread);
 
 	protected:
-		compute_command_buffer(command_buffer::type _type);
+		compute_command_buffer(render_thread& _render_thread, command_buffer::type _type);
 
 	public:
 		virtual ~compute_command_buffer();
@@ -118,7 +125,7 @@ namespace veer::display::render
 		friend class command_queue_base;
 
 	public:
-		graphics_command_buffer();
+		graphics_command_buffer(render_thread& _render_thread);
 
 	public:
 		virtual ~graphics_command_buffer();

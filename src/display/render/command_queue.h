@@ -19,12 +19,16 @@ namespace veer::display::render
 	public:
 		command_queue(render_device& _device, command_buffer::type _type);
 
-		void execute_command_buffers(veer::containers::span<command_buffer*> _command_buffers);
+		void enqueue(command_buffer&& _command_buffers) override;
 
-		void signal(uint64_t _value);
-		void wait_for_value(uint64_t _value);
+		void signal(uint64_t _value) override;
+		void wait_for_value(uint64_t _value) override;
 
 		virtual ~command_queue() = 0;
+
+		void flush() override;
+
+	private:
 	
 #if defined(D3D12_RENDER_BACKEND)
 #include "backends/dx12/dx12_command_queue.inl"

@@ -27,32 +27,29 @@ namespace veer::display::render
 
 	command_queue::~command_queue()
 	{
+		VEER_ASSERT(m_queued_command_lists.empty(), "Some command lists were queued but not flushed");
 		// m_fence and m_command_queue_api_handle are ComPtr
 	}
 
-	void command_queue::execute_command_buffers(veer::containers::span<command_buffer*> _command_buffers)
+	void command_queue::enqueue(command_buffer&& _command_buffer)
 	{
-		veer::containers::resizable_array<ID3D12CommandList*> dx12_command_lists;
-		dx12_command_lists.reserve(_command_buffers.size());
-		for (command_buffer* command_buffer : _command_buffers)
-		{
-			dx12_command_lists.push_back(command_buffer->get_api_handle());
-		}
+		ID3D12GraphicsCommandList* command_list = _command_buffer.release_handle();
+		VEER_ASSERT(command_list != nullptr, "command_buffer object has already been executed");
+		const HRESULT hr = command_list->Close();
+		VEER_ASSERT(SUCCEEDED(hr), "Failed to properly close command list (" << hr << ")");
 
-		m_command_queue_api_handle->ExecuteCommandLists((UINT)dx12_command_lists.size(), dx12_command_lists.data());
+		m_queued_command_lists.push_back(command_list);
 
-		command_queue_base::execute_command_buffers(_command_buffers);
+		command_queue_base::enqueue(std::forward<command_buffer&&>(_command_buffer));
 	}
 
 	// TODO : . Ping pong between backbuffer index (given as a parameter) for m_fence_value
 	void command_queue::signal(uint64_t _value)
 	{
-		VEER_ASSERT(_value > m_last_signaled_fence_value, "Trying to signal a fence value (" << _value << ") lower than last signaled value (" << m_last_signaled_fence_value << ")");
+		command_queue_base::signal(_value);
 
 		HRESULT hr = m_command_queue_api_handle->Signal(m_fence.Get(), _value);
 		VEER_ASSERT(SUCCEEDED(hr), "Failed to signal command queue fence (" << hr << ")");
-
-		command_queue_base::signal(_value);
 	}
 
 	void command_queue::wait_for_value(uint64_t _value)
@@ -78,6 +75,14 @@ namespace veer::display::render
 	{
 		return m_command_queue_api_handle;
 	}
+
+	void command_queue::flush()
+	{
+		m_command_queue_api_handle->ExecuteCommandLists((UINT)m_queued_command_lists.size(), m_queued_command_lists.data());
+		m_queued_command_lists.clear();
+	}
+
+
 
 
 	copy_command_queue::copy_command_queue(render_device& _device)

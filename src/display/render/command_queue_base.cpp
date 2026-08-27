@@ -10,15 +10,18 @@ namespace veer::display::render
 
 	}
 	
-	void command_queue_base::execute_command_buffers(veer::containers::span<command_buffer*> _command_buffers)
+	void command_queue_base::enqueue(command_buffer&& _command_buffer)
 	{
-		for(command_buffer* buffer : _command_buffers)
-			m_executed_buffers.emplace_back( m_last_signaled_fence_value, buffer );
+		m_executed_buffers.emplace_back(m_last_signaled_fence_value, std::forward<command_buffer&&>(_command_buffer));
 	}
 
 	
 	void command_queue_base::signal(uint64_t _value)
 	{
+		VEER_ASSERT(_value > m_last_signaled_fence_value, "Trying to signal a fence value (" << _value << ") lower than last signaled value (" << m_last_signaled_fence_value << ")");
+
+		flush();
+
 		m_last_signaled_fence_value = _value;
 	}
 
@@ -29,7 +32,7 @@ namespace veer::display::render
 		{
 			if (it->m_fence_value_execution < _value)
 			{
-				it->m_buffer->on_execution();
+				it->m_buffer.on_execution();
 				it = m_executed_buffers.erase(it);
 			}
 			else 

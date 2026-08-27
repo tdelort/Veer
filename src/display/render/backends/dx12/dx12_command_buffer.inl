@@ -4,10 +4,8 @@ public:
 
 	ID3D12GraphicsCommandList* get_api_handle();
 
-	// TODO : maybe other implems will need something similar
-	void open(const render_device& _device, ComPtr<ID3D12CommandAllocator>& _command_allocator);
-	void close();
+	ID3D12GraphicsCommandList* release_handle();
 
 protected:
 	// We might need another handle type on other platforms (XBox DMA CommandLists)
-	ComPtr<ID3D12GraphicsCommandList> m_command_list_handle;
+	ID3D12GraphicsCommandList* m_command_list_handle;

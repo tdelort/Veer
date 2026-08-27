@@ -12,10 +12,11 @@ namespace veer::display::render
 	class command_queue_base
 	{
 	public:
-		virtual void execute_command_buffers(veer::containers::span<command_buffer*> _command_buffers);
+		virtual void enqueue(command_buffer&& _command_buffers);
 
 		virtual void signal(uint64_t _value);
 		virtual void wait_for_value(uint64_t _value);
+		virtual void flush() = 0;
 
 		virtual ~command_queue_base() = 0;
 
@@ -26,7 +27,7 @@ namespace veer::display::render
 		struct executed_buffer
 		{
 			uint64_t m_fence_value_execution;
-			command_buffer* m_buffer;
+			command_buffer m_buffer;
 		};
 
 		containers::resizable_array<executed_buffer> m_executed_buffers;
