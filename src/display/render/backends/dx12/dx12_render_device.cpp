@@ -222,7 +222,7 @@ namespace veer::display::render
 	}
 
 
-	void render_device::check_errors()
+	void render_device::check_errors() const
 	{
 #if defined(_DEBUG)
 

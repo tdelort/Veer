@@ -95,8 +95,6 @@ namespace veer::display::render
 
 		_upload_buffer.transition_barrier(*this, render_device_resource_sync_state::CopyDest);
 
-		// TODO : use common code
-		// _upload_buffer.copy_texture(const render_device_texture_2d &_dst, const render_device_texture_2d &_src)->CopyResource(dx12_resource.get_api_handle(), upload_alloc->GetResource());
 		_upload_buffer.get_api_handle()->CopyResource(get_api_handle(), upload_alloc->GetResource());
 	}
 

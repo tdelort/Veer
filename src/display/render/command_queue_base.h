@@ -16,7 +16,6 @@ namespace veer::display::render
 
 		virtual void signal(uint64_t _value);
 		virtual void wait_for_value(uint64_t _value);
-		virtual void flush() = 0;
 
 		virtual ~command_queue_base() = 0;
 

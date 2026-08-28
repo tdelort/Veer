@@ -36,9 +36,7 @@ namespace veer::display::render
 			VEER_ASSERT(false, "All command_buffer::type should be covered");
 			break;
 		}
-		// TODO Fix
-		return D3D12_COMMAND_LIST_TYPE_DIRECT;
-		//return dx12_type;
+		return dx12_type;
 	}
 
 	ID3D12GraphicsCommandList* command_buffer::get_api_handle()
@@ -56,16 +54,10 @@ namespace veer::display::render
 // --- command_buffer ---
 
 	command_buffer::command_buffer(render_thread& _render_thread, command_buffer::type _type)
-		: m_type{ _type }
+		: m_type{_type}
+		, m_owner_thread{&_render_thread}
 	{
 		m_command_list_handle = _render_thread.alloc_api_command_list(s_convert(_type));
-
-		// needs to be set on each command list once before most calls (at least before setting root signatures)
-		containers::static_array<ID3D12DescriptorHeap*, 2> shader_visible_heaps;
-		shader_visible_heaps[0] = _render_thread.get_device().get_srv_uav_cbv_descriptor_heap().get_api_handle();
-		shader_visible_heaps[1] = _render_thread.get_device().get_sampler_descriptor_heap().get_api_handle();
-
-		get_api_handle()->SetDescriptorHeaps(2u, shader_visible_heaps.data());
 	}
 
 	command_buffer::command_buffer(command_buffer&& _other)
@@ -75,12 +67,15 @@ namespace veer::display::render
 
 	command_buffer& command_buffer::operator=(command_buffer&& _other)
 	{
+		m_owner_thread = _other.m_owner_thread;
+		_other.m_owner_thread = nullptr;
+
 		m_type = _other.m_type;
 
-		m_command_list_handle = _other.m_command_list_handle;
-		m_command_list_handle = nullptr;
-
 		m_after_execution_callbacks = std::move(_other.m_after_execution_callbacks);
+
+		m_command_list_handle = _other.m_command_list_handle;
+		_other.m_command_list_handle = nullptr;
 
 		return *this;
 	}
@@ -111,7 +106,7 @@ namespace veer::display::render
 // --- copy_command_buffer ---
 
 	copy_command_buffer::copy_command_buffer(render_thread& _render_thread)
-		: command_buffer(_render_thread, command_buffer::type::copy)
+		: copy_command_buffer(_render_thread, command_buffer::type::copy)
 	{
 
 	}
@@ -141,7 +136,7 @@ namespace veer::display::render
 // --- compute_command_buffer ---
 
 	compute_command_buffer::compute_command_buffer(render_thread& _render_thread)
-		: copy_command_buffer(_render_thread, command_buffer::type::compute)
+		: compute_command_buffer(_render_thread, command_buffer::type::compute)
 	{
 
 	}
@@ -149,7 +144,12 @@ namespace veer::display::render
 	compute_command_buffer::compute_command_buffer(render_thread& _render_thread, command_buffer::type _type)
 		: copy_command_buffer(_render_thread, _type)
 	{
+		// needs to be set on each command list once before most calls (at least before setting root signatures)
+		containers::static_array<ID3D12DescriptorHeap*, 2> shader_visible_heaps;
+		shader_visible_heaps[0] = _render_thread.get_device().get_srv_uav_cbv_descriptor_heap().get_api_handle();
+		shader_visible_heaps[1] = _render_thread.get_device().get_sampler_descriptor_heap().get_api_handle();
 
+		get_api_handle()->SetDescriptorHeaps(2u, shader_visible_heaps.data());
 	}
 
 	compute_command_buffer::~compute_command_buffer()

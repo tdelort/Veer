@@ -20,8 +20,6 @@ namespace veer::display::render
 	{
 		VEER_ASSERT(_value > m_last_signaled_fence_value, "Trying to signal a fence value (" << _value << ") lower than last signaled value (" << m_last_signaled_fence_value << ")");
 
-		flush();
-
 		m_last_signaled_fence_value = _value;
 	}
 

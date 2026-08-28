@@ -22,17 +22,41 @@ public:
 	void free_api_command_list(ID3D12GraphicsCommandList* _ptr);
 
 private:
-	using command_list_handle_pool_t = containers::resizable_array<ID3D12CommandList*>;
-	command_list_handle_pool_t& get_command_list_handle_pool(D3D12_COMMAND_LIST_TYPE _type);
+	template<typename T>
+	struct command_list_type_tuple  
+	{
+		T m_graphics;
+		T m_compute;
+		T m_copy;
 
-	ID3D12CommandAllocator* get_current_command_allocator();
+		T* get_from_type(D3D12_COMMAND_LIST_TYPE _type)
+		{
+			switch (_type) 
+			{
+			case D3D12_COMMAND_LIST_TYPE_DIRECT:
+				return &m_graphics;
+			case D3D12_COMMAND_LIST_TYPE_COMPUTE: 
+				return &m_compute;
+			case D3D12_COMMAND_LIST_TYPE_COPY:
+				return &m_copy;
+			default:
+				break;
+			}
+			return nullptr;
+		}
+	};
+
+	using command_list_handle_pool_t = containers::resizable_array<ID3D12GraphicsCommandList*>;
+	using command_list_handle_pools_t = command_list_type_tuple<command_list_handle_pool_t>;
+
+	using command_list_allocators_t = command_list_type_tuple<ID3D12CommandAllocator*>;
+	
+private:
+	command_list_allocators_t& get_current_command_allocator();
 
 private:
-	ComPtr<ID3D12CommandAllocator> m_command_allocators[swap_chain::s_swap_chain_buffer_count];
-
-	command_list_handle_pool_t m_graphics_command_list_handles;
-	command_list_handle_pool_t m_compute_command_list_handles;
-	command_list_handle_pool_t m_copy_command_list_handles;
+	containers::static_array<command_list_allocators_t, swap_chain::s_swap_chain_buffer_count> m_command_list_allocators;
+	command_list_handle_pools_t m_command_list_pools;
 
 #if 0
 	freelist<dx12_command_list_handle> m_graphics_command_list_handles;

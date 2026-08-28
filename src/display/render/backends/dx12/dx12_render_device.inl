@@ -8,7 +8,7 @@ public:
 	dx12_descriptor_heap& get_srv_uav_cbv_descriptor_heap() const;
 	dx12_descriptor_heap& get_sampler_descriptor_heap() const;
 
-	void check_errors();
+	void check_errors() const;
 
 private:
 	void create_descriptor_heaps();

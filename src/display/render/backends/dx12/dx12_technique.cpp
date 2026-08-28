@@ -266,8 +266,6 @@ namespace veer::display::render
         D3D12_GRAPHICS_PIPELINE_STATE_DESC pso_desc = {};
         pso_desc.pRootSignature = m_root_signature.Get();
         
-        // TODO : GRAPHICS PSO only
-
         const shader_code_memory_blob_t& shader_vs = _source_code[static_cast<size_t>(shader_stage_type::vertex)];
         if (!shader_vs.empty())
         {

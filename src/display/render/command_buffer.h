@@ -61,10 +61,21 @@ namespace veer::display::render
 			m_after_execution_callbacks.clear();
 		}
 
+		render_thread* get_owner_thread() const
+		{
+			return m_owner_thread;
+		}
+
+		type get_type() const
+		{
+			return m_type;
+		}
+
 	protected:
+		veer::containers::resizable_array<after_execution_callback_t> m_after_execution_callbacks;
+		render_thread* m_owner_thread;
 		type m_type;
 
-		veer::containers::resizable_array<after_execution_callback_t> m_after_execution_callbacks;
 
 #if defined(D3D12_RENDER_BACKEND)
 #include "backends/dx12/dx12_command_buffer.inl"

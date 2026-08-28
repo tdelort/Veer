@@ -1,15 +1,13 @@
 ﻿#pragma once
 
-#define VEER_VEC_DEFINE_GETTER( _name, _i0 )						\
+#define VEER_VEC_DEFINE_GETTER( _name, _i0 )					\
 	[[nodiscard]] TYPE _name() const { return m_data[_i0]; }    \
 	TYPE& _name() { return m_data[_i0]; }                    
-
-// TODO : implement swizzle getters that return a ref to modifiy values
 
 #define VEER_VEC_DEFINE_GETTER_2( _name, _i0, _i1 )													\
 	[[nodiscard]] vec<TYPE, 2u> _name() const { return vec<TYPE, 2u>( m_data[_i0], m_data[_i1] ); }	\
 
-#define VEER_VEC_DEFINE_GETTER_3( _name, _i0, _i1, _i2 )																\
+#define VEER_VEC_DEFINE_GETTER_3( _name, _i0, _i1, _i2 )															\
 	[[nodiscard]] vec<TYPE, 3u> _name() const { return vec<TYPE, 3u>( m_data[_i0], m_data[_i1], m_data[_i2] ); }	\
 
 #define VEER_VEC_DEFINE_GETTER_4( _name, _i0, _i1, _i2, _i3 )																	\

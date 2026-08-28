@@ -31,7 +31,6 @@ namespace veer::display::window
 	glfw_window::glfw_window( math::vec2u _size )
 	{
 		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-		// TODO : handle resizable window
 		glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
         VEER_LOG("glfwCreateWindow");
 		GLFWwindow* api_handle = glfwCreateWindow( _size[0], _size[1], "VEER window", nullptr, nullptr);

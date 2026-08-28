@@ -14,8 +14,6 @@ namespace veer
 		using const_pointer = const void*;
 		using size_type = size_t;
 
-		// TODO implement Allocator concept
-
 		veer_system_allocator() = default;
  
 		constexpr veer_system_allocator(const veer_system_allocator&) noexcept {}

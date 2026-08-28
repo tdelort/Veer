@@ -4,6 +4,7 @@
 
 #if defined(D3D12_RENDER_BACKEND)
 #include <display/render/swap_chain.h>
+#include <core/containers/static_array.h>
 #include <display/render/backends/dx12/dx12_pch.h>
 // #elif defined(VULKAN_RENDER_BACKEND)
 // #elif defined(METAL_RENDER_BACKEND)

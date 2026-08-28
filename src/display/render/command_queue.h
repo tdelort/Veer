@@ -26,10 +26,11 @@ namespace veer::display::render
 
 		virtual ~command_queue() = 0;
 
-		void flush() override;
+		void flush();
 
 	private:
-	
+		command_buffer::type m_type;
+
 #if defined(D3D12_RENDER_BACKEND)
 #include "backends/dx12/dx12_command_queue.inl"
 // #elif defined(VULKAN_RENDER_BACKEND)
@@ -38,16 +39,6 @@ namespace veer::display::render
 // #include "backends/metal/mtl_command_queue.inl"
 #endif 
 	};
-
-	template<typename T>
-	class command_buffer_factory
-	{
-	public:
-		// ptr, do whatever you want with it
-		template<typename U>
-		unique_ptr<T> get_command_buffer();
-	};
-
 		
 	class copy_command_queue : public command_queue
 	{

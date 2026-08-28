@@ -4,6 +4,7 @@
 #include <core/core.h>
 #include <core/containers/resizable_array.h>
 
+#include <display/render/render_thread.h>
 #include <display/render/render_device.h>
 
 
@@ -11,6 +12,7 @@ namespace veer::display::render
 {
 
 	command_queue::command_queue(render_device& _device, command_buffer::type _type)
+		: m_type{_type}
 	{
 		D3D12_COMMAND_QUEUE_DESC desc = {};
 		desc.Type = command_buffer::s_convert(_type);
@@ -33,17 +35,21 @@ namespace veer::display::render
 
 	void command_queue::enqueue(command_buffer&& _command_buffer)
 	{
+		VEER_ASSERT(m_type == _command_buffer.get_type(), "Wrong type of command buffer for queue");
 		ID3D12GraphicsCommandList* command_list = _command_buffer.release_handle();
 		VEER_ASSERT(command_list != nullptr, "command_buffer object has already been executed");
 		const HRESULT hr = command_list->Close();
 		VEER_ASSERT(SUCCEEDED(hr), "Failed to properly close command list (" << hr << ")");
 
 		m_queued_command_lists.push_back(command_list);
+		m_queued_command_lists_owner_thread.push_back(_command_buffer.get_owner_thread());
+
+		_command_buffer.get_owner_thread()->get_device().check_errors();
 
 		command_queue_base::enqueue(std::forward<command_buffer&&>(_command_buffer));
 	}
 
-	// TODO : . Ping pong between backbuffer index (given as a parameter) for m_fence_value
+	// TODO : Ping pong between backbuffer index (given as a parameter) for m_fence_value
 	void command_queue::signal(uint64_t _value)
 	{
 		command_queue_base::signal(_value);
@@ -79,7 +85,14 @@ namespace veer::display::render
 	void command_queue::flush()
 	{
 		m_command_queue_api_handle->ExecuteCommandLists((UINT)m_queued_command_lists.size(), m_queued_command_lists.data());
+
+		for(size_t i = 0; i < m_queued_command_lists.size(); ++i)
+		{
+			m_queued_command_lists_owner_thread[i]->free_api_command_list(static_cast<ID3D12GraphicsCommandList*>(m_queued_command_lists[i]));
+		}
+
 		m_queued_command_lists.clear();
+		m_queued_command_lists_owner_thread.clear();
 	}
 
 
