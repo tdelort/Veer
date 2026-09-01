@@ -1,89 +1,122 @@
 #pragma once
 
-#include <core/core.h>
 #include <core/concepts.h>
+#include <core/core.h>
 #include <core/veer_system_allocator.h>
 
 namespace veer::containers
 {
-    template<typename T, system_allocator ALLOCATOR = veer::veer_system_allocator>
-	class resizable_array
-	{
-	public:
-		using value_type = T;
-		using pointer = T*;
-		using const_pointer = const T*;
-		using reference = T&;
-		using const_reference = const T&;
-		using iterator = T*;
-		using const_iterator = const T*;
+    template <typename T, system_allocator ALLOCATOR = veer::veer_system_allocator>
+    class resizable_array
+    {
+    public:
+        using value_type = T;
+        using pointer = T*;
+        using const_pointer = const T*;
+        using reference = T&;
+        using const_reference = const T&;
+        using iterator = T*;
+        using const_iterator = const T*;
 
-	public:
-		resizable_array();
-		~resizable_array();
+    public:
+        resizable_array();
+        ~resizable_array();
 
-		resizable_array(const resizable_array& _other);
-		resizable_array& operator=(const resizable_array& _other);
-		resizable_array(resizable_array&& _other);
-		resizable_array& operator=(resizable_array&& _other);
+        resizable_array(const resizable_array& _other);
+        resizable_array& operator=(const resizable_array& _other);
+        resizable_array(resizable_array&& _other);
+        resizable_array& operator=(resizable_array&& _other);
 
-		// getters / setters
-		T* data() { return m_data; }
-		const T* data() const { return m_data; }
+        // getters / setters
+        T* data()
+        {
+            return m_data;
+        }
+        const T* data() const
+        {
+            return m_data;
+        }
 
-		T* begin() { return m_data; }
-		const T* cbegin() const { return m_data; }
+        T* begin()
+        {
+            return m_data;
+        }
+        const T* cbegin() const
+        {
+            return m_data;
+        }
 
-		T* end() { return m_data + m_size; }
-		const T* cend() const { return m_data + m_size; }
+        T* end()
+        {
+            return m_data + m_size;
+        }
+        const T* cend() const
+        {
+            return m_data + m_size;
+        }
 
-		size_t size() const { return m_size; }
-		size_t capacity() const { return m_capacity; }
-		bool empty() const { return size() == 0u; }
+        size_t size() const
+        {
+            return m_size;
+        }
+        size_t capacity() const
+        {
+            return m_capacity;
+        }
+        bool empty() const
+        {
+            return size() == 0u;
+        }
 
-		T& operator[](size_t _i) { return m_data[_i]; }
-		const T& operator[](size_t _i) const { return m_data[_i]; }
+        T& operator[](size_t _i)
+        {
+            return m_data[_i];
+        }
+        const T& operator[](size_t _i) const
+        {
+            return m_data[_i];
+        }
 
-		T& back();
-		const T& back() const;
+        T& back();
+        const T& back() const;
 
-		// change size
-		void push_back(const T& _val);
-		void push_back(T&& _val);
+        // change size
+        void push_back(const T& _val);
+        void push_back(T&& _val);
 
-		void pop_back();
+        void pop_back();
 
-		template<typename... ARGS>
-		reference emplace_back(ARGS&&... _args);
+        template <typename... ARGS>
+        reference emplace_back(ARGS&&... _args);
 
-		void insert(iterator _pos, const T& _elem);
+        void insert(iterator _pos, const T& _elem);
 
-		template<typename INPUT_ITERATOR> 
-		void insert(iterator _pos, INPUT_ITERATOR _first, INPUT_ITERATOR _last);
+        template <typename INPUT_ITERATOR>
+        void insert(iterator _pos, INPUT_ITERATOR _first, INPUT_ITERATOR _last);
 
-		iterator erase(iterator _it);
+        iterator erase(iterator _it);
 
-		void reserve(size_t _new_capacity);
-		void resize(size_t _new_size, const_reference _new_values = T());
+        void reserve(size_t _new_capacity);
+        void resize(size_t _new_size, const_reference _new_values = T());
 
-		void clear();
-		void destroy();
+        void clear();
+        void destroy();
 
-	private:
-		void grow();
-		void grow(size_t _min_capacity_needed);
-		void alloc(size_t _new_capacity);
+    private:
+        void grow();
+        void grow(size_t _min_capacity_needed);
+        void alloc(size_t _new_capacity);
 
-	private:
-		T* m_data{nullptr};
-		size_t m_size{0u};
-		size_t m_capacity{0u};
+    private:
+        T* m_data{nullptr};
+        size_t m_size{0u};
+        size_t m_capacity{0u};
 
-		ALLOCATOR m_allocator;
-	};
+        ALLOCATOR m_allocator;
+    };
 
-	template<typename ITERATOR, typename T>
-	ITERATOR find(ITERATOR _from, ITERATOR _to, const T& _value);
-}
+    template <typename ITERATOR, typename T>
+    ITERATOR find(ITERATOR _from, ITERATOR _to, const T& _value);
+} // namespace veer::containers
 
 #include "resizable_array.hpp"

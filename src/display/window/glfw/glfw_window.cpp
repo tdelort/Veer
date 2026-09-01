@@ -3,7 +3,7 @@
 #include "core/math/vec.h"
 
 #define GLFW_EXPOSE_NATIVE_WIN32
-//#define GLFW_EXPOSE_NATIVE_WGL
+// #define GLFW_EXPOSE_NATIVE_WGL
 #define GLFW_NATIVE_INCLUDE_NONE
 #include <GLFW/glfw3native.h>
 
@@ -27,63 +27,63 @@ namespace veer::display::window
 	}
 #endif // 0
 
-	// Window
-	glfw_window::glfw_window( math::vec2u _size )
-	{
-		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-		glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
+    // Window
+    glfw_window::glfw_window(math::vec2u _size)
+    {
+        glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+        glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
         VEER_LOG("glfwCreateWindow");
-		GLFWwindow* api_handle = glfwCreateWindow( _size[0], _size[1], "VEER window", nullptr, nullptr);
-		m_api_handle = api_handle;
+        GLFWwindow* api_handle = glfwCreateWindow(_size[0], _size[1], "VEER window", nullptr, nullptr);
+        m_api_handle = api_handle;
 
-		//glfwSetFramebufferSizeCallback( m_api_handle, s_glfw_on_frame_buffer_size_changed_callback );
+        // glfwSetFramebufferSizeCallback( m_api_handle, s_glfw_on_frame_buffer_size_changed_callback );
 
-		math::vec2i frame_buffer_size;
-		glfwGetFramebufferSize(m_api_handle, &frame_buffer_size[0], &frame_buffer_size[1]);
+        math::vec2i frame_buffer_size;
+        glfwGetFramebufferSize(m_api_handle, &frame_buffer_size[0], &frame_buffer_size[1]);
 
-		// TODO : improve vec
-		m_window_to_frame_buffer_size_ratio = math::vec2f( _size[0] == 0 ? 1.f : frame_buffer_size[0] / _size[0], _size[1] == 0 ? 1.f :frame_buffer_size[1] / _size[1]);
-	}
+        // TODO : improve vec
+        m_window_to_frame_buffer_size_ratio = math::vec2f(_size[0] == 0 ? 1.f : static_cast<float>(frame_buffer_size[0]) / _size[0],
+                                                          _size[1] == 0 ? 1.f : static_cast<float>(frame_buffer_size[1]) / _size[1]);
+    }
 
-	bool glfw_window::is_open() const
-	{
-		return !glfwWindowShouldClose( m_api_handle );
-	}
+    bool glfw_window::is_open() const
+    {
+        return !glfwWindowShouldClose(m_api_handle);
+    }
 
-	window::os_window_handle glfw_window::get_os_window_handle()
-	{
-#if defined( VEER_OS_WINDOWS )
-		return glfwGetWin32Window(m_api_handle);
+    window::os_window_handle glfw_window::get_os_window_handle()
+    {
+#if defined(VEER_OS_WINDOWS)
+        return glfwGetWin32Window(m_api_handle);
 #endif // defined( VEER_OS_WINDOWS )
-	}
+    }
 
-	void glfw_window::poll_events()
-	{
-		glfwPollEvents();
-	}
+    void glfw_window::poll_events()
+    {
+        glfwPollEvents();
+    }
 
-	math::vec2u glfw_window::get_size() const
-	{
-		int w, h;
-		glfwGetFramebufferSize(m_api_handle, &w, &h);
-		return math::vec2u((unsigned int)math::max(0, w), (unsigned int)math::max(0, h));
-	}
+    math::vec2u glfw_window::get_size() const
+    {
+        int w, h;
+        glfwGetFramebufferSize(m_api_handle, &w, &h);
+        return math::vec2u((unsigned int)math::max(0, w), (unsigned int)math::max(0, h));
+    }
 
-	void glfw_window::set_size(math::vec2u _size) &
-	{
+    void glfw_window::set_size(math::vec2u _size) &
+    {
+    }
 
-	}
+    math::vec2f glfw_window::get_mouse_position() const
+    {
+        double x, y;
+        glfwGetCursorPos(m_api_handle, &x, &y);
+        return math::vec2f(static_cast<float>(x), static_cast<float>(y));
+    }
 
-	math::vec2f glfw_window::get_mouse_position() const
-	{
-		double x, y;
-		glfwGetCursorPos(m_api_handle, &x, &y);
-		return math::vec2f(static_cast<float>(x), static_cast<float>(y));
-	}
-
-	glfw_window::~glfw_window()
-	{
-		glfwDestroyWindow(m_api_handle);
-		m_api_handle = nullptr;
-	}
-}
+    glfw_window::~glfw_window()
+    {
+        glfwDestroyWindow(m_api_handle);
+        m_api_handle = nullptr;
+    }
+} // namespace veer::display::window
