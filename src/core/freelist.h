@@ -23,3 +23,5 @@ namespace veer
         containers::resizable_array<T, ALLOCATOR> m_pool;
     };
 }
+
+#include "freelist.hpp"

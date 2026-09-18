@@ -7,7 +7,6 @@
 #include <core/debug.h>
 #include <core/unique_ptr.h>
 
-#include <display/render/backends/dx12/dx12_technique.h>
 #include <display/render/backends/dx12/dx12_swap_chain.h>
 
 #include <display/window/window.h>
@@ -210,17 +209,6 @@ namespace veer::display::render
 	{
 		return unique_ptr<dx12_swap_chain>::make(*this, _window);
 	}
-
-	unique_ptr<graphics_technique> render_device::alloc_internal(const shader_stage_source_container_t& _source_code, const shader_signature& _signature, const shader_render_state& _render_state)
-	{
-		return unique_ptr<dx12_graphics_technique>::make(*this, _source_code, _signature, _render_state);
-	}
-
-	unique_ptr<compute_technique> render_device::alloc_internal(const shader_stage_source_container_t& _source_code)
-	{
-		return unique_ptr<dx12_compute_technique>::make(*this, _source_code);
-	}
-
 
 	void render_device::check_errors() const
 	{

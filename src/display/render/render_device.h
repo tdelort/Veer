@@ -8,8 +8,6 @@
 #if defined(D3D12_RENDER_BACKEND)
 #include <display/render/backends/dx12/dx12_pch.h>
 #include <display/render/backends/dx12/dx12_descriptor_heap.h>
-// #elif defined(VULKAN_RENDER_BACKEND)
-// #elif defined(METAL_RENDER_BACKEND)
 #endif 
 
 namespace veer::display::window
@@ -44,15 +42,13 @@ namespace veer::display::render
 	protected:
 		// alloc only viable candidates
 		unique_ptr<swap_chain> alloc_internal(veer::display::window::window& _window);
-        unique_ptr<graphics_technique> alloc_internal(const shader_stage_source_container_t& _source_code, const shader_signature& _signature, const shader_render_state& _render_state);
-        unique_ptr<compute_technique> alloc_internal(const shader_stage_source_container_t& _source_code);
 
 #if defined(D3D12_RENDER_BACKEND)
 #include "backends/dx12/dx12_render_device.inl"
-// #elif defined(VULKAN_RENDER_BACKEND)
-// #include "backends/vulkan/vk_render_device.inl"
-// #elif defined(METAL_RENDER_BACKEND)
-// #include "backends/metal/mtl_render_device.inl"
+#elif defined(VULKAN_RENDER_BACKEND)
+#error not implemented
+#elif defined(METAL_RENDER_BACKEND)
+#error not implemented
 #endif 
 	};
 }

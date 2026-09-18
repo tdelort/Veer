@@ -80,10 +80,10 @@ namespace veer::display::render
 
 #if defined(D3D12_RENDER_BACKEND)
 #include "backends/dx12/dx12_command_buffer.inl"
-// #elif defined(VULKAN_RENDER_BACKEND)
-// #include "backends/vulkan/vk_command_buffer.inl"
-// #elif defined(METAL_RENDER_BACKEND)
-// #include "backends/metal/mtl_command_buffer.inl"
+#elif defined(VULKAN_RENDER_BACKEND)
+#error not implemented
+#elif defined(METAL_RENDER_BACKEND)
+#error not implemented
 #endif
     };
 

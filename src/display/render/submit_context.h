@@ -6,6 +6,7 @@
 #include <core/math/vec.h>
 
 #include <display/render/base_types.h>
+#include <display/render/constant_buffer.h>
 
 namespace veer::display::render
 {
@@ -31,22 +32,16 @@ namespace veer::display::render
     public:
         submit_context(command_buffer& _command_buffer);
 
-        template <RenderDataType T>
-        void set_constant(const shader_parameter_id& _param_id, const T& _val);
-        template <RenderDataType T, size_t ELEM_COUNT>
-        void set_constant(const shader_parameter_id& _param_id, const math::vec<T, ELEM_COUNT>& _val)
-            requires veer::LessEqual<ELEM_COUNT, 4>;
-        void set_texture(const shader_parameter_id& _param_id, const render_device_texture_base& _texture);
-        void set_buffer(const shader_parameter_id& _param_id, const render_device_buffer& _buffer);
-
     protected:
         command_buffer& m_command_buffer;
     };
 
-    class copy_submit_context : private submit_context
+    class copy_submit_context : public submit_context
     {
     public:
         copy_submit_context(copy_command_buffer& _command_buffer);
+
+        // TODO : add copies
 
     private:
         copy_command_buffer& get_copy_command_buffer();
@@ -56,20 +51,19 @@ namespace veer::display::render
     // simplify some boiler plate code that 90% of users won't care about (profile markers, resource transition,
     // constant buffer handling, etc). And in the case you want the extra control, you can still get/use the underlying
     // command buffer
-    class compute_submit_context : private submit_context
+    class compute_submit_context : public submit_context
     {
     public:
         compute_submit_context(compute_command_buffer& _command_buffer, compute_technique& _technique);
 
-        // private inheritance and choosing explicitly which basic operations are allowed on each submit context types
-        using submit_context::set_buffer;
-        using submit_context::set_constant;
-        using submit_context::set_texture;
-
+    public:
+        // TODO : add copies
         void clear_texture(render_device_texture_base& _resource, math::vec4f _val);
         void clear_texture(render_device_texture_base& _resource, math::vec4u _val);
         void clear_buffer(render_device_buffer& _resource, float _val);
         void clear_buffer(render_device_buffer& _resource, uint32_t _val);
+
+        void set_constant_buffer(constant_buffer& _constant_buffer, constant_buffer_type _type);
 
         void dispatch(size_t _x, size_t _y, size_t _z);
 
@@ -77,10 +71,14 @@ namespace veer::display::render
         compute_command_buffer& get_compute_command_buffer();
     };
 
-    class graphics_submit_context : private submit_context
+    class graphics_submit_context : public submit_context
     {
     public:
         graphics_submit_context(graphics_command_buffer& _command_buffer, graphics_technique& _technique);
+
+    public:
+        // TODO : add copies
+        // TODO : add clears
 
         // TODO : For submit_contexts, this might be a bit too much control ?
         void set_render_output(render_device_texture_2d* _depth, render_device_texture_2d* _color);
@@ -95,6 +93,8 @@ namespace veer::display::render
         // mesh construct
         // TODO : vertex and/or index buffer are actually optional. Change API to support this
         void set_mesh(render_device_buffer& _index_buffer, render_device_buffer& _vertex_buffer);
+
+        void set_constant_buffer(constant_buffer& _constant_buffer, constant_buffer_type _type);
 
         void draw_instanced(size_t _vertex_count, size_t _instance_count);
         void draw_indexed_instanced(size_t _index_count, size_t _instance_count);
@@ -121,5 +121,3 @@ namespace veer::display::render
         render_device_buffer* m_vertex_buffer;
     };
 } // namespace veer::display::render
-
-#include "submit_context.hpp"

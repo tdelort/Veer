@@ -2,6 +2,8 @@ target_sources(${PROJECT_NAME}
 	PRIVATE
         dx12_command_buffer.cpp
         dx12_command_queue.cpp
+        dx12_compute_technique.cpp
+        dx12_graphics_technique.cpp
         dx12_render_device_buffer.cpp
         dx12_render_device_resource.cpp
         dx12_render_device_texture_base.cpp
@@ -14,5 +16,5 @@ target_sources(${PROJECT_NAME}
         dx12_render_device_backbuffer.cpp
         dx12_shader_compiler.cpp
         dx12_swap_chain.cpp
-        dx12_technique.cpp
+        dx12_technique_helpers.cpp
 )

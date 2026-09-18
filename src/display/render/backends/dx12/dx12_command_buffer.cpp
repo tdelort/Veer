@@ -8,11 +8,12 @@
 #include <display/render/render_device_resource.h>
 #include <display/render/render_thread.h>
 #include <display/render/resource_desc.h>
-#include <display/render/technique.h>
+#include <display/render/compute_technique.h>
+#include <display/render/graphics_technique.h>
 #include <display/render/render_device.h>
 
 #include <display/render/backends/dx12/dx12_render_device_resource_sync_state.h>
-#include <display/render/backends/dx12/dx12_technique.h>
+#include <display/render/backends/dx12/dx12_technique_helpers.h>
 
 namespace veer::display::render
 {
@@ -158,9 +159,8 @@ namespace veer::display::render
 
 	void compute_command_buffer::set_technique(compute_technique& _technique)
 	{
-		dx12_compute_technique& dx12_technique = static_cast<dx12_compute_technique&>(_technique);
-		get_api_handle()->SetPipelineState(dx12_technique.get_pipeline_state_object());
-		get_api_handle()->SetComputeRootSignature(dx12_technique.get_root_signature());
+		get_api_handle()->SetPipelineState(_technique.get_pipeline_state_object());
+		get_api_handle()->SetComputeRootSignature(_technique.get_root_signature());
 	}
 
 	void compute_command_buffer::clear_texture(const render_device_texture_base& _texture, math::vec4u _color)
@@ -219,7 +219,7 @@ namespace veer::display::render
 
 	void graphics_command_buffer::set_technique(graphics_technique& _technique)
 	{
-		dx12_graphics_technique& dx12_technique = static_cast<dx12_graphics_technique&>(_technique);
+		graphics_technique& dx12_technique = static_cast<graphics_technique&>(_technique);
 		get_api_handle()->SetPipelineState(dx12_technique.get_pipeline_state_object());
 		get_api_handle()->SetGraphicsRootSignature(dx12_technique.get_root_signature());
 	}

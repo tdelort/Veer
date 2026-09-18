@@ -6,11 +6,11 @@
 #include <display/render/render_device.h>
 #include <display/render/render_device_resource_sync_state.h>
 
-
 namespace veer::display::render
 {
     render_device_resource::render_device_resource(render_device& _device)
-        : m_device(_device), m_upload_flags(render_device_resource::upload_flags::dirty_alloc)
+        : m_device(_device)
+        , m_upload_flags(render_device_resource::upload_flags::dirty_alloc)
     {
     }
 
@@ -61,15 +61,17 @@ namespace veer::display::render
 
         D3D12MA::Allocation* resource_alloc;
         VEER_LOG("CreateResource");
-        hr = m_device.get_allocator()->CreateResource(&default_alloc_desc, &resource_desc, _state, clear_value_arg,
-                                                      &m_resource_alloc, IID_NULL, NULL);
+        hr = m_device.get_allocator()->CreateResource(
+            &default_alloc_desc, &resource_desc, _state, clear_value_arg, &m_resource_alloc, IID_NULL, NULL
+        );
         VEER_ASSERT(SUCCEEDED(hr), "Failed to create D3D12 resource. Error (" << hr << ")");
 
         set_api_handle(m_resource_alloc->GetResource());
     }
 
-    void render_device_resource::upload_data_to_default_heap(copy_command_buffer& _upload_buffer,
-                                                             veer::containers::span<const byte_t> _data)
+    void render_device_resource::upload_data_to_default_heap(
+        copy_command_buffer& _upload_buffer, veer::containers::span<const byte_t> _data
+    )
     {
         D3D12_RESOURCE_DESC resource_desc = get_resource_desc();
 
@@ -81,7 +83,8 @@ namespace veer::display::render
         D3D12MA::Allocation* upload_alloc;
         VEER_LOG("CreateResource");
         hr = m_device.get_allocator()->CreateResource(
-            &upload_alloc_desc, &resource_desc, D3D12_RESOURCE_STATE_GENERIC_READ, NULL, &upload_alloc, IID_NULL, NULL);
+            &upload_alloc_desc, &resource_desc, D3D12_RESOURCE_STATE_GENERIC_READ, NULL, &upload_alloc, IID_NULL, NULL
+        );
         VEER_ASSERT(SUCCEEDED(hr), "Failed to create upload resource. Error (" << hr << ")");
 
         // this alloc needs to be released after the upload command buffer is executed and waited for
@@ -110,11 +113,12 @@ namespace veer::display::render
     D3D12_RESOURCE_FLAGS render_device_resource::s_convert(buffer_desc::usage_flags _states)
     {
         std::pair<buffer_desc::usage_flags, D3D12_RESOURCE_FLAGS> s_conversionTable[] = {
-            {buffer_desc::usage_flags::index, D3D12_RESOURCE_FLAG_NONE},
-            {buffer_desc::usage_flags::vertex, D3D12_RESOURCE_FLAG_NONE},
-            {buffer_desc::usage_flags::constant, D3D12_RESOURCE_FLAG_NONE},
-            {buffer_desc::usage_flags::storage, D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS},
-            {buffer_desc::usage_flags::indirect_args, D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS}};
+            {buffer_desc::usage_flags::index,         D3D12_RESOURCE_FLAG_NONE                  },
+            {buffer_desc::usage_flags::vertex,        D3D12_RESOURCE_FLAG_NONE                  },
+            {buffer_desc::usage_flags::constant,      D3D12_RESOURCE_FLAG_NONE                  },
+            {buffer_desc::usage_flags::storage,       D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS},
+            {buffer_desc::usage_flags::indirect_args, D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS}
+        };
 
         D3D12_RESOURCE_FLAGS dx12_flags = D3D12_RESOURCE_FLAG_NONE;
         for (size_t i = 0u; i < VEER_STATIC_ARRAY_SIZE(s_conversionTable); ++i)
@@ -131,9 +135,10 @@ namespace veer::display::render
     D3D12_RESOURCE_FLAGS render_device_resource::s_convert(texture_desc::usage_flags _states)
     {
         std::pair<texture_desc::usage_flags, D3D12_RESOURCE_FLAGS> s_conversionTable[] = {
-            {texture_desc::usage_flags::storage, D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS},
-            {texture_desc::usage_flags::render_target, D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET},
-            {texture_desc::usage_flags::depth_stencil, D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL}};
+            {texture_desc::usage_flags::storage,       D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS},
+            {texture_desc::usage_flags::render_target, D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET   },
+            {texture_desc::usage_flags::depth_stencil, D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL   }
+        };
 
         D3D12_RESOURCE_FLAGS dx12_flags = D3D12_RESOURCE_FLAG_NONE;
         for (size_t i = 0u; i < VEER_STATIC_ARRAY_SIZE(s_conversionTable); ++i)

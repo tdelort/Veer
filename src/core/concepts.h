@@ -34,10 +34,4 @@ namespace veer
         { a.deallocate(p) };
     };
 
-    // a small subset of Arithmetic to make things easier
-    template <typename T>
-    concept RenderDataType = std::disjunction_v<
-        std::is_same<T, bool>, std::is_same<T, int32_t>, std::is_same<T, int64_t>, std::is_same<T, uint32_t>,
-        std::is_same<T, uint64_t>, std::is_same<T, float>, std::is_same<T, double>>;
-
 } // namespace veer

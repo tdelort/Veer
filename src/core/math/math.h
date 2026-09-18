@@ -33,4 +33,10 @@ namespace veer::math
         ((accum = max(_args, accum)),...);
         return accum;
     }
+
+	template<Arithmetic T>
+    constexpr T ceiled_remainder(const T& _val, const T& _quotient)
+    {
+        return (_val + _quotient - 1) / _quotient;
+    }
 };

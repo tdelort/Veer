@@ -11,8 +11,10 @@
 #if defined(D3D12_RENDER_BACKEND) 
 #define RENDER_BACKEND_PLATFORM_PREFIX "dx12"
 #elif defined(VULKAN_RENDER_BACKEND) 
+#error not implemented
 #define RENDER_BACKEND_PLATFORM_PREFIX "vulkan"
 #elif defined(METAL_RENDER_BACKEND) 
+#error not implemented
 #define RENDER_BACKEND_PLATFORM_PREFIX "metal"
 #endif
 

@@ -37,7 +37,7 @@ namespace veer::containers
             return m_data;
         }
 
-        T* begin()
+        T* begin() const
         {
             return m_data;
         }
@@ -46,7 +46,7 @@ namespace veer::containers
             return m_data;
         }
 
-        T* end()
+        T* end() const
         {
             return m_data + m_size;
         }
@@ -94,6 +94,9 @@ namespace veer::containers
         template <typename INPUT_ITERATOR>
         void insert(iterator _pos, INPUT_ITERATOR _first, INPUT_ITERATOR _last);
 
+        template <typename INPUT_ITERATOR>
+        void add(INPUT_ITERATOR _first, INPUT_ITERATOR _last);
+
         iterator erase(iterator _it);
 
         void reserve(size_t _new_capacity);
@@ -117,6 +120,9 @@ namespace veer::containers
 
     template <typename ITERATOR, typename T>
     ITERATOR find(ITERATOR _from, ITERATOR _to, const T& _value);
+
+    template <typename ITERATOR, typename T>
+    ITERATOR find_if(ITERATOR _from, ITERATOR _to, std::function<bool(const T&)>& _predicate);
 } // namespace veer::containers
 
 #include "resizable_array.hpp"

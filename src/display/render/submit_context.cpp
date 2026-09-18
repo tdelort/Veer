@@ -12,16 +12,6 @@ namespace veer::display::render
     {
     }
 
-    void submit_context::set_texture(const shader_parameter_id& _param_id, const render_device_texture_base& _texture)
-    {
-        VEER_LOG_ERROR("Not Implemented");
-    }
-
-    void submit_context::set_buffer(const shader_parameter_id& _param_id, const render_device_buffer& _buffer)
-    {
-        VEER_LOG_ERROR("Not Implemented");
-    }
-
     // copy_submit_context
 
     copy_submit_context::copy_submit_context(copy_command_buffer& _command_buffer)
@@ -70,6 +60,14 @@ namespace veer::display::render
         compute_command_buffer& command_buffer = get_compute_command_buffer();
         command_buffer.transition_barrier(_resource, render_device_resource_sync_state::UnorderedAccessView);
         command_buffer.clear_buffer(_resource, _val);
+    }
+
+    void compute_submit_context::set_constant_buffer(constant_buffer& _constant_buffer, constant_buffer_type _type)
+    {
+        compute_command_buffer& command_buffer = get_compute_command_buffer();
+        render_device_buffer* buffer = _constant_buffer.get_internal_buffer();
+        VEER_ASSERT(buffer != nullptr, "You did not init constant buffer before using it (using its update_context)");
+        command_buffer.set_constant_buffer(*buffer, _type);
     }
 
     void compute_submit_context::dispatch(size_t _x, size_t _y, size_t _z)
@@ -150,6 +148,14 @@ namespace veer::display::render
     {
         m_index_buffer = &_index_buffer;
         m_vertex_buffer = &_vertex_buffer;
+    }
+
+    void graphics_submit_context::set_constant_buffer(constant_buffer& _constant_buffer, constant_buffer_type _type)
+    {
+        graphics_command_buffer& command_buffer = get_graphics_command_buffer();
+        render_device_buffer* buffer = _constant_buffer.get_internal_buffer();
+        VEER_ASSERT(buffer != nullptr, "You did not init constant buffer before using it (using its update_context)");
+        command_buffer.set_constant_buffer(*buffer, _type);
     }
 
     void graphics_submit_context::draw_instanced(size_t _vertex_count, size_t _instance_count)

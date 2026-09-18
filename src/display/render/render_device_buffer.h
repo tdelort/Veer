@@ -44,7 +44,7 @@ namespace veer::display::render
 		
 		bindless_id get_bindless_id(render_device_resource_heap_type _heap_type) const override;
 	public:
-		virtual void upload(copy_command_buffer& _upload_command_buffer, upload_flags _upload_flags) override;
+		void upload(upload_flags _upload_flags);
 
     private:
         byte_t* map();
@@ -55,10 +55,10 @@ namespace veer::display::render
 
 #if defined(D3D12_RENDER_BACKEND)
 #include "backends/dx12/dx12_render_device_buffer.inl"
-// #elif defined(VULKAN_RENDER_BACKEND)
-// #include "backends/vulkan/vk_render_device_buffer.inl"
-// #elif defined(METAL_RENDER_BACKEND)
-// #include "backends/metal/mtl_render_device_buffer.inl"
+#elif defined(VULKAN_RENDER_BACKEND)
+#error not implemented
+#elif defined(METAL_RENDER_BACKEND)
+#error not implemented
 #endif 
     };
 }

@@ -20,36 +20,31 @@ namespace veer::display::render
     static constexpr size_t s_max_viewport_and_scissors_count = 16u;
     static constexpr size_t s_max_color_render_targets = 8u;
 
-    struct render_data_type_info
+    struct buffer_elem_info
     {
-        const std::type_info& m_cpu_typeid;
-        size_t m_cpu_size;
-        size_t m_gpu_size;
+        constexpr buffer_elem_info()
+            : buffer_elem_info(0, 0)
+        {
+        }
+
+        constexpr buffer_elem_info(size_t _offset, size_t _size)
+            : m_offset(_offset)
+            , m_size(_size)
+        {
+        }
+
+        constexpr size_t get_offset() const
+        {
+            return static_cast<size_t>(m_offset);
+        }
+
+        constexpr size_t get_size() const
+        {
+            return static_cast<size_t>(m_size);
+        }
+
+    private:
+        uint32_t m_size                 : 8;
+        uint32_t m_offset               : 24;
     };
-
-#define FILL_CPU_INFO(_type) typeid(_type), sizeof(_type)
-
-#if defined(D3D12_RENDER_BACKEND)
-#define SELECT_GPU_SIZE(_dx12, _vk, _mtl) (_dx12)
-#elif defined(VULKAN_RENDER_BACKEND)
-#define SELECT_GPU_SIZE(_dx12, _vk, _mtl) (_vk)
-#error Change 0 values in s_render_data_types
-#elif defined(METAL_RENDER_BACKEND)
-#define SELECT_GPU_SIZE(_dx12, _vk, _mtl) (_mtl)
-#error Change 0 values in s_render_data_types
-#endif
-
-    // TODO : change 0 when implementing other backends
-    static constexpr render_data_type_info s_render_data_types[] = {
-        {FILL_CPU_INFO(bool),     SELECT_GPU_SIZE(4, 0, 0)},
-        {FILL_CPU_INFO(int32_t),  SELECT_GPU_SIZE(4, 0, 0)},
-        {FILL_CPU_INFO(int64_t),  SELECT_GPU_SIZE(8, 0, 0)},
-        {FILL_CPU_INFO(uint32_t), SELECT_GPU_SIZE(4, 0, 0)},
-        {FILL_CPU_INFO(uint64_t), SELECT_GPU_SIZE(8, 0, 0)},
-        {FILL_CPU_INFO(float),    SELECT_GPU_SIZE(4, 0, 0)},
-        {FILL_CPU_INFO(double),   SELECT_GPU_SIZE(8, 0, 0)},
-    };
-
-#undef SELECT_GPU_SIZE
-#undef FILL_CPU_INFO
 } // namespace veer::display::render
