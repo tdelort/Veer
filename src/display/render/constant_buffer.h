@@ -6,7 +6,6 @@
 #include <display/render/render_data_type.h>
 #include <display/render/render_device_resource.h>
 
-
 namespace veer::display::render
 {
     class command_buffer;
@@ -27,15 +26,14 @@ namespace veer::display::render
             template <RenderDataType T, size_t ELEM_COUNT>
             void set_constant(const buffer_elem_info& _elem, math::vec<T, ELEM_COUNT> _val)
                 requires veer::LessEqual<ELEM_COUNT, 4>;
-            void set_texture_read_only(const buffer_elem_info& _elem, const render_device_texture_base& _texture);
-            void set_texture_read_write(const buffer_elem_info& _elem, const render_device_texture_base& _texture);
-            void set_buffer_read_only(const buffer_elem_info& _elem, const render_device_buffer& _buffer);
-            void set_buffer_read_write(const buffer_elem_info& _elem, const render_device_buffer& _buffer);
+            void set_texture_read_only(const buffer_elem_info& _elem, render_device_texture_base& _texture);
+            void set_texture_read_write(const buffer_elem_info& _elem, render_device_texture_base& _texture);
+            void set_buffer_read_only(const buffer_elem_info& _elem, render_device_buffer& _buffer);
+            void set_buffer_read_write(const buffer_elem_info& _elem, render_device_buffer& _buffer);
 
         private:
             void set_resource(
-                const buffer_elem_info& _elem, const render_device_resource& _resource,
-                render_device_resource_heap_type _type
+                const buffer_elem_info& _elem, render_device_resource& _resource, access_mode _access
             );
 
         private:
@@ -43,13 +41,25 @@ namespace veer::display::render
             render_thread& m_render_thread;
         };
 
+        struct resource_info
+        {
+            render_device_resource* m_resource{nullptr};
+            access_mode m_access{};
+        };
+
+        using resource_table_t = containers::resizable_array<resource_info>;
+
     public:
-        constant_buffer(render_device& _device, const constant_buffer_definition& _def, const char* _debug_name = "constant_buffer");
+        constant_buffer(
+            render_device& _device, const constant_buffer_definition& _def, const char* _debug_name = "constant_buffer"
+        );
 
     public:
         const constant_buffer_definition& get_def() const;
         render_device_buffer* get_internal_buffer() const;
         size_t size() const;
+
+        const resource_table_t& get_resource_table() const;
 
     private:
         buffer_desc get_internal_buffer_desc() const;
@@ -58,9 +68,12 @@ namespace veer::display::render
         render_device& m_device;
         constant_buffer_definition m_definition;
 
+        // --- staged data
         // m_cpu_buffer.size() == m_gpu_buffer.size_in_bytes()
         containers::resizable_array<byte_t> m_cpu_buffer;
+        resource_table_t m_resource_table;
 
+        // --- buffer freelist
         struct live_buffer
         {
             unique_ptr<render_device_buffer> m_buffer_ptr{nullptr};

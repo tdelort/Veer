@@ -1,5 +1,6 @@
 #include "constant_buffer.h"
 
+#include <display/render/base_types.h>
 #include <display/render/render_device_buffer.h>
 #include <display/render/render_device_resource.h>
 #include <display/render/render_device_texture_base.h>
@@ -13,6 +14,7 @@ namespace veer::display::render
         : m_constant_buffer(_constant_buffer)
         , m_render_thread(_render_thread)
     {
+        m_constant_buffer.m_resource_table.clear();
     }
 
     constant_buffer::update_context::~update_context()
@@ -84,40 +86,46 @@ namespace veer::display::render
     using descriptor_handle_t = math::vec<display::render::render_device_resource::bindless_id, 2u>;
 
     void constant_buffer::update_context::set_texture_read_only(
-        const buffer_elem_info& _elem, const render_device_texture_base& _texture
+        const buffer_elem_info& _elem, render_device_texture_base& _texture
     )
     {
-        set_resource(_elem, _texture, render_device_resource_heap_type::srv);
+        set_resource(_elem, _texture, access_mode::read);
     }
 
     void constant_buffer::update_context::set_texture_read_write(
-        const buffer_elem_info& _elem, const render_device_texture_base& _texture
+        const buffer_elem_info& _elem, render_device_texture_base& _texture
     )
     {
-        set_resource(_elem, _texture, render_device_resource_heap_type::uav);
+        set_resource(_elem, _texture, access_mode::read | access_mode::write);
     }
 
     void constant_buffer::update_context::set_buffer_read_only(
-        const buffer_elem_info& _elem, const render_device_buffer& _buffer
+        const buffer_elem_info& _elem, render_device_buffer& _buffer
     )
     {
-        set_resource(_elem, _buffer, render_device_resource_heap_type::srv);
+        set_resource(_elem, _buffer, access_mode::read);
     }
 
     void constant_buffer::update_context::set_buffer_read_write(
-        const buffer_elem_info& _elem, const render_device_buffer& _buffer
+        const buffer_elem_info& _elem, render_device_buffer& _buffer
     )
     {
-        set_resource(_elem, _buffer, render_device_resource_heap_type::uav);
+        set_resource(_elem, _buffer, access_mode::read | access_mode::write);
     }
 
     void constant_buffer::update_context::set_resource(
-        const buffer_elem_info& _elem, const render_device_resource& _resource, render_device_resource_heap_type _type
+        const buffer_elem_info& _elem, render_device_resource& _resource, access_mode _access
     )
     {
-        const render_device_resource::bindless_id srv_id = _resource.get_bindless_id(_type);
+        render_device_resource_heap_type heap_type = flags::get(_access, access_mode::write)
+                                                         ? render_device_resource_heap_type::uav
+                                                         : render_device_resource_heap_type::srv;
+
+        const render_device_resource::bindless_id srv_id = _resource.get_bindless_id(heap_type);
         const render_device_resource::bindless_id sampler_id = render_device_resource::s_invalid_bindless_id;
         const descriptor_handle_t descriptor_handle(srv_id, sampler_id);
+
+        m_constant_buffer.m_resource_table.emplace_back(&_resource, _access);
 
         set_constant(_elem, descriptor_handle);
     }
@@ -157,6 +165,11 @@ namespace veer::display::render
     size_t constant_buffer::size() const
     {
         return m_cpu_buffer.size();
+    }
+
+    const constant_buffer::resource_table_t& constant_buffer::get_resource_table() const
+    {
+        return m_resource_table;
     }
 
     buffer_desc constant_buffer::get_internal_buffer_desc() const

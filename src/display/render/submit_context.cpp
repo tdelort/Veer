@@ -1,9 +1,9 @@
 #include "submit_context.h"
 
 #include <display/render/command_buffer.h>
-#include <display/render/technique.h>
 #include <display/render/compute_technique.h>
 #include <display/render/graphics_technique.h>
+#include <display/render/technique.h>
 
 namespace veer::display::render
 {
@@ -47,7 +47,8 @@ namespace veer::display::render
     compute_submit_context::compute_submit_context(
         compute_command_buffer& _command_buffer, compute_technique& _technique
     )
-        : submit_context(_command_buffer), m_technique(_technique)
+        : submit_context(_command_buffer)
+        , m_technique(_technique)
     {
         get_compute_command_buffer().set_technique(m_technique);
     }
@@ -88,7 +89,23 @@ namespace veer::display::render
 
         const constant_buffer_definition& def_from_technique = m_technique.get_constant_buffer_definition(_type);
         const constant_buffer_definition& def_from_constant_buffer = _constant_buffer.get_def();
-        VEER_ASSERT(def_from_technique == def_from_constant_buffer, "set_constant_buffer called with a constant buffer not compatible with technique");
+        VEER_ASSERT(
+            def_from_technique == def_from_constant_buffer,
+            "set_constant_buffer called with a constant buffer not compatible with technique"
+        );
+
+        const constant_buffer::resource_table_t& resource_table = _constant_buffer.get_resource_table();
+        for (constant_buffer::resource_info& resource : resource_table)
+        {
+            if (resource.m_resource == nullptr)
+                continue;
+
+            const render_device_resource_sync_state state =
+                flags::get(resource.m_access, access_mode::write)
+                    ? render_device_resource_sync_state::UnorderedAccessView
+                    : render_device_resource_sync_state::NonPixelShaderResource;
+            command_buffer.transition_barrier(*resource.m_resource, state);
+        }
 
         command_buffer.set_constant_buffer(*buffer, _type);
     }
@@ -109,6 +126,7 @@ namespace veer::display::render
         graphics_command_buffer& _command_buffer, graphics_technique& _technique
     )
         : submit_context(_command_buffer)
+        , m_technique(_technique)
         , m_viewports_count(0u)
         , m_scissors_count(0u)
         , m_color_render_outputs_count(0u)
@@ -178,6 +196,29 @@ namespace veer::display::render
         graphics_command_buffer& command_buffer = get_graphics_command_buffer();
         render_device_buffer* buffer = _constant_buffer.get_internal_buffer();
         VEER_ASSERT(buffer != nullptr, "You did not init constant buffer before using it (using its update_context)");
+
+        const constant_buffer_definition& def_from_technique = m_technique.get_constant_buffer_definition(_type);
+        const constant_buffer_definition& def_from_constant_buffer = _constant_buffer.get_def();
+        VEER_ASSERT(
+            def_from_technique == def_from_constant_buffer,
+            "set_constant_buffer called with a constant buffer not compatible with technique"
+        );
+
+        const constant_buffer::resource_table_t& resource_table = _constant_buffer.get_resource_table();
+        for (constant_buffer::resource_info& resource : resource_table)
+        {
+            if (resource.m_resource == nullptr)
+                continue;
+
+            VEER_ASSERT(!flags::get(resource.m_access, access_mode::write), "RoV are not supported yet");
+
+            const render_device_resource_sync_state state =
+                flags::get(resource.m_access, access_mode::write)
+                    ? render_device_resource_sync_state::UnorderedAccessView
+                    : render_device_resource_sync_state::PixelShaderResource;
+            command_buffer.transition_barrier(*resource.m_resource, state);
+        }
+
         command_buffer.set_constant_buffer(*buffer, _type);
     }
 

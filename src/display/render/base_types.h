@@ -17,6 +17,16 @@ namespace veer::display::render
         math::vec2u m_max{0u, 0u};
     };
 
+    enum class access_mode
+    {
+        none = 0,
+        read = 1 << 0,
+        write = 1 << 1,
+    };
+    
+    VEER_ENUM_CLASS_FLAG_OPERATORS(access_mode);
+
+
     static constexpr size_t s_max_viewport_and_scissors_count = 16u;
     static constexpr size_t s_max_color_render_targets = 8u;
 

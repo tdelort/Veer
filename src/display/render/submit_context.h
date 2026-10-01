@@ -108,6 +108,8 @@ namespace veer::display::render
         graphics_command_buffer& get_graphics_command_buffer();
 
     private:
+        graphics_technique& m_technique;
+
         containers::static_array<viewport, s_max_viewport_and_scissors_count> m_viewports;
         size_t m_viewports_count;
 
