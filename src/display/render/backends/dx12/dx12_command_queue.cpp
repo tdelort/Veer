@@ -38,15 +38,18 @@ namespace veer::display::render
 		VEER_ASSERT(m_type == _command_buffer.get_type(), "Wrong type of command buffer for queue");
 		ID3D12GraphicsCommandList* command_list = _command_buffer.release_handle();
 		VEER_ASSERT(command_list != nullptr, "command_buffer object has already been executed");
-		const HRESULT hr = command_list->Close();
-		VEER_ASSERT(SUCCEEDED(hr), "Failed to properly close command list (" << hr << ")");
+		const veer::hr hr = command_list->Close();
+		VEER_ASSERT(hr.succeeded(), "Failed to properly close command list (" << hr << ")");
+
+		render_thread* owner_thread = _command_buffer.get_owner_thread();
+		owner_thread->on_close_command_list();
 
 		m_queued_command_lists.push_back(command_list);
-		m_queued_command_lists_owner_thread.push_back(_command_buffer.get_owner_thread());
+		m_queued_command_lists_owner_thread.push_back(owner_thread);
 
 		_command_buffer.get_owner_thread()->get_device().check_errors();
 
-		command_queue_base::enqueue(std::forward<command_buffer&&>(_command_buffer));
+		command_queue_base::enqueue(std::move(_command_buffer));
 	}
 
 	// TODO : Ping pong between backbuffer index (given as a parameter) for m_fence_value
@@ -54,8 +57,8 @@ namespace veer::display::render
 	{
 		command_queue_base::signal(_value);
 
-		HRESULT hr = m_command_queue_api_handle->Signal(m_fence.Get(), _value);
-		VEER_ASSERT(SUCCEEDED(hr), "Failed to signal command queue fence (" << hr << ")");
+		veer::hr hr = m_command_queue_api_handle->Signal(m_fence.Get(), _value);
+		VEER_ASSERT(hr.succeeded(), "Failed to signal command queue fence (" << hr << ")");
 	}
 
 	void command_queue::wait_for_value(uint64_t _value)
@@ -66,8 +69,8 @@ namespace veer::display::render
 			HANDLE event = CreateEvent(nullptr, false, false, nullptr);
 
 			// Fire event when GPU hits current fence.  
-			HRESULT hr = m_fence->SetEventOnCompletion(_value, event);
-			VEER_ASSERT(SUCCEEDED(hr), "Failed to set event on command queue fence (" << hr << ")");
+			veer::hr hr = m_fence->SetEventOnCompletion(_value, event);
+			VEER_ASSERT(hr.succeeded(), "Failed to set event on command queue fence (" << hr << ")");
 
 			// Wait until the GPU hits current fence event is fired.
 			WaitForSingleObject(event, INFINITE);

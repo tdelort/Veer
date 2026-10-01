@@ -4,8 +4,8 @@
 
 namespace veer::display::render 
 {
-	render_device_texture_base::render_device_texture_base(render_device& _device)
-        : render_device_resource(_device)
+	render_device_texture_base::render_device_texture_base(render_device& _device, const char* _debug_name)
+        : render_device_resource(_device, _debug_name)
 	{
 	}
 	

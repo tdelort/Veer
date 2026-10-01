@@ -19,10 +19,12 @@ namespace veer::display::render
 {
 
     graphics_technique::graphics_technique(
-        render_device& _device, const shader_stage_source_container_t& _source_code, const shader_signature& _signature,
+        const constant_buffer_definition& _frame_constant_buffer_definition,
+        const constant_buffer_definition& _material_constant_buffer_definition, const render_device& _device,
+        const shader_stage_source_container_t& _source_code, const shader_signature& _signature,
         const shader_render_state& _render_state
     )
-        : technique()
+        : technique(_frame_constant_buffer_definition, _material_constant_buffer_definition)
     {
         // TODO : get from device instead of creating it each time since it will be the same for most techniques
         m_root_signature = s_create_root_signature(_device);
@@ -66,8 +68,8 @@ namespace veer::display::render
         pso_desc.InputLayout.pInputElementDescs = input_elems_desc.data();
 
         // TODO depth state
-        pso_desc.DepthStencilState.DepthEnable = FALSE;
-        pso_desc.DepthStencilState.StencilEnable = FALSE;
+        pso_desc.DepthStencilState.DepthEnable = _render_state.m_depth_enable;
+        pso_desc.DepthStencilState.StencilEnable = _render_state.m_stencil_enable;
 
         // TODO other state data
         pso_desc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;

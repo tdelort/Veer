@@ -29,7 +29,6 @@ namespace veer::display::render
 
     dx12_descriptor dx12_descriptor_heap::acquire_descriptor()
     {
-        VEER_LOG("acquire_descriptor");
         size_t index = m_first_available_descriptor_index;
 
         if (!m_free_indices.empty())

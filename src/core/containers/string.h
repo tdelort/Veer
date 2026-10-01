@@ -4,7 +4,6 @@
 #include <core/core.h>
 #include <core/veer_system_allocator.h>
 
-
 namespace veer::containers
 {
     // not a specialization (using private inheritance) of resizable_array since I plan to implement short string
@@ -23,6 +22,10 @@ namespace veer::containers
 
     public:
         base_string();
+
+        template <typename CHAR_TYPE>
+        base_string(const CHAR_TYPE* _str);
+
         ~base_string();
 
         base_string(const base_string& _other);
@@ -31,11 +34,11 @@ namespace veer::containers
         base_string& operator=(base_string&& _other);
 
         // getters / setters
-        char* str()
+        T* str()
         {
             return m_data;
         }
-        const char* c_str() const
+        const T* c_str() const
         {
             return m_data;
         }
@@ -105,21 +108,39 @@ namespace veer::containers
         void clear();
         void destroy();
 
-    private:
+    protected:
         void grow();
         void grow(size_t _min_capacity_needed);
         void alloc(size_t _new_capacity);
 
-    private:
+    protected:
         size_t m_size{0u};
         size_t m_capacity{0u};
         T* m_data{nullptr};
 
-        ALLOCATOR m_allocator;
+        ALLOCATOR m_allocator{};
     };
 
-    using string = base_string<char>;
-    using wstring = base_string<wchar_t>;
+    class string : public base_string<char>
+    {
+    public:
+        using base_string::base_string;
+    };
+
+    class wstring : public base_string<wchar_t>
+    {
+    public:
+        using base_string::base_string;
+
+        wstring(base_string<char> _string)
+        {
+            grow(_string.size());
+            size_t converted_chars_count = 0;
+            mbstowcs_s(&converted_chars_count, str(), capacity(), _string.str(), _string.size());
+            m_size = converted_chars_count;
+        }
+    };
+
 } // namespace veer::containers
 
 #include "string.hpp"

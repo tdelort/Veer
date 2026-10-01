@@ -4,7 +4,6 @@
 #include <display/render/shader_source.h>
 #include <display/render/technique.h>
 
-
 #if defined(D3D12_RENDER_BACKEND)
 #include <display/render/backends/dx12/dx12_pch.h>
 #endif // defined(D3D12_RENDER_BACKEND)
@@ -16,7 +15,11 @@ namespace veer::display::render
     class compute_technique : public technique
     {
     public:
-        compute_technique(render_device& _device, const shader_stage_source_container_t& _source_code);
+        compute_technique(
+            const constant_buffer_definition& _frame_constant_buffer_definition,
+            const constant_buffer_definition& _material_constant_buffer_definition, const render_device& _device,
+            const shader_stage_source_container_t& _source_code
+        );
         virtual ~compute_technique();
 
 #if defined(D3D12_RENDER_BACKEND)

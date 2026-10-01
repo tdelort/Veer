@@ -7,7 +7,7 @@ namespace veer::display::render
     class render_device_texture_base : public render_device_resource
     {
     public:
-        render_device_texture_base(render_device& _device);
+        render_device_texture_base(render_device& _device, const char* _debug_name);
         virtual ~render_device_texture_base();
 		
 	public:

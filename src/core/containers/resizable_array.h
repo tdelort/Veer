@@ -4,6 +4,8 @@
 #include <core/core.h>
 #include <core/veer_system_allocator.h>
 
+#include <core/containers/span.h>
+
 namespace veer::containers
 {
     template <typename T, SystemAllocator ALLOCATOR = veer::veer_system_allocator>
@@ -20,6 +22,7 @@ namespace veer::containers
 
     public:
         resizable_array();
+        resizable_array(std::initializer_list<T> _list);
         ~resizable_array();
 
         resizable_array(const resizable_array& _other);

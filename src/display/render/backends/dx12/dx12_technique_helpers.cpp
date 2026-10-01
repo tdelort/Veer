@@ -1,8 +1,9 @@
 #include "dx12_technique_helpers.h"
 
 #include "dx12_pch.h"
-#include <display/render/render_device.h>
 #include <display/render/backends/dx12/dx12_render_device_data_format.h>
+#include <display/render/render_device.h>
+#include <display/render/sampler_state.h>
 
 namespace veer::display::render
 {
@@ -23,7 +24,7 @@ namespace veer::display::render
 
     D3D12_BLEND s_convert(blend_state::factor _blend_factor)
     {
-        D3D12_BLEND s_conversionTable[] = {
+        static constexpr D3D12_BLEND s_conversion_table[] = {
             D3D12_BLEND_ZERO,             // zero,
             D3D12_BLEND_ONE,              // one,
             D3D12_BLEND_SRC_COLOR,        // src_color,
@@ -45,23 +46,23 @@ namespace veer::display::render
             D3D12_BLEND_INV_SRC1_ALPHA    // one_minus_src1_alpha,
         };
 
-        static_assert(VEER_STATIC_ARRAY_SIZE(s_conversionTable) == static_cast<size_t>(blend_state::factor::COUNT));
+        static_assert(VEER_STATIC_ARRAY_SIZE(s_conversion_table) == static_cast<size_t>(blend_state::factor::COUNT));
 
-        return s_conversionTable[static_cast<size_t>(_blend_factor)];
+        return s_conversion_table[static_cast<size_t>(_blend_factor)];
     }
 
     D3D12_BLEND_OP s_convert(blend_state::operation _blend_operation)
     {
-        D3D12_BLEND_OP s_conversionTable[] = {
+        static constexpr D3D12_BLEND_OP s_conversion_table[] = {
             D3D12_BLEND_OP_ADD,          // add
             D3D12_BLEND_OP_SUBTRACT,     // subtract
             D3D12_BLEND_OP_REV_SUBTRACT, // reverse_subtract
             D3D12_BLEND_OP_MIN,          // min
             D3D12_BLEND_OP_MAX,          // max
         };
-        static_assert(VEER_STATIC_ARRAY_SIZE(s_conversionTable) == static_cast<size_t>(blend_state::operation::COUNT));
+        static_assert(VEER_STATIC_ARRAY_SIZE(s_conversion_table) == static_cast<size_t>(blend_state::operation::COUNT));
 
-        return s_conversionTable[static_cast<size_t>(_blend_operation)];
+        return s_conversion_table[static_cast<size_t>(_blend_operation)];
     }
 
     D3D12_COLOR_WRITE_ENABLE s_convert(blend_state::write_mask _write_mask)
@@ -70,7 +71,8 @@ namespace veer::display::render
             (flags::get(_write_mask, blend_state::write_mask::r) ? D3D12_COLOR_WRITE_ENABLE_RED : 0u) |
             (flags::get(_write_mask, blend_state::write_mask::g) ? D3D12_COLOR_WRITE_ENABLE_GREEN : 0u) |
             (flags::get(_write_mask, blend_state::write_mask::b) ? D3D12_COLOR_WRITE_ENABLE_BLUE : 0u) |
-            (flags::get(_write_mask, blend_state::write_mask::a) ? D3D12_COLOR_WRITE_ENABLE_ALPHA : 0u));
+            (flags::get(_write_mask, blend_state::write_mask::a) ? D3D12_COLOR_WRITE_ENABLE_ALPHA : 0u)
+        );
     }
 
     D3D12_RENDER_TARGET_BLEND_DESC s_convert(blend_state _blend_state)
@@ -96,15 +98,16 @@ namespace veer::display::render
 
     D3D12_CULL_MODE s_convert(rasterizer_state::cull_mode _cull_mode)
     {
-        D3D12_CULL_MODE s_conversionTable[] = {
+        static constexpr D3D12_CULL_MODE s_conversion_table[] = {
             D3D12_CULL_MODE_NONE,  // none
             D3D12_CULL_MODE_FRONT, // front
             D3D12_CULL_MODE_BACK,  // back
         };
-        static_assert(VEER_STATIC_ARRAY_SIZE(s_conversionTable) ==
-                      static_cast<size_t>(rasterizer_state::cull_mode::COUNT));
+        static_assert(
+            VEER_STATIC_ARRAY_SIZE(s_conversion_table) == static_cast<size_t>(rasterizer_state::cull_mode::COUNT)
+        );
 
-        return s_conversionTable[static_cast<size_t>(_cull_mode)];
+        return s_conversion_table[static_cast<size_t>(_cull_mode)];
     }
 
     D3D12_RASTERIZER_DESC s_convert(rasterizer_state _rasterizer_state)
@@ -125,13 +128,41 @@ namespace veer::display::render
         return dx12_rasterizer_state_desc;
     }
 
+    D3D12_FILTER s_convert(sampler_desc::filter _filter)
+    {
+        static constexpr D3D12_FILTER s_conversion_table[] = {
+            D3D12_FILTER_MIN_MAG_MIP_POINT,  // point
+            D3D12_FILTER_MIN_MAG_MIP_LINEAR, // linear
+            D3D12_FILTER_ANISOTROPIC,        // anisotropic
+        };
+
+        static_assert(VEER_STATIC_ARRAY_SIZE(s_conversion_table) == static_cast<size_t>(sampler_desc::filter::COUNT));
+
+        return s_conversion_table[static_cast<size_t>(_filter)];
+    }
+
+    D3D12_TEXTURE_ADDRESS_MODE s_convert(sampler_desc::address_mode _mode)
+    {
+        static constexpr D3D12_TEXTURE_ADDRESS_MODE s_conversion_table[] = {
+            D3D12_TEXTURE_ADDRESS_MODE_CLAMP,  // clamp
+            D3D12_TEXTURE_ADDRESS_MODE_WRAP,   // wrap
+            D3D12_TEXTURE_ADDRESS_MODE_MIRROR, // mirror
+        };
+
+        static_assert(
+            VEER_STATIC_ARRAY_SIZE(s_conversion_table) == static_cast<size_t>(sampler_desc::address_mode::COUNT)
+        );
+
+        return s_conversion_table[static_cast<size_t>(_mode)];
+    }
+
     size_t s_get_root_param_index(constant_buffer_type _constant_buffer)
     {
         return static_cast<size_t>(_constant_buffer);
     }
 
     // TODO : this will be almost the same everywhere, reuse
-    ComPtr<ID3D12RootSignature> s_create_root_signature(render_device& _device)
+    ComPtr<ID3D12RootSignature> s_create_root_signature(const render_device& _device)
     {
 #if 0
         // TODO : description could be brought up in the platform agnostic part 
@@ -176,10 +207,8 @@ namespace veer::display::render
         // Build root signature using above config
         size_t param_index = 0u;
         containers::static_array<D3D12_ROOT_PARAMETER, static_cast<size_t>(constant_buffer_type::COUNT)>
-            root_parameters;
-        // constant buffers
-        for (size_t constant_buffer_index = 0u;
-             constant_buffer_index < static_cast<size_t>(constant_buffer_type::COUNT); ++constant_buffer_index)
+            root_parameters{};
+        for (size_t constant_buffer_index = 0u; constant_buffer_index < root_parameters.size(); ++constant_buffer_index)
         {
             D3D12_ROOT_PARAMETER& param =
                 root_parameters[s_get_root_param_index(static_cast<constant_buffer_type>(constant_buffer_index))];
@@ -190,22 +219,53 @@ namespace veer::display::render
             param_index++;
         }
 
+        containers::static_array<D3D12_STATIC_SAMPLER_DESC, VEER_STATIC_ARRAY_SIZE(s_static_samplers)>
+            static_samplers_desc{};
+        for (
+            size_t static_sampler_index = 0u; static_sampler_index < static_samplers_desc.size(); ++static_sampler_index
+        )
+        {
+            D3D12_STATIC_SAMPLER_DESC sampler_desc = {};
+            sampler_desc.Filter = s_convert(s_static_samplers[static_sampler_index].m_filter);
+            D3D12_TEXTURE_ADDRESS_MODE address_mode =
+                s_convert(s_static_samplers[static_sampler_index].m_uvw_address_mode);
+            sampler_desc.AddressU = address_mode;
+            sampler_desc.AddressV = address_mode;
+            sampler_desc.AddressW = address_mode;
+
+            // default values
+            sampler_desc.MipLODBias = 0;
+            sampler_desc.MaxAnisotropy = s_max_anisotropy_level; // TODO : maybe add more aniso samplers
+            sampler_desc.ComparisonFunc = D3D12_COMPARISON_FUNC_NONE;
+            sampler_desc.BorderColor = D3D12_STATIC_BORDER_COLOR_TRANSPARENT_BLACK;
+            sampler_desc.MinLOD = 0;
+            sampler_desc.MaxLOD = D3D12_FLOAT32_MAX;
+
+            // register things
+            sampler_desc.RegisterSpace = 0;
+            sampler_desc.ShaderRegister = static_sampler_index;
+            sampler_desc.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+
+            static_samplers_desc[static_sampler_index] = sampler_desc;
+        }
+
         D3D12_ROOT_SIGNATURE_DESC root_signature_desc = {};
         root_signature_desc.NumParameters = root_parameters.size();
         root_signature_desc.pParameters = root_parameters.data();
-        root_signature_desc.NumStaticSamplers = 0u;
-        root_signature_desc.pStaticSamplers = nullptr;
+        root_signature_desc.NumStaticSamplers = static_samplers_desc.size();
+        root_signature_desc.pStaticSamplers = static_samplers_desc.data();
         root_signature_desc.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT |
                                     D3D12_ROOT_SIGNATURE_FLAG_CBV_SRV_UAV_HEAP_DIRECTLY_INDEXED |
                                     D3D12_ROOT_SIGNATURE_FLAG_SAMPLER_HEAP_DIRECTLY_INDEXED;
 
         ComPtr<ID3DBlob> root_signature_blob, error_blob;
-        HRESULT hr = D3D12SerializeRootSignature(&root_signature_desc, D3D_ROOT_SIGNATURE_VERSION_1_0,
-                                                 &root_signature_blob, &error_blob);
+        HRESULT hr = D3D12SerializeRootSignature(
+            &root_signature_desc, D3D_ROOT_SIGNATURE_VERSION_1_0, &root_signature_blob, &error_blob
+        );
         VEER_ASSERT(SUCCEEDED(hr), "Failed to serialize root signature. Error (" << hr << ")");
         if (error_blob != nullptr)
         {
-            VEER_LOG("Root signature serialization output : " << (const char*)error_blob->GetBufferPointer());
+            VEER_LOG("Root signature serialization output : " << static_cast<const char*>(error_blob->GetBufferPointer()));
             error_blob->Release();
         }
 
@@ -214,10 +274,11 @@ namespace veer::display::render
 
         ComPtr<ID3D12RootSignature> root_signature_obj;
         VEER_LOG("CreateRootSignature");
-        hr = _device.get_api_handle()->CreateRootSignature(0, root_signature_data, root_signature_data_size,
-                                                           IID_PPV_ARGS(&root_signature_obj));
+        hr = _device.get_api_handle()->CreateRootSignature(
+            0, root_signature_data, root_signature_data_size, IID_PPV_ARGS(&root_signature_obj)
+        );
         VEER_ASSERT(SUCCEEDED(hr), "Failed to create root signature. Error (" << hr << ")");
 
         return root_signature_obj;
     }
-}
+} // namespace veer::display::render

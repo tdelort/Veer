@@ -23,5 +23,5 @@ namespace veer::display::render
     // One big root signature to rule them all so this can be static
     size_t s_get_root_param_index(constant_buffer_type _constant_buffer);
 
-    ComPtr<ID3D12RootSignature> s_create_root_signature(render_device& _device);
+    ComPtr<ID3D12RootSignature> s_create_root_signature(const render_device& _device);
 }

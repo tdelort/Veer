@@ -43,8 +43,13 @@ namespace veer::display::render
             return static_cast<size_t>(m_size);
         }
 
+        bool operator==(const buffer_elem_info& _other) const
+        {
+            return (get_size() == _other.get_size()) && (get_offset() == _other.get_offset());
+        }
+
     private:
-        uint32_t m_size                 : 8;
-        uint32_t m_offset               : 24;
+        uint32_t m_size   : 8;
+        uint32_t m_offset : 24;
     };
 } // namespace veer::display::render

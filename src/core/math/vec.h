@@ -46,22 +46,31 @@ namespace veer::math
 
     public:
         constexpr vec();
-        constexpr ~vec();
 
         constexpr vec(TYPE _e);
 
-        template <Arithmetic... ARGS, typename = typename std::enable_if<(sizeof...(ARGS) == ELEM_COUNT)>::type>
-        constexpr vec(ARGS... _args) : m_data{_args...}
+        template <Arithmetic... ARGS>
+            requires(sizeof...(ARGS) == ELEM_COUNT)
+        constexpr vec(ARGS... _args)
+            : m_data{_args...}
         {
         }
 
         // TODO : add copy/move ctors + cast ctors
-        template <Arithmetic OTHER_TYPE, size_t OTHER_ELEM_COUNT,
-                  typename = typename std::enable_if<ELEM_COUNT == OTHER_ELEM_COUNT>::type>
-        constexpr vec(const vec<OTHER_TYPE, OTHER_ELEM_COUNT>& _other)
+        template <Arithmetic OTHER_TYPE, size_t OTHER_ELEM_COUNT>
+            requires(ELEM_COUNT == OTHER_ELEM_COUNT)
+        constexpr vec<TYPE, ELEM_COUNT>& operator=(const vec<OTHER_TYPE, OTHER_ELEM_COUNT>& _other)
         {
             for (size_t i = 0; i < ELEM_COUNT; ++i)
-                m_data[i] = _other[i];
+                m_data[i] = static_cast<TYPE>(_other[i]);
+            return *this;
+        }
+
+        template <Arithmetic OTHER_TYPE, size_t OTHER_ELEM_COUNT>
+            requires(ELEM_COUNT == OTHER_ELEM_COUNT)
+        constexpr vec(const vec<OTHER_TYPE, OTHER_ELEM_COUNT>& _other)
+        {
+            *this = _other;
         }
 
         // not constexpr because of the bounds check assert
@@ -97,50 +106,69 @@ namespace veer::math
         constexpr vec<TYPE, ELEM_COUNT>& operator/=(OTHER_TYPE _other);
         template <Arithmetic OTHER_TYPE>
         constexpr vec<TYPE, ELEM_COUNT>& operator/=(const vec<OTHER_TYPE, ELEM_COUNT>& _other);
+
+        friend std::ostream& operator<<(std::ostream& _os, const vec<TYPE, ELEM_COUNT>& _vec)
+        {
+            _os << "(" << _vec[0];
+            for (size_t i = 1; i < ELEM_COUNT; ++i)
+                _os << ", " << _vec[i];
+            _os << ")";
+            return _os;
+        }
     };
 
     template <Arithmetic TYPE, size_t ELEM_COUNT>
     [[nodiscard]] constexpr vec<TYPE, ELEM_COUNT> operator-(const vec<TYPE, ELEM_COUNT>& _vec);
 
     template <Arithmetic TYPE, size_t ELEM_COUNT>
-    [[nodiscard]] constexpr vec<TYPE, ELEM_COUNT> operator+(const vec<TYPE, ELEM_COUNT>& _lhs,
-                                                            const vec<TYPE, ELEM_COUNT>& _rhs);
+    [[nodiscard]] constexpr vec<TYPE, ELEM_COUNT> operator+(
+        const vec<TYPE, ELEM_COUNT>& _lhs, const vec<TYPE, ELEM_COUNT>& _rhs
+    );
 
     template <Arithmetic TYPE, size_t ELEM_COUNT>
-    [[nodiscard]] constexpr vec<TYPE, ELEM_COUNT> operator-(const vec<TYPE, ELEM_COUNT>& _lhs,
-                                                            const vec<TYPE, ELEM_COUNT>& _rhs);
+    [[nodiscard]] constexpr vec<TYPE, ELEM_COUNT> operator-(
+        const vec<TYPE, ELEM_COUNT>& _lhs, const vec<TYPE, ELEM_COUNT>& _rhs
+    );
 
     template <Arithmetic TYPE, size_t ELEM_COUNT>
-    [[nodiscard]] constexpr vec<TYPE, ELEM_COUNT> operator*(const vec<TYPE, ELEM_COUNT>& _lhs,
-                                                            const vec<TYPE, ELEM_COUNT>& _rhs);
+    [[nodiscard]] constexpr vec<TYPE, ELEM_COUNT> operator*(
+        const vec<TYPE, ELEM_COUNT>& _lhs, const vec<TYPE, ELEM_COUNT>& _rhs
+    );
 
     template <Arithmetic TYPE, size_t ELEM_COUNT>
-    [[nodiscard]] constexpr vec<TYPE, ELEM_COUNT> operator/(const vec<TYPE, ELEM_COUNT>& _lhs,
-                                                            const vec<TYPE, ELEM_COUNT>& _rhs);
+    [[nodiscard]] constexpr vec<TYPE, ELEM_COUNT> operator/(
+        const vec<TYPE, ELEM_COUNT>& _lhs, const vec<TYPE, ELEM_COUNT>& _rhs
+    );
 
     template <Arithmetic TYPE, size_t ELEM_COUNT>
-    [[nodiscard]] constexpr vec<bool, ELEM_COUNT> operator==(const vec<TYPE, ELEM_COUNT>& _lhs,
-                                                             const vec<TYPE, ELEM_COUNT>& _rhs);
+    [[nodiscard]] constexpr vec<bool, ELEM_COUNT> operator==(
+        const vec<TYPE, ELEM_COUNT>& _lhs, const vec<TYPE, ELEM_COUNT>& _rhs
+    );
 
     template <Arithmetic TYPE, size_t ELEM_COUNT>
-    [[nodiscard]] constexpr vec<bool, ELEM_COUNT> operator!=(const vec<TYPE, ELEM_COUNT>& _lhs,
-                                                             const vec<TYPE, ELEM_COUNT>& _rhs);
+    [[nodiscard]] constexpr vec<bool, ELEM_COUNT> operator!=(
+        const vec<TYPE, ELEM_COUNT>& _lhs, const vec<TYPE, ELEM_COUNT>& _rhs
+    );
 
     template <Arithmetic TYPE, size_t ELEM_COUNT>
-    [[nodiscard]] constexpr vec<bool, ELEM_COUNT> operator<(const vec<TYPE, ELEM_COUNT>& _lhs,
-                                                            const vec<TYPE, ELEM_COUNT>& _rhs);
+    [[nodiscard]] constexpr vec<bool, ELEM_COUNT> operator<(
+        const vec<TYPE, ELEM_COUNT>& _lhs, const vec<TYPE, ELEM_COUNT>& _rhs
+    );
 
     template <Arithmetic TYPE, size_t ELEM_COUNT>
-    [[nodiscard]] constexpr vec<bool, ELEM_COUNT> operator>(const vec<TYPE, ELEM_COUNT>& _lhs,
-                                                            const vec<TYPE, ELEM_COUNT>& _rhs);
+    [[nodiscard]] constexpr vec<bool, ELEM_COUNT> operator>(
+        const vec<TYPE, ELEM_COUNT>& _lhs, const vec<TYPE, ELEM_COUNT>& _rhs
+    );
 
     template <Arithmetic TYPE, size_t ELEM_COUNT>
-    [[nodiscard]] constexpr vec<bool, ELEM_COUNT> operator<=(const vec<TYPE, ELEM_COUNT>& _lhs,
-                                                             const vec<TYPE, ELEM_COUNT>& _rhs);
+    [[nodiscard]] constexpr vec<bool, ELEM_COUNT> operator<=(
+        const vec<TYPE, ELEM_COUNT>& _lhs, const vec<TYPE, ELEM_COUNT>& _rhs
+    );
 
     template <Arithmetic TYPE, size_t ELEM_COUNT>
-    [[nodiscard]] constexpr vec<bool, ELEM_COUNT> operator>=(const vec<TYPE, ELEM_COUNT>& _lhs,
-                                                             const vec<TYPE, ELEM_COUNT>& _rhs);
+    [[nodiscard]] constexpr vec<bool, ELEM_COUNT> operator>=(
+        const vec<TYPE, ELEM_COUNT>& _lhs, const vec<TYPE, ELEM_COUNT>& _rhs
+    );
 
     template <size_t ELEM_COUNT>
     [[nodiscard]] constexpr vec<bool, ELEM_COUNT> operator!(const vec<bool, ELEM_COUNT>& _vec);
@@ -163,8 +191,9 @@ namespace veer::math
     [[nodiscard]] constexpr vec<TYPE, ELEM_COUNT> normalize(const vec<TYPE, ELEM_COUNT>& _v);
 
     template <Arithmetic TYPE, size_t ELEM_COUNT>
-    [[nodiscard]] constexpr vec<TYPE, ELEM_COUNT> normalize_safe(const vec<TYPE, ELEM_COUNT>& _v,
-                                                                 float _epsilon = FLT_EPSILON);
+    [[nodiscard]] constexpr vec<TYPE, ELEM_COUNT> normalize_safe(
+        const vec<TYPE, ELEM_COUNT>& _v, float _epsilon = FLT_EPSILON
+    );
 
     template <size_t ELEM_COUNT>
     [[nodiscard]] constexpr bool all(const vec<bool, ELEM_COUNT>& _vec);

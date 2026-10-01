@@ -24,9 +24,6 @@ namespace veer::display::render
     class render_device_buffer;
     class render_device_resource;
 
-    // TODO : We could probably need a copy_submit_context, but if this is the case, there is a few things that would
-    // benefit from a schmol refactor
-
     class submit_context
     {
     public:
@@ -42,6 +39,8 @@ namespace veer::display::render
         copy_submit_context(copy_command_buffer& _command_buffer);
 
         // TODO : add copies
+        void copy_texture(render_device_texture_base& _dst, render_device_texture_base& _src);
+        void copy_buffer(render_device_buffer& _dst, render_device_buffer& _src, uint64_t _num_bytes);
 
     private:
         copy_command_buffer& get_copy_command_buffer();
@@ -65,10 +64,13 @@ namespace veer::display::render
 
         void set_constant_buffer(constant_buffer& _constant_buffer, constant_buffer_type _type);
 
-        void dispatch(size_t _x, size_t _y, size_t _z);
+        void dispatch(math::vec3u _group_count);
 
     private:
         compute_command_buffer& get_compute_command_buffer();
+
+    private:
+        compute_technique& m_technique;
     };
 
     class graphics_submit_context : public submit_context
@@ -80,7 +82,6 @@ namespace veer::display::render
         // TODO : add copies
         // TODO : add clears
 
-        // TODO : For submit_contexts, this might be a bit too much control ?
         void set_render_output(render_device_texture_2d* _depth, render_device_texture_2d* _color);
         void set_render_output(render_device_texture_2d* _depth, containers::span<render_device_texture_2d*> _colors);
         void set_viewports(containers::span<viewport> _viewports);

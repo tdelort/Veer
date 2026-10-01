@@ -11,7 +11,6 @@
 #include <core/containers/span.h>
 #include <display/render/backends/dx12/dx12_pch.h>
 #include <display/render/resource_desc.h>
-
 #endif
 
 using backend_handle = void*;
@@ -41,7 +40,7 @@ namespace veer::display::render
         };
 
     public:
-        render_device_resource(render_device& _device);
+        render_device_resource(render_device& _device, const char* _debug_name);
         virtual ~render_device_resource() = 0;
 
         // common functions
@@ -74,6 +73,7 @@ namespace veer::display::render
 
         containers::resizable_array<byte_t> m_data;
 
+        containers::string m_debug_name;
 #if defined(D3D12_RENDER_BACKEND)
 #include "backends/dx12/dx12_render_device_resource.inl"
 #elif defined(VULKAN_RENDER_BACKEND)

@@ -5,6 +5,7 @@
 #include <core/core.h>
 #include <core/debug.h>
 #include <core/math/math.h>
+#include <core/containers/span.h>
 
 namespace veer::containers
 {
@@ -15,6 +16,13 @@ namespace veer::containers
         , m_capacity{0u}
         , m_allocator()
     {
+    }
+
+    template <typename T, SystemAllocator ALLOCATOR>
+    resizable_array<T, ALLOCATOR>::resizable_array(std::initializer_list<T> _list)
+        : resizable_array<T, ALLOCATOR>()
+    {
+        add(_list.begin(), _list.end());
     }
 
     template <typename T, SystemAllocator ALLOCATOR>
@@ -245,6 +253,11 @@ namespace veer::containers
                                         << _new_capacity << ") smaller than size " << m_size << " !"
         );
         T* new_data = static_cast<T*>(m_allocator.allocate(_new_capacity * sizeof(T)));
+
+        for (size_t i = 0; i < _new_capacity; ++i)
+            new (new_data + i) T();
+
+        std::vector<T> a;
 
         if (m_data != nullptr)
         {

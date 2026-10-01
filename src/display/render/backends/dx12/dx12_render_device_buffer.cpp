@@ -6,8 +6,10 @@
 
 namespace veer::display::render
 {
-    render_device_buffer::render_device_buffer(render_device& _device, const buffer_desc& _desc)
-        : render_device_resource(_device)
+    render_device_buffer::render_device_buffer(
+        render_device& _device, const buffer_desc& _desc, const char* _debug_name
+    )
+        : render_device_resource(_device, _debug_name)
         , m_desc{_desc}
     {
     }
@@ -24,7 +26,7 @@ namespace veer::display::render
         D3D12_RESOURCE_DESC dx12_desc = {};
 
         dx12_desc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-		// TODO : we could fit many constant buffers in one Alignment
+        // TODO : we could fit many constant buffers in one Alignment
         dx12_desc.Alignment = D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT;
         dx12_desc.Height = 1u;
         dx12_desc.DepthOrArraySize = 1u;
@@ -34,7 +36,7 @@ namespace veer::display::render
         dx12_desc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
         dx12_desc.Format = DXGI_FORMAT_UNKNOWN;
 
-        const buffer_desc& veer_desc = desc();
+        const buffer_desc& veer_desc = get_desc();
 
         dx12_desc.Width = veer_desc.m_size * veer_desc.m_stride;
 
@@ -57,8 +59,8 @@ namespace veer::display::render
     byte_t* render_device_buffer::map()
     {
         byte_t* gpu_data;
-        HRESULT hr = get_api_handle()->Map(0u, nullptr, reinterpret_cast<void**>(&gpu_data));
-        VEER_ASSERT(SUCCEEDED(hr), "Failed to Map buffer resource. Error (" << hr << ")");
+        veer::hr hr = get_api_handle()->Map(0u, nullptr, reinterpret_cast<void**>(&gpu_data));
+        VEER_ASSERT(hr.succeeded(), "Failed to Map buffer resource. Error (" << hr << ")");
         return gpu_data;
     }
 
@@ -99,7 +101,7 @@ namespace veer::display::render
 
     void render_device_buffer::update_views()
     {
-        const buffer_desc& buffer_desc = desc();
+        const buffer_desc& buffer_desc = get_desc();
         // TODO : generating this here instead of directly using the one used during the CreateResource call might cause
         // problems and is a bit counter productive
         const size_t size_in_bytes = get_resource_desc().Width;
@@ -180,7 +182,7 @@ namespace veer::display::render
     const D3D12_INDEX_BUFFER_VIEW& render_device_buffer::get_index_buffer_view() const
     {
         VEER_ASSERT(
-            flags::get(desc().m_flags, buffer_desc::usage_flags::index),
+            flags::get(get_desc().m_flags, buffer_desc::usage_flags::index),
             "Buffer should be alloc with index usage flag to be used as index buffer"
         );
         VEER_ASSERT(
@@ -193,7 +195,7 @@ namespace veer::display::render
     const D3D12_VERTEX_BUFFER_VIEW& render_device_buffer::get_vertex_buffer_view() const
     {
         VEER_ASSERT(
-            flags::get(desc().m_flags, buffer_desc::usage_flags::vertex),
+            flags::get(get_desc().m_flags, buffer_desc::usage_flags::vertex),
             "Buffer should be alloc with index usage flag to be used as vertex buffer"
         );
         VEER_ASSERT(

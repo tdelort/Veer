@@ -15,10 +15,6 @@ namespace veer::math
     {
     }
 
-    template <Arithmetic TYPE, size_t ELEM_COUNT>
-    constexpr vec<TYPE, ELEM_COUNT>::~vec()
-    {
-    }
 
     template <Arithmetic TYPE, size_t ELEM_COUNT>
     TYPE vec<TYPE, ELEM_COUNT>::operator[](size_t _index) const

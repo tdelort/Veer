@@ -3,7 +3,7 @@
 #include "debug.h"
 #include <core/concepts.h>
 
-#define VEER_LOG_ALLOCS
+// #define VEER_LOG_ALLOCS
 
 namespace veer
 {
@@ -29,6 +29,11 @@ namespace veer
         {
             pointer ptr = static_cast<pointer>(std::malloc(_size_in_bytes));
             VEER_ASSERT(ptr != nullptr, "Alloc Failed");
+
+            static size_t counter = 0;
+            counter += _size_in_bytes;
+            VEER_ASSERT(counter < 1024u * 1024u * 1024u, "Here");
+
 
 #if defined(VEER_LOG_ALLOCS)
             VEER_LOG("[ALLOC] " << _size_in_bytes << " bytes at " << ptr);

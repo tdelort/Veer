@@ -28,7 +28,7 @@ namespace veer
 {												\
 	std::stringstream VEER_ASSERT_INTERNAL__ss;	\
 	VEER_ASSERT_INTERNAL__ss << _msg;				\
-	debug::assert_if( ( _test ), VEER_ASSERT_INTERNAL__ss.str().c_str(), __FILE__, VEER_PRETTY_FUNCTION, __LINE__ ); \
+	veer::debug::assert_if( ( _test ), VEER_ASSERT_INTERNAL__ss.str().c_str(), __FILE__, VEER_PRETTY_FUNCTION, __LINE__ ); \
 }
 
 #define VEER_ASSERT(_test, _msg) VEER_ASSERT_INTERNAL( _test, _msg );

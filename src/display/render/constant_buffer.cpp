@@ -7,21 +7,6 @@
 
 namespace veer::display::render
 {
-    // constant_buffer_definition
-
-    const buffer_elem_info& constant_buffer_definition::get_elem_info(const char* _name) const
-    {
-        std::function<bool(const constant_buffer_elem_info&)> predicate =
-            [&_name](const constant_buffer_elem_info& _elem) { return std::strcmp(_elem.m_name, _name) == 0; };
-
-        containers::resizable_array<constant_buffer_elem_info>::const_iterator it =
-            veer::containers::find_if(m_elements.cbegin(), m_elements.cend(), predicate);
-
-        VEER_ASSERT(it != m_elements.cend(), "Param not found");
-
-        return it->m_elem_info;
-    }
-
     // constant_buffer::update_context
 
     constant_buffer::update_context::update_context(constant_buffer& _constant_buffer, render_thread& _render_thread)
@@ -34,12 +19,15 @@ namespace veer::display::render
     {
         const uint64_t current_frame_index = m_render_thread.get_frame_index();
 
-        m_constant_buffer.m_live_buffer_pool.push_back(std::move(m_constant_buffer.m_current_buffer));
+        if (m_constant_buffer.m_current_buffer.m_buffer_ptr != nullptr)
+        {
+            m_constant_buffer.m_live_buffer_pool.push_back(std::move(m_constant_buffer.m_current_buffer));
+        }
 
         {
             // First, try to reclaim live buffers
             for (
-                auto it = m_constant_buffer.m_live_buffer_pool.begin();
+                live_buffer* it = m_constant_buffer.m_live_buffer_pool.begin();
                 it != m_constant_buffer.m_live_buffer_pool.end();
             )
             {
@@ -65,7 +53,8 @@ namespace veer::display::render
             {
                 // Nothing in free list, alloc new elem
                 buffer = unique_ptr<render_device_buffer>::make(
-                    m_constant_buffer.m_device, m_constant_buffer.get_internal_buffer_desc()
+                    m_constant_buffer.m_device, m_constant_buffer.get_internal_buffer_desc(),
+                    m_constant_buffer.m_debug_name.c_str()
                 );
 
                 buffer->upload(render_device_resource::upload_flags::dirty_alloc);
@@ -135,9 +124,12 @@ namespace veer::display::render
 
     // constant_buffer
 
-    constant_buffer::constant_buffer(render_device& _device, const constant_buffer_definition& _def)
+    constant_buffer::constant_buffer(
+        render_device& _device, const constant_buffer_definition& _def, const char* _debug_name
+    )
         : m_device{_device}
-        , m_definition{_def}
+        , m_definition{std::move(_def)}
+        , m_debug_name{_debug_name}
     {
         size_t size = 0u;
         for (const constant_buffer_elem_info& _constant_buffer_elem_info : m_definition.m_elements)

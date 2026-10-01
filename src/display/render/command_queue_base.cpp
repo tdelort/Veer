@@ -12,7 +12,7 @@ namespace veer::display::render
 	
 	void command_queue_base::enqueue(command_buffer&& _command_buffer)
 	{
-		m_executed_buffers.emplace_back(m_last_signaled_fence_value, std::forward<command_buffer&&>(_command_buffer));
+		m_executed_buffers.emplace_back(m_last_signaled_fence_value, std::move(_command_buffer));
 	}
 
 	

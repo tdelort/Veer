@@ -53,6 +53,12 @@ namespace veer::display::render
 	}
 
 // --- command_buffer ---
+	command_buffer::command_buffer()
+		: m_type{command_buffer::type::none}
+		, m_owner_thread{nullptr}
+		, m_command_list_handle{nullptr}
+	{
+	}
 
 	command_buffer::command_buffer(render_thread& _render_thread, command_buffer::type _type)
 		: m_type{_type}
@@ -83,7 +89,7 @@ namespace veer::display::render
 
 	command_buffer::~command_buffer()
 	{
-		VEER_ASSERT(m_command_list_handle == nullptr, "command_buffer destroyed with actually being executed!!!");
+		VEER_ASSERT(m_command_list_handle == nullptr, "command_buffer destroyed without actually being executed!!!");
 	}
 
 	void command_buffer::transition_barrier(render_device_resource& _resource, render_device_resource_sync_state _to_state)
@@ -197,10 +203,9 @@ namespace veer::display::render
 		get_api_handle()->SetComputeRootConstantBufferView(veer::display::render::s_get_root_param_index(_type), _buffer.get_api_handle()->GetGPUVirtualAddress());
 	}
 
-	void compute_command_buffer::dispatch(size_t _x, size_t _y, size_t _z)
+	void compute_command_buffer::dispatch(math::vec3u _group_count)
 	{
-		(void)_x, _y, _z;
-		VEER_ASSERT(false, "Not implemented");
+		get_api_handle()->Dispatch(_group_count.x(), _group_count.y(), _group_count.z());
 	}
 
 

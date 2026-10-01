@@ -1,6 +1,5 @@
 #pragma once
 
-// TODO use only texture_base whenever possible
 #include "display/render/render_device_buffer.h"
 #include "display/render/render_device_texture_2d.h"
 #include "display/render/render_device_texture_base.h"
@@ -34,6 +33,8 @@ namespace veer::display::render
             graphics,
             compute,
             copy,
+
+            none, // default constructed command buffer, useful mainly to put it in a resizable_array 
         };
 
         command_buffer(const command_buffer& _other) = delete;
@@ -42,6 +43,7 @@ namespace veer::display::render
         command_buffer(command_buffer&& _other);
         command_buffer& operator=(command_buffer&& _other);
 
+        command_buffer();
         command_buffer(render_thread& _render_thread, command_buffer::type _type);
         virtual ~command_buffer();
 
@@ -129,14 +131,12 @@ namespace veer::display::render
 
         void set_constant_buffer(const render_device_buffer& _buffer, constant_buffer_type _type);
 
-        void dispatch(size_t _x, size_t _y, size_t _z);
+        void dispatch(math::vec3u _group_count);
         // TODO : void dispatch_indirect(const render_device_buffer& _buffer, size_t _arg_index);
     };
 
     class graphics_command_buffer : public compute_command_buffer
     {
-        friend class command_queue_base;
-
     public:
         graphics_command_buffer(render_thread& _render_thread);
 

@@ -2,6 +2,8 @@
 
 #include <display/render/command_buffer.h>
 #include <display/render/technique.h>
+#include <display/render/compute_technique.h>
+#include <display/render/graphics_technique.h>
 
 namespace veer::display::render
 {
@@ -19,6 +21,22 @@ namespace veer::display::render
     {
     }
 
+    void copy_submit_context::copy_texture(render_device_texture_base& _dst, render_device_texture_base& _src)
+    {
+        copy_command_buffer& command_buffer = get_copy_command_buffer();
+        command_buffer.transition_barrier(_dst, render_device_resource_sync_state::CopyDest);
+        command_buffer.transition_barrier(_src, render_device_resource_sync_state::CopySource);
+        command_buffer.copy_texture(_dst, _src);
+    }
+
+    void copy_submit_context::copy_buffer(render_device_buffer& _dst, render_device_buffer& _src, uint64_t _num_bytes)
+    {
+        copy_command_buffer& command_buffer = get_copy_command_buffer();
+        command_buffer.transition_barrier(_dst, render_device_resource_sync_state::CopyDest);
+        command_buffer.transition_barrier(_src, render_device_resource_sync_state::CopySource);
+        command_buffer.copy_buffer(_dst, _src, _num_bytes);
+    }
+
     copy_command_buffer& copy_submit_context::get_copy_command_buffer()
     {
         return static_cast<copy_command_buffer&>(m_command_buffer);
@@ -29,9 +47,9 @@ namespace veer::display::render
     compute_submit_context::compute_submit_context(
         compute_command_buffer& _command_buffer, compute_technique& _technique
     )
-        : submit_context(_command_buffer)
+        : submit_context(_command_buffer), m_technique(_technique)
     {
-        get_compute_command_buffer().set_technique(_technique);
+        get_compute_command_buffer().set_technique(m_technique);
     }
 
     void compute_submit_context::clear_texture(render_device_texture_base& _resource, math::vec4f _val)
@@ -67,12 +85,17 @@ namespace veer::display::render
         compute_command_buffer& command_buffer = get_compute_command_buffer();
         render_device_buffer* buffer = _constant_buffer.get_internal_buffer();
         VEER_ASSERT(buffer != nullptr, "You did not init constant buffer before using it (using its update_context)");
+
+        const constant_buffer_definition& def_from_technique = m_technique.get_constant_buffer_definition(_type);
+        const constant_buffer_definition& def_from_constant_buffer = _constant_buffer.get_def();
+        VEER_ASSERT(def_from_technique == def_from_constant_buffer, "set_constant_buffer called with a constant buffer not compatible with technique");
+
         command_buffer.set_constant_buffer(*buffer, _type);
     }
 
-    void compute_submit_context::dispatch(size_t _x, size_t _y, size_t _z)
+    void compute_submit_context::dispatch(math::vec3u _group_count)
     {
-        get_compute_command_buffer().dispatch(_x, _y, _z);
+        get_compute_command_buffer().dispatch(_group_count);
     }
 
     compute_command_buffer& compute_submit_context::get_compute_command_buffer()

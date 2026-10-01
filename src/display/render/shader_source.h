@@ -46,6 +46,8 @@ namespace veer::display::render
     {
         veer::containers::span<blend_state> m_blend_states;
         rasterizer_state m_rasterizer_state;
+        bool m_depth_enable;
+        bool m_stencil_enable;
         // depth_state ? m_depth_enable / m_stencil_enable ?
     };
 

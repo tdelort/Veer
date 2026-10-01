@@ -35,9 +35,19 @@ namespace veer::display::render
             return m_device;
         }
 
+        void on_close_command_list()
+        {
+            VEER_ASSERT(
+                m_command_buffer_open,
+                "on_close_command_list called while no command buffer owner by this render thread was open, fishy"
+            );
+            m_command_buffer_open = false;
+        }
+
     private:
-        size_t m_current_frame_index;
         const render_device& m_device;
+        size_t m_current_frame_index{0u};
+        bool m_command_buffer_open{false};
 
 #if defined(D3D12_RENDER_BACKEND)
 #include "backends/dx12/dx12_render_thread.inl"

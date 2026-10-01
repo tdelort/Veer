@@ -1,6 +1,7 @@
 public:
 	static D3D12_RESOURCE_FLAGS s_convert(buffer_desc::usage_flags _states);
-	static D3D12_RESOURCE_FLAGS s_convert(texture_desc::usage_flags _states);
+	static D3D12_RESOURCE_FLAGS s_convert(texture_2d_desc::usage_flags _states);
+	static D3D12_RESOURCE_FLAGS s_convert(texture_3d_desc::usage_flags _states);
 
 protected:
 	virtual D3D12_RESOURCE_DESC get_resource_desc() const = 0;

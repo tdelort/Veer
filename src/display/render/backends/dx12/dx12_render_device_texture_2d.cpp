@@ -11,8 +11,8 @@
 
 namespace veer::display::render 
 {
-	render_device_texture_2d::render_device_texture_2d(render_device& _device, const texture_2d_desc& _desc)
-        : render_device_texture_base(_device)
+	render_device_texture_2d::render_device_texture_2d(render_device& _device, const texture_2d_desc& _desc, const char* _debug_name)
+        : render_device_texture_base(_device, _debug_name)
         , m_desc{ _desc }
 	{
 	}
@@ -36,7 +36,7 @@ namespace veer::display::render
 		dx12_desc.SampleDesc.Quality = 0u;
 		dx12_desc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
 
-		const texture_2d_desc& veer_desc = desc();
+		const texture_2d_desc& veer_desc = get_desc();
 
 		dx12_desc.Width = veer_desc.m_size[0u];
 		dx12_desc.Height = veer_desc.m_size[1u];
@@ -56,7 +56,7 @@ namespace veer::display::render
 	// something like "unique_ptr<render_device_texture_2d_view> create_view(render_device_texture_2d_view_desc _desc)"
 	void render_device_texture_2d::update_views()
 	{
-		const texture_2d_desc& texture_desc = desc();
+		const texture_2d_desc& texture_desc = get_desc();
 
 		{
 			dx12_descriptor_heap& srv_uav_cbv_heap = m_device.get_srv_uav_cbv_descriptor_heap();
@@ -77,7 +77,7 @@ namespace veer::display::render
 				m_device.get_api_handle()->CreateShaderResourceView(get_api_handle(), &srv_desc, m_srv_cpu_descriptor.m_handle);
 			}
 
-			if (flags::get(texture_desc.m_flags, texture_desc::usage_flags::storage))
+			if (flags::get(texture_desc.m_flags, texture_2d_desc::usage_flags::storage))
 			{
 				m_device.get_srv_uav_cbv_descriptor_heap().release_descriptor(m_uav_cpu_descriptor);
 
@@ -92,7 +92,7 @@ namespace veer::display::render
 			}
 		}
 
-		if (flags::get(texture_desc.m_flags, texture_desc::usage_flags::render_target))
+		if (flags::get(texture_desc.m_flags, texture_2d_desc::usage_flags::render_target))
 		{
 			m_device.get_rtv_descriptor_heap().release_descriptor(m_rtv_cpu_descriptor);
 
@@ -107,7 +107,7 @@ namespace veer::display::render
 			m_device.get_api_handle()->CreateRenderTargetView(get_api_handle(), &rtv_desc, m_rtv_cpu_descriptor.m_handle);
 		}
 
-		if (flags::get(texture_desc.m_flags, texture_desc::usage_flags::depth_stencil))
+		if (flags::get(texture_desc.m_flags, texture_2d_desc::usage_flags::depth_stencil))
 		{
 			m_device.get_dsv_descriptor_heap().release_descriptor(m_dsv_cpu_descriptor);
 
