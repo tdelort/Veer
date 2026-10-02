@@ -11,8 +11,10 @@ namespace veer::math
     }
 
     template <Arithmetic TYPE, size_t ELEM_COUNT>
-    constexpr vec<TYPE, ELEM_COUNT>::vec(TYPE _e) : m_data{_e}
+    constexpr vec<TYPE, ELEM_COUNT>::vec(TYPE _e) 
     {
+        for (size_t i = 0; i < ELEM_COUNT; ++i)
+            m_data[i] = _e;
     }
 
 

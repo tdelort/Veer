@@ -59,7 +59,7 @@ namespace veer::math
     }
 
     // 127 - 15
-    static constexpr uint64_t s_f32_to_f16_exponent_offset = 112u;
+    static constexpr int64_t s_f32_to_f16_exponent_offset = 112;
 
     constexpr uint16_t to_float_16(float _value)
     {
@@ -78,7 +78,7 @@ namespace veer::math
         // -1 ^ s_16 * 2 ^ (e_16 - 15) * (1.m_32)
         const uint16_t s_16 = (s_32 << 15) & 0x8000;
         const uint16_t e_16 = (tmp << 10) & 0x7C00;
-        const uint16_t m_16 = (m_32 >> 13) & 0x003F;
+        const uint16_t m_16 = (m_32 >> 13) & 0x03FF;
 
         return s_16 | e_16 | m_16;
     }
