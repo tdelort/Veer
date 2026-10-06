@@ -20,7 +20,7 @@ namespace veer
 } // namespace veer
 
 
-#define VEER_BREAKPOINT __debugbreak()
+#define VEER_BREAKPOINT() __debugbreak()
 #define VEER_PRETTY_FUNCTION __FUNCTION__
 
 

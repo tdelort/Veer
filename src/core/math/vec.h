@@ -35,9 +35,9 @@ namespace veer::math
         using value_type = TYPE;
         using type = vec<TYPE, ELEM_COUNT>;
         using size_type = size_t;
-        size_type m_size = ELEM_COUNT;
+        static constexpr size_type m_size = ELEM_COUNT;
 
-    protected:
+    private:
 #if defined(VEC_SIMD)
         // use some internal simd type like a __m128 if ELEM_COUNT <= 4
 #else  // defined( VEC_SIMD )
@@ -56,19 +56,28 @@ namespace veer::math
         {
         }
 
+        template <size_t OTHER_ELEM_COUNT, Arithmetic... ARGS>
+            requires((OTHER_ELEM_COUNT + sizeof...(ARGS)) == ELEM_COUNT)
+        constexpr vec(const vec<TYPE, OTHER_ELEM_COUNT>& _v, ARGS... _args)
+        {
+            size_t i = 0;
+            for (; i < OTHER_ELEM_COUNT; ++i)
+                m_data[i] = static_cast<TYPE>(_v[i]);
+
+            ((m_data[i++] = _args), ...);
+        }
+
         // TODO : add copy/move ctors + cast ctors
-        template <Arithmetic OTHER_TYPE, size_t OTHER_ELEM_COUNT>
-            requires(ELEM_COUNT == OTHER_ELEM_COUNT)
-        constexpr vec<TYPE, ELEM_COUNT>& operator=(const vec<OTHER_TYPE, OTHER_ELEM_COUNT>& _other)
+        template <Arithmetic OTHER_TYPE>
+        constexpr vec<TYPE, ELEM_COUNT>& operator=(const vec<OTHER_TYPE, ELEM_COUNT>& _other)
         {
             for (size_t i = 0; i < ELEM_COUNT; ++i)
                 m_data[i] = static_cast<TYPE>(_other[i]);
             return *this;
         }
 
-        template <Arithmetic OTHER_TYPE, size_t OTHER_ELEM_COUNT>
-            requires(ELEM_COUNT == OTHER_ELEM_COUNT)
-        constexpr vec(const vec<OTHER_TYPE, OTHER_ELEM_COUNT>& _other)
+        template <Arithmetic OTHER_TYPE>
+        constexpr vec(const vec<OTHER_TYPE, ELEM_COUNT>& _other)
         {
             *this = _other;
         }
@@ -131,9 +140,17 @@ namespace veer::math
     );
 
     template <Arithmetic TYPE, size_t ELEM_COUNT>
+    [[nodiscard]] constexpr vec<TYPE, ELEM_COUNT> operator*(TYPE _s, const vec<TYPE, ELEM_COUNT>& _v);
+    template <Arithmetic TYPE, size_t ELEM_COUNT>
+    [[nodiscard]] constexpr vec<TYPE, ELEM_COUNT> operator*(const vec<TYPE, ELEM_COUNT>& _v, TYPE _s);
+
+    template <Arithmetic TYPE, size_t ELEM_COUNT>
     [[nodiscard]] constexpr vec<TYPE, ELEM_COUNT> operator*(
         const vec<TYPE, ELEM_COUNT>& _lhs, const vec<TYPE, ELEM_COUNT>& _rhs
     );
+
+    template <Arithmetic TYPE, size_t ELEM_COUNT>
+    [[nodiscard]] constexpr vec<TYPE, ELEM_COUNT> operator/(const vec<TYPE, ELEM_COUNT>& _v, TYPE _s);
 
     template <Arithmetic TYPE, size_t ELEM_COUNT>
     [[nodiscard]] constexpr vec<TYPE, ELEM_COUNT> operator/(
@@ -221,6 +238,10 @@ namespace veer::math
     using vec4u64 = vec<uint64_t, 4u>;
     using vec4i64 = vec<int64_t, 4u>;
     using vec4f64 = vec<float, 4u>;
+
+    using vec2b = vec<bool, 2u>;
+    using vec3b = vec<bool, 3u>;
+    using vec4b = vec<bool, 4u>;
 } // namespace veer::math
 
 #include "vec_scalar.hpp"

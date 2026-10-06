@@ -7,6 +7,7 @@ namespace veer
         if(!_condition)
         {
             print(log_level::error, _message, _file, _function, _line );
+            VEER_BREAKPOINT();
         }
     }
 

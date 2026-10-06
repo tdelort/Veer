@@ -5,6 +5,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 project(VeerEngine VERSION 0.1.0)
 
 add_library(${PROJECT_NAME} STATIC )
+option(BUILD_TESTS "Build tests" OFF)
 
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_20)
 set_target_properties(
@@ -18,10 +19,8 @@ set_target_properties(
     DEBUG_POSTFIX "d"
 )
 
-add_compile_definitions(_DEBUG)
-
 add_link_options(
-    -DEBUG
+    ${LINKER_OPTION}
 )
 
 # GLFW build 

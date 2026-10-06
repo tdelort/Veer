@@ -6,17 +6,17 @@
 namespace veer::math
 {
     template <Arithmetic TYPE, size_t ELEM_COUNT>
-    constexpr vec<TYPE, ELEM_COUNT>::vec() : m_data{0}
+    constexpr vec<TYPE, ELEM_COUNT>::vec()
+        : m_data{0}
     {
     }
 
     template <Arithmetic TYPE, size_t ELEM_COUNT>
-    constexpr vec<TYPE, ELEM_COUNT>::vec(TYPE _e) 
+    constexpr vec<TYPE, ELEM_COUNT>::vec(TYPE _e)
     {
         for (size_t i = 0; i < ELEM_COUNT; ++i)
             m_data[i] = _e;
     }
-
 
     template <Arithmetic TYPE, size_t ELEM_COUNT>
     TYPE vec<TYPE, ELEM_COUNT>::operator[](size_t _index) const
@@ -51,7 +51,7 @@ namespace veer::math
     ELEM_ACCESS_DEFINE(a, 3u)
 
     //----------------------------------------------------------------------------
-    //							COUMPOUND OPERATORS
+    //							COMPOUND OPERATORS
     //----------------------------------------------------------------------------
 
     // +=
@@ -60,7 +60,7 @@ namespace veer::math
     constexpr vec<TYPE, ELEM_COUNT>& vec<TYPE, ELEM_COUNT>::operator+=(OTHER_TYPE _other)
     {
         for (size_t i = 0; i < ELEM_COUNT; ++i)
-            m_data[i] += static_cast<TYPE>(_other.m_data[i]);
+            m_data[i] += static_cast<TYPE>(_other);
         return *this;
     }
 
@@ -79,7 +79,7 @@ namespace veer::math
     constexpr vec<TYPE, ELEM_COUNT>& vec<TYPE, ELEM_COUNT>::operator-=(OTHER_TYPE _other)
     {
         for (size_t i = 0; i < ELEM_COUNT; ++i)
-            m_data[i] -= static_cast<TYPE>(_other.m_data[i]);
+            m_data[i] -= static_cast<TYPE>(_other);
         return *this;
     }
 
@@ -98,7 +98,7 @@ namespace veer::math
     constexpr vec<TYPE, ELEM_COUNT>& vec<TYPE, ELEM_COUNT>::operator*=(OTHER_TYPE _other)
     {
         for (size_t i = 0; i < ELEM_COUNT; ++i)
-            m_data[i] *= static_cast<TYPE>(_other.m_data[i]);
+            m_data[i] *= static_cast<TYPE>(_other);
         return *this;
     }
 
@@ -117,7 +117,7 @@ namespace veer::math
     constexpr vec<TYPE, ELEM_COUNT>& vec<TYPE, ELEM_COUNT>::operator/=(OTHER_TYPE _other)
     {
         for (size_t i = 0; i < ELEM_COUNT; ++i)
-            m_data[i] /= static_cast<TYPE>(_other.m_data[i]);
+            m_data[i] /= static_cast<TYPE>(_other);
         return *this;
     }
 
@@ -135,7 +135,7 @@ namespace veer::math
     {
         vec<TYPE, ELEM_COUNT> result;
         for (size_t i = 0; i < ELEM_COUNT; ++i)
-            result[i] = _vec[i];
+            result[i] = -_vec[i];
         return result;
     }
 
@@ -154,10 +154,17 @@ namespace veer::math
     }
 
     template <Arithmetic TYPE, size_t ELEM_COUNT>
-    constexpr vec<TYPE, ELEM_COUNT> operator/(const vec<TYPE, ELEM_COUNT>& _lhs, const vec<TYPE, ELEM_COUNT>& _rhs)
+    [[nodiscard]] constexpr vec<TYPE, ELEM_COUNT> operator*(TYPE _s, const vec<TYPE, ELEM_COUNT>& _v)
     {
-        vec<TYPE, ELEM_COUNT> res(_lhs);
-        return res /= _rhs;
+        vec<TYPE, ELEM_COUNT> res(_v);
+        return res *= _s;
+    }
+
+    template <Arithmetic TYPE, size_t ELEM_COUNT>
+    [[nodiscard]] constexpr vec<TYPE, ELEM_COUNT> operator*(const vec<TYPE, ELEM_COUNT>& _v, TYPE _s)
+    {
+        vec<TYPE, ELEM_COUNT> res(_v);
+        return res *= _s;
     }
 
     template <Arithmetic TYPE, size_t ELEM_COUNT>
@@ -165,6 +172,20 @@ namespace veer::math
     {
         vec<TYPE, ELEM_COUNT> res(_lhs);
         return res *= _rhs;
+    }
+
+    template <Arithmetic TYPE, size_t ELEM_COUNT>
+    [[nodiscard]] constexpr vec<TYPE, ELEM_COUNT> operator/(const vec<TYPE, ELEM_COUNT>& _v, TYPE _s)
+    {
+        vec<TYPE, ELEM_COUNT> res(_v);
+        return res /= _s;
+    }
+
+    template <Arithmetic TYPE, size_t ELEM_COUNT>
+    constexpr vec<TYPE, ELEM_COUNT> operator/(const vec<TYPE, ELEM_COUNT>& _lhs, const vec<TYPE, ELEM_COUNT>& _rhs)
+    {
+        vec<TYPE, ELEM_COUNT> res(_lhs);
+        return res /= _rhs;
     }
 
     template <Arithmetic TYPE, size_t ELEM_COUNT>
@@ -248,8 +269,10 @@ namespace veer::math
     template <Arithmetic TYPE>
     constexpr vec<TYPE, 3u> cross(const vec<TYPE, 3u>& _lhs, const vec<TYPE, 3u>& _rhs)
     {
-        return vec<TYPE, 3u>(_lhs[1] * _rhs[2] - _lhs[2] * _rhs[1], _lhs[2] * _rhs[0] - _lhs[0] * _rhs[2],
-                             _lhs[0] * _rhs[1] - _lhs[1] * _rhs[0]);
+        return vec<TYPE, 3u>(
+            _lhs[1] * _rhs[2] - _lhs[2] * _rhs[1], _lhs[2] * _rhs[0] - _lhs[0] * _rhs[2],
+            _lhs[0] * _rhs[1] - _lhs[1] * _rhs[0]
+        );
     }
 
     // sq_length
