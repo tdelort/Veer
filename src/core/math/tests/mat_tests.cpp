@@ -53,11 +53,10 @@ namespace veer::tests
         const math::mat4x4f z{};
 
         const math::mat2x2f a_upper_2x2 = a.get<2u, 2u>();
-        const math::mat2x2f b_upper_2x2 = b.get<2u, 2u>();
+        const math::mat1x2f b_lower_1x2 = b.get<1u, 2u>(math::vec2u(1u, 1u));
         VEER_TEST_ASSERT(math::all(a_upper_2x2[0] == a0));
         VEER_TEST_ASSERT(math::all(a_upper_2x2[1] == a1));
-        VEER_TEST_ASSERT(math::all(b_upper_2x2[0] == math::vec2f(b0.x(), b0.y())));
-        VEER_TEST_ASSERT(math::all(b_upper_2x2[1] == math::vec2f(b1.x(), b1.y())));
+        VEER_TEST_ASSERT(math::all(b_lower_1x2[0] == math::vec2f(b1.y(), b1.z())));
 
         math::mat2x3f c = b;
         c.set(a.get<2u, 2u>());
@@ -68,9 +67,9 @@ namespace veer::tests
         VEER_TEST_ASSERT(math::all(c[0] == math::vec3f(0.f)));
         VEER_TEST_ASSERT(math::all(c[1] == math::vec3f(0.f)));
 
-        c.set(b.get<2u, 1u>());
-        VEER_TEST_ASSERT(math::all(c[0] == math::vec3f(b0.x(), 0.f, 0.f)));
-        VEER_TEST_ASSERT(math::all(c[1] == math::vec3f(b1.x(), 0.f, 0.f)));
+        c.set(b.get<2u, 1u>(math::vec2u(0u, 1u)), math::vec2u(0u, 2u));
+        VEER_TEST_ASSERT(math::all(c[0] == math::vec3f(0.f, 0.f, b0.y())));
+        VEER_TEST_ASSERT(math::all(c[1] == math::vec3f(0.f, 0.f, b1.y())));
         return result::succeeded;
     }
 
@@ -169,7 +168,7 @@ namespace veer::tests
         math::mat2x2f lhs(lhs_0, lhs_1);
         math::vec2f rhs_0(1.f, 0.f);
         math::vec2f rhs_1(0.f, -1.f);
-        math::mat2x2f rhs(lhs_0, lhs_1);
+        math::mat2x2f rhs(rhs_0, rhs_1);
 
         VEER_TEST_ASSERT(math::all((lhs == rhs) == mat2x2b(math::vec2b(false, true), math::vec2b(true, false))));
         VEER_TEST_ASSERT(math::all((lhs != rhs) == mat2x2b(math::vec2b(true, false), math::vec2b(false, true))));

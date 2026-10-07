@@ -50,6 +50,30 @@ namespace veer::math
     ELEM_ACCESS_DEFINE(b, 2u)
     ELEM_ACCESS_DEFINE(a, 3u)
 
+    template <Arithmetic TYPE, size_t ELEM_COUNT>
+    template <size_t OTHER_ELEM_COUNT>
+        requires LessEqual<OTHER_ELEM_COUNT, ELEM_COUNT>
+    vec<TYPE, OTHER_ELEM_COUNT> vec<TYPE, ELEM_COUNT>::get(const size_t& _offset /*= 0u*/) const
+    {
+        vec<TYPE, OTHER_ELEM_COUNT> res{};
+        for (size_t i = 0u; i < OTHER_ELEM_COUNT; ++i)
+        {
+            res[i] = operator[](i + _offset);
+        }
+        return res;
+    }
+
+    template <Arithmetic TYPE, size_t ELEM_COUNT>
+    template <size_t OTHER_ELEM_COUNT>
+        requires LessEqual<OTHER_ELEM_COUNT, ELEM_COUNT>
+    void vec<TYPE, ELEM_COUNT>::set(const vec<TYPE, OTHER_ELEM_COUNT>& _v, const size_t& _offset /*= 0u*/)
+    {
+        for (size_t i = 0u; i < OTHER_ELEM_COUNT; ++i)
+        {
+            operator[](i + _offset) = _v[i];
+        }
+    }
+
     //----------------------------------------------------------------------------
     //							COMPOUND OPERATORS
     //----------------------------------------------------------------------------
@@ -194,7 +218,7 @@ namespace veer::math
     {                                                                                                                  \
         vec<bool, ELEM_COUNT> result;                                                                                  \
         for (size_t i = 0; i < ELEM_COUNT; ++i)                                                                        \
-            result[i] = (_lhs[i] _op _rhs[i]);                                                                          \
+            result[i] = (_lhs[i] _op _rhs[i]);                                                                         \
         return result;                                                                                                 \
     }
 

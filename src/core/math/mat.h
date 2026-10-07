@@ -73,16 +73,27 @@ namespace veer::math
 
         template <size_t OTHER_ROW_COUNT, size_t OTHER_COLUMN_COUNT>
             requires LessEqual<OTHER_ROW_COUNT, ROW_COUNT> && LessEqual<OTHER_COLUMN_COUNT, COLUMN_COUNT>
-        mat<TYPE, OTHER_ROW_COUNT, OTHER_COLUMN_COUNT> get() const;
+        mat<TYPE, OTHER_ROW_COUNT, OTHER_COLUMN_COUNT> get(const vec2u& _offset = vec2u(0u)) const;
 
         template <size_t OTHER_ROW_COUNT, size_t OTHER_COLUMN_COUNT>
             requires LessEqual<OTHER_ROW_COUNT, ROW_COUNT> && LessEqual<OTHER_COLUMN_COUNT, COLUMN_COUNT>
-        void set(const mat<TYPE, OTHER_ROW_COUNT, OTHER_COLUMN_COUNT>& _m);
+        void set(const mat<TYPE, OTHER_ROW_COUNT, OTHER_COLUMN_COUNT>& _m, const vec2u& _offset = vec2u(0u));
 
         constexpr mat<TYPE, ROW_COUNT, COLUMN_COUNT>& operator+=(const mat<TYPE, ROW_COUNT, COLUMN_COUNT>& _rhs);
         constexpr mat<TYPE, ROW_COUNT, COLUMN_COUNT>& operator-=(const mat<TYPE, ROW_COUNT, COLUMN_COUNT>& _rhs);
 
         constexpr mat<TYPE, ROW_COUNT, COLUMN_COUNT>& operator*=(TYPE _s);
+
+        // casts
+        constexpr explicit operator TYPE()
+            requires(Equal<ROW_COUNT, 1> && Equal<COLUMN_COUNT, 1>);
+
+        constexpr explicit operator vec<TYPE, COLUMN_COUNT>()
+            requires(Equal<ROW_COUNT, 1>);
+
+        // you know what ? No, transpose and then cast, or do it manually.
+        // constexpr explicit operator vec<TYPE, ROW_COUNT>()
+        //     requires(Equal<COLUMN_COUNT, 1>);
     };
 
     template <Arithmetic TYPE, size_t ROW_COUNT, size_t COLUMN_COUNT>

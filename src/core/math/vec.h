@@ -96,6 +96,14 @@ namespace veer::math
         ELEM_ACCESS_DECLARE(b, 2u)
         ELEM_ACCESS_DECLARE(a, 3u)
 
+        template <size_t OTHER_ELEM_COUNT>
+            requires LessEqual<OTHER_ELEM_COUNT, ELEM_COUNT>
+        vec<TYPE, OTHER_ELEM_COUNT> get(const size_t& _offset = 0u) const;
+
+        template <size_t OTHER_ELEM_COUNT>
+            requires LessEqual<OTHER_ELEM_COUNT, ELEM_COUNT>
+        void set(const vec<TYPE, OTHER_ELEM_COUNT>& _v, const size_t& _offset = 0u);
+
         template <Arithmetic OTHER_TYPE>
         constexpr vec<TYPE, ELEM_COUNT>& operator+=(OTHER_TYPE _other);
         template <Arithmetic OTHER_TYPE>

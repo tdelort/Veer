@@ -52,15 +52,13 @@ namespace veer::math
     template <Arithmetic TYPE, size_t ROW_COUNT, size_t COLUMN_COUNT>
     template <size_t OTHER_ROW_COUNT, size_t OTHER_COLUMN_COUNT>
         requires LessEqual<OTHER_ROW_COUNT, ROW_COUNT> && LessEqual<OTHER_COLUMN_COUNT, COLUMN_COUNT>
-    mat<TYPE, OTHER_ROW_COUNT, OTHER_COLUMN_COUNT> mat<TYPE, ROW_COUNT, COLUMN_COUNT>::get() const
+    mat<TYPE, OTHER_ROW_COUNT, OTHER_COLUMN_COUNT> mat<
+        TYPE, ROW_COUNT, COLUMN_COUNT>::get(const vec2u& _offset /*= vec2u(0u)*/) const
     {
         mat<TYPE, OTHER_ROW_COUNT, OTHER_COLUMN_COUNT> result{};
         for (size_t r = 0; r < OTHER_ROW_COUNT; ++r)
         {
-            for (size_t c = 0; c < OTHER_COLUMN_COUNT; ++c)
-            {
-                result[r][c] = m_rows[r][c];
-            }
+            result[r] = operator[](_offset.x() + r).template get<OTHER_COLUMN_COUNT>(_offset.y());
         }
         return result;
     }
@@ -68,14 +66,13 @@ namespace veer::math
     template <Arithmetic TYPE, size_t ROW_COUNT, size_t COLUMN_COUNT>
     template <size_t OTHER_ROW_COUNT, size_t OTHER_COLUMN_COUNT>
         requires LessEqual<OTHER_ROW_COUNT, ROW_COUNT> && LessEqual<OTHER_COLUMN_COUNT, COLUMN_COUNT>
-    void mat<TYPE, ROW_COUNT, COLUMN_COUNT>::set(const mat<TYPE, OTHER_ROW_COUNT, OTHER_COLUMN_COUNT>& _m)
+    void mat<TYPE, ROW_COUNT, COLUMN_COUNT>::set(
+        const mat<TYPE, OTHER_ROW_COUNT, OTHER_COLUMN_COUNT>& _m, const vec2u& _offset /*= vec2u(0u)*/
+    )
     {
         for (size_t r = 0; r < OTHER_ROW_COUNT; ++r)
         {
-            for (size_t c = 0; c < OTHER_COLUMN_COUNT; ++c)
-            {
-                m_rows[r][c] = _m[r][c];
-            }
+            operator[](_offset.x() + r).set(_m[r], _offset.y());
         }
     }
 
@@ -105,6 +102,21 @@ namespace veer::math
         for (size_t i = 0u; i < ROW_COUNT; ++i)
             m_rows[i] *= _s;
         return *this;
+    }
+
+    // casts
+    template <Arithmetic TYPE, size_t ROW_COUNT, size_t COLUMN_COUNT>
+    constexpr mat<TYPE, ROW_COUNT, COLUMN_COUNT>::operator TYPE()
+        requires(Equal<ROW_COUNT, 1> && Equal<COLUMN_COUNT, 1>)
+    {
+        return m_rows[0u][0u];
+    }
+
+    template <Arithmetic TYPE, size_t ROW_COUNT, size_t COLUMN_COUNT>
+    constexpr mat<TYPE, ROW_COUNT, COLUMN_COUNT>::operator vec<TYPE, COLUMN_COUNT>()
+        requires(Equal<ROW_COUNT, 1>)
+    {
+        return m_rows[0u];
     }
 
     template <Arithmetic TYPE, size_t ROW_COUNT, size_t COLUMN_COUNT>
