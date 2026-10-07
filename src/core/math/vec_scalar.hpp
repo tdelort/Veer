@@ -188,61 +188,24 @@ namespace veer::math
         return res /= _rhs;
     }
 
-    template <Arithmetic TYPE, size_t ELEM_COUNT>
-    constexpr vec<bool, ELEM_COUNT> operator==(const vec<TYPE, ELEM_COUNT>& _lhs, const vec<TYPE, ELEM_COUNT>& _rhs)
-    {
-        vec<bool, ELEM_COUNT> result;
-        for (size_t i = 0; i < ELEM_COUNT; ++i)
-            result[i] = (_lhs[i] == _rhs[i]);
-        return result;
+#define VEC_BOOL_BINARY_OPERATOR_DEFINE(_op)                                                                           \
+    template <Arithmetic TYPE, size_t ELEM_COUNT>                                                                      \
+    constexpr vec<bool, ELEM_COUNT> operator _op(const vec<TYPE, ELEM_COUNT>& _lhs, const vec<TYPE, ELEM_COUNT>& _rhs) \
+    {                                                                                                                  \
+        vec<bool, ELEM_COUNT> result;                                                                                  \
+        for (size_t i = 0; i < ELEM_COUNT; ++i)                                                                        \
+            result[i] = (_lhs[i] _op _rhs[i]);                                                                          \
+        return result;                                                                                                 \
     }
 
-    template <Arithmetic TYPE, size_t ELEM_COUNT>
-    constexpr vec<bool, ELEM_COUNT> operator!=(const vec<TYPE, ELEM_COUNT>& _lhs, const vec<TYPE, ELEM_COUNT>& _rhs)
-    {
-        vec<bool, ELEM_COUNT> result;
-        for (size_t i = 0; i < ELEM_COUNT; ++i)
-            result[i] = (_lhs[i] != _rhs[i]);
-        return result;
-    }
+    VEC_BOOL_BINARY_OPERATOR_DEFINE(==)
+    VEC_BOOL_BINARY_OPERATOR_DEFINE(!=)
+    VEC_BOOL_BINARY_OPERATOR_DEFINE(<)
+    VEC_BOOL_BINARY_OPERATOR_DEFINE(<=)
+    VEC_BOOL_BINARY_OPERATOR_DEFINE(>)
+    VEC_BOOL_BINARY_OPERATOR_DEFINE(>=)
 
-    template <Arithmetic TYPE, size_t ELEM_COUNT>
-    constexpr vec<bool, ELEM_COUNT> operator<(const vec<TYPE, ELEM_COUNT>& _lhs, const vec<TYPE, ELEM_COUNT>& _rhs)
-    {
-        vec<bool, ELEM_COUNT> result;
-        for (size_t i = 0; i < ELEM_COUNT; ++i)
-            result[i] = (_lhs[i] < _rhs[i]);
-        return result;
-    }
-
-    // I could implement other comparisons operators using ==, <, and !, but this means I rely on the compiler
-    // to remove the loops caused by each operator
-    template <Arithmetic TYPE, size_t ELEM_COUNT>
-    constexpr vec<bool, ELEM_COUNT> operator>(const vec<TYPE, ELEM_COUNT>& _lhs, const vec<TYPE, ELEM_COUNT>& _rhs)
-    {
-        vec<bool, ELEM_COUNT> result;
-        for (size_t i = 0; i < ELEM_COUNT; ++i)
-            result[i] = (_lhs[i] > _rhs[i]);
-        return result;
-    }
-
-    template <Arithmetic TYPE, size_t ELEM_COUNT>
-    constexpr vec<bool, ELEM_COUNT> operator<=(const vec<TYPE, ELEM_COUNT>& _lhs, const vec<TYPE, ELEM_COUNT>& _rhs)
-    {
-        vec<bool, ELEM_COUNT> result;
-        for (size_t i = 0; i < ELEM_COUNT; ++i)
-            result[i] = (_lhs[i] <= _rhs[i]);
-        return result;
-    }
-
-    template <Arithmetic TYPE, size_t ELEM_COUNT>
-    constexpr vec<bool, ELEM_COUNT> operator>=(const vec<TYPE, ELEM_COUNT>& _lhs, const vec<TYPE, ELEM_COUNT>& _rhs)
-    {
-        vec<bool, ELEM_COUNT> result;
-        for (size_t i = 0; i < ELEM_COUNT; ++i)
-            result[i] = (_lhs[i] >= _rhs[i]);
-        return result;
-    }
+#undef VEC_BOOL_BINARY_OPERATOR_DEFINE
 
     template <size_t ELEM_COUNT>
     constexpr vec<bool, ELEM_COUNT> operator!(const vec<bool, ELEM_COUNT>& _vec)

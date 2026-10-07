@@ -157,35 +157,20 @@ namespace veer::math
         const vec<TYPE, ELEM_COUNT>& _lhs, const vec<TYPE, ELEM_COUNT>& _rhs
     );
 
-    template <Arithmetic TYPE, size_t ELEM_COUNT>
-    [[nodiscard]] constexpr vec<bool, ELEM_COUNT> operator==(
-        const vec<TYPE, ELEM_COUNT>& _lhs, const vec<TYPE, ELEM_COUNT>& _rhs
+#define VEC_BOOL_BINARY_OPERATOR_DECLARE(_op)                                                                          \
+    template <Arithmetic TYPE, size_t ELEM_COUNT>                                                                      \
+    [[nodiscard]] constexpr vec<bool, ELEM_COUNT> operator _op(                                                        \
+        const vec<TYPE, ELEM_COUNT>& _lhs, const vec<TYPE, ELEM_COUNT>& _rhs                                           \
     );
 
-    template <Arithmetic TYPE, size_t ELEM_COUNT>
-    [[nodiscard]] constexpr vec<bool, ELEM_COUNT> operator!=(
-        const vec<TYPE, ELEM_COUNT>& _lhs, const vec<TYPE, ELEM_COUNT>& _rhs
-    );
+    VEC_BOOL_BINARY_OPERATOR_DECLARE(==)
+    VEC_BOOL_BINARY_OPERATOR_DECLARE(!=)
+    VEC_BOOL_BINARY_OPERATOR_DECLARE(<)
+    VEC_BOOL_BINARY_OPERATOR_DECLARE(<=)
+    VEC_BOOL_BINARY_OPERATOR_DECLARE(>)
+    VEC_BOOL_BINARY_OPERATOR_DECLARE(>=)
 
-    template <Arithmetic TYPE, size_t ELEM_COUNT>
-    [[nodiscard]] constexpr vec<bool, ELEM_COUNT> operator<(
-        const vec<TYPE, ELEM_COUNT>& _lhs, const vec<TYPE, ELEM_COUNT>& _rhs
-    );
-
-    template <Arithmetic TYPE, size_t ELEM_COUNT>
-    [[nodiscard]] constexpr vec<bool, ELEM_COUNT> operator>(
-        const vec<TYPE, ELEM_COUNT>& _lhs, const vec<TYPE, ELEM_COUNT>& _rhs
-    );
-
-    template <Arithmetic TYPE, size_t ELEM_COUNT>
-    [[nodiscard]] constexpr vec<bool, ELEM_COUNT> operator<=(
-        const vec<TYPE, ELEM_COUNT>& _lhs, const vec<TYPE, ELEM_COUNT>& _rhs
-    );
-
-    template <Arithmetic TYPE, size_t ELEM_COUNT>
-    [[nodiscard]] constexpr vec<bool, ELEM_COUNT> operator>=(
-        const vec<TYPE, ELEM_COUNT>& _lhs, const vec<TYPE, ELEM_COUNT>& _rhs
-    );
+#undef VEC_BOOL_BINARY_OPERATOR_DECLARE
 
     template <size_t ELEM_COUNT>
     [[nodiscard]] constexpr vec<bool, ELEM_COUNT> operator!(const vec<bool, ELEM_COUNT>& _vec);

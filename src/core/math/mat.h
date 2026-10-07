@@ -79,12 +79,8 @@ namespace veer::math
             requires LessEqual<OTHER_ROW_COUNT, ROW_COUNT> && LessEqual<OTHER_COLUMN_COUNT, COLUMN_COUNT>
         void set(const mat<TYPE, OTHER_ROW_COUNT, OTHER_COLUMN_COUNT>& _m);
 
-        constexpr mat<TYPE, ROW_COUNT, COLUMN_COUNT>& operator+=(
-            const mat<TYPE, ROW_COUNT, COLUMN_COUNT>& _rhs
-        );
-        constexpr mat<TYPE, ROW_COUNT, COLUMN_COUNT>& operator-=(
-            const mat<TYPE, ROW_COUNT, COLUMN_COUNT>& _rhs
-        );
+        constexpr mat<TYPE, ROW_COUNT, COLUMN_COUNT>& operator+=(const mat<TYPE, ROW_COUNT, COLUMN_COUNT>& _rhs);
+        constexpr mat<TYPE, ROW_COUNT, COLUMN_COUNT>& operator-=(const mat<TYPE, ROW_COUNT, COLUMN_COUNT>& _rhs);
 
         constexpr mat<TYPE, ROW_COUNT, COLUMN_COUNT>& operator*=(TYPE _s);
     };
@@ -121,45 +117,31 @@ namespace veer::math
     template <Arithmetic TYPE, size_t M, size_t N, size_t P>
     [[nodiscard]] constexpr mat<TYPE, M, P> operator*(const mat<TYPE, M, N>& _lhs, const mat<TYPE, N, P>& _rhs);
 
-    template <Arithmetic TYPE, size_t ROW_COUNT, size_t COLUMN_COUNT>
-    [[nodiscard]] constexpr mat<bool, ROW_COUNT, COLUMN_COUNT> operator==(
-        const mat<TYPE, ROW_COUNT, COLUMN_COUNT>& _lhs, const mat<TYPE, ROW_COUNT, COLUMN_COUNT>& _rhs
+#define MAT_BOOL_BINARY_OPERATOR_DECLARE(_op)                                                                          \
+    template <Arithmetic TYPE, size_t ROW_COUNT, size_t COLUMN_COUNT>                                                  \
+    [[nodiscard]] constexpr mat<bool, ROW_COUNT, COLUMN_COUNT> operator _op(                                           \
+        const mat<TYPE, ROW_COUNT, COLUMN_COUNT>& _lhs, const mat<TYPE, ROW_COUNT, COLUMN_COUNT>& _rhs                 \
     );
 
-    template <Arithmetic TYPE, size_t ROW_COUNT, size_t COLUMN_COUNT>
-    [[nodiscard]] constexpr mat<bool, ROW_COUNT, COLUMN_COUNT> operator!=(
-        const mat<TYPE, ROW_COUNT, COLUMN_COUNT>& _lhs, const mat<TYPE, ROW_COUNT, COLUMN_COUNT>& _rhs
-    );
+    MAT_BOOL_BINARY_OPERATOR_DECLARE(==)
+    MAT_BOOL_BINARY_OPERATOR_DECLARE(!=)
+    MAT_BOOL_BINARY_OPERATOR_DECLARE(<)
+    MAT_BOOL_BINARY_OPERATOR_DECLARE(<=)
+    MAT_BOOL_BINARY_OPERATOR_DECLARE(>)
+    MAT_BOOL_BINARY_OPERATOR_DECLARE(>=)
 
-    template <Arithmetic TYPE, size_t ROW_COUNT, size_t COLUMN_COUNT>
-    [[nodiscard]] constexpr mat<bool, ROW_COUNT, COLUMN_COUNT> operator<(
-        const mat<TYPE, ROW_COUNT, COLUMN_COUNT>& _lhs, const mat<TYPE, ROW_COUNT, COLUMN_COUNT>& _rhs
-    );
-
-    template <Arithmetic TYPE, size_t ROW_COUNT, size_t COLUMN_COUNT>
-    [[nodiscard]] constexpr mat<bool, ROW_COUNT, COLUMN_COUNT> operator>(
-        const mat<TYPE, ROW_COUNT, COLUMN_COUNT>& _lhs, const mat<TYPE, ROW_COUNT, COLUMN_COUNT>& _rhs
-    );
-
-    template <Arithmetic TYPE, size_t ROW_COUNT, size_t COLUMN_COUNT>
-    [[nodiscard]] constexpr mat<bool, ROW_COUNT, COLUMN_COUNT> operator<=(
-        const mat<TYPE, ROW_COUNT, COLUMN_COUNT>& _lhs, const mat<TYPE, ROW_COUNT, COLUMN_COUNT>& _rhs
-    );
-
-    template <Arithmetic TYPE, size_t ROW_COUNT, size_t COLUMN_COUNT>
-    [[nodiscard]] constexpr mat<bool, ROW_COUNT, COLUMN_COUNT> operator>=(
-        const mat<TYPE, ROW_COUNT, COLUMN_COUNT>& _lhs, const mat<TYPE, ROW_COUNT, COLUMN_COUNT>& _rhs
-    );
+#undef MAT_BOOL_BINARY_OPERATOR_DECLARE
 
     template <size_t ROW_COUNT, size_t COLUMN_COUNT>
-    [[nodiscard]] constexpr mat<bool, ROW_COUNT, COLUMN_COUNT> operator!(const mat<bool, ROW_COUNT, COLUMN_COUNT>& _mat);
+    [[nodiscard]] constexpr mat<bool, ROW_COUNT, COLUMN_COUNT> operator!(
+        const mat<bool, ROW_COUNT, COLUMN_COUNT>& _mat
+    );
 
     template <size_t ROW_COUNT, size_t COLUMN_COUNT>
     [[nodiscard]] constexpr bool all(const mat<bool, ROW_COUNT, COLUMN_COUNT>& _mat);
 
     template <size_t ROW_COUNT, size_t COLUMN_COUNT>
     [[nodiscard]] constexpr bool any(const mat<bool, ROW_COUNT, COLUMN_COUNT>& _mat);
-
 
     namespace mat_utils
     {

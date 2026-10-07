@@ -180,83 +180,28 @@ namespace veer::math
         return res;
     }
 
-    template <Arithmetic TYPE, size_t ROW_COUNT, size_t COLUMN_COUNT>
-    [[nodiscard]] constexpr mat<bool, ROW_COUNT, COLUMN_COUNT> operator==(
-        const mat<TYPE, ROW_COUNT, COLUMN_COUNT>& _lhs, const mat<TYPE, ROW_COUNT, COLUMN_COUNT>& _rhs
-    )
-    {
-        mat<bool, ROW_COUNT, COLUMN_COUNT> res{};
-        for (size_t r = 0; r < ROW_COUNT; ++r)
-        {
-            res[r] = (_lhs[r] == _rhs[r]);
-        }
-        return res;
+#define MAT_BOOL_BINARY_OPERATOR_DEFINE(_op)                                                                           \
+    template <Arithmetic TYPE, size_t ROW_COUNT, size_t COLUMN_COUNT>                                                  \
+    [[nodiscard]] constexpr mat<bool, ROW_COUNT, COLUMN_COUNT> operator _op(                                           \
+        const mat<TYPE, ROW_COUNT, COLUMN_COUNT>& _lhs, const mat<TYPE, ROW_COUNT, COLUMN_COUNT>& _rhs                 \
+    )                                                                                                                  \
+    {                                                                                                                  \
+        mat<bool, ROW_COUNT, COLUMN_COUNT> res{};                                                                      \
+        for (size_t r = 0; r < ROW_COUNT; ++r)                                                                         \
+        {                                                                                                              \
+            res[r] = (_lhs[r] _op _rhs[r]);                                                                            \
+        }                                                                                                              \
+        return res;                                                                                                    \
     }
 
-    template <Arithmetic TYPE, size_t ROW_COUNT, size_t COLUMN_COUNT>
-    [[nodiscard]] constexpr mat<bool, ROW_COUNT, COLUMN_COUNT> operator!=(
-        const mat<TYPE, ROW_COUNT, COLUMN_COUNT>& _lhs, const mat<TYPE, ROW_COUNT, COLUMN_COUNT>& _rhs
-    )
-    {
-        mat<bool, ROW_COUNT, COLUMN_COUNT> res{};
-        for (size_t r = 0; r < ROW_COUNT; ++r)
-        {
-            res[r] = (_lhs[r] != _rhs[r]);
-        }
-        return res;
-    }
+    MAT_BOOL_BINARY_OPERATOR_DEFINE(==)
+    MAT_BOOL_BINARY_OPERATOR_DEFINE(!=)
+    MAT_BOOL_BINARY_OPERATOR_DEFINE(<)
+    MAT_BOOL_BINARY_OPERATOR_DEFINE(<=)
+    MAT_BOOL_BINARY_OPERATOR_DEFINE(>)
+    MAT_BOOL_BINARY_OPERATOR_DEFINE(>=)
 
-    template <Arithmetic TYPE, size_t ROW_COUNT, size_t COLUMN_COUNT>
-    [[nodiscard]] constexpr mat<bool, ROW_COUNT, COLUMN_COUNT> operator<(
-        const mat<TYPE, ROW_COUNT, COLUMN_COUNT>& _lhs, const mat<TYPE, ROW_COUNT, COLUMN_COUNT>& _rhs
-    )
-    {
-        mat<bool, ROW_COUNT, COLUMN_COUNT> res{};
-        for (size_t r = 0; r < ROW_COUNT; ++r)
-        {
-            res[r] = (_lhs[r] < _rhs[r]);
-        }
-        return res;
-    }
-
-    template <Arithmetic TYPE, size_t ROW_COUNT, size_t COLUMN_COUNT>
-    [[nodiscard]] constexpr mat<bool, ROW_COUNT, COLUMN_COUNT> operator>(
-        const mat<TYPE, ROW_COUNT, COLUMN_COUNT>& _lhs, const mat<TYPE, ROW_COUNT, COLUMN_COUNT>& _rhs
-    )
-    {
-        mat<bool, ROW_COUNT, COLUMN_COUNT> res{};
-        for (size_t r = 0; r < ROW_COUNT; ++r)
-        {
-            res[r] = (_lhs[r] > _rhs[r]);
-        }
-        return res;
-    }
-
-    template <Arithmetic TYPE, size_t ROW_COUNT, size_t COLUMN_COUNT>
-    [[nodiscard]] constexpr mat<bool, ROW_COUNT, COLUMN_COUNT> operator<=(
-        const mat<TYPE, ROW_COUNT, COLUMN_COUNT>& _lhs, const mat<TYPE, ROW_COUNT, COLUMN_COUNT>& _rhs
-    )
-    {
-        mat<bool, ROW_COUNT, COLUMN_COUNT> res{};
-        for (size_t r = 0; r < ROW_COUNT; ++r)
-        {
-            res[r] = (_lhs[r] < _rhs[r]);
-        }
-        return res;
-    }
-
-    template <Arithmetic TYPE, size_t ROW_COUNT, size_t COLUMN_COUNT>
-    [[nodiscard]] constexpr mat<bool, ROW_COUNT, COLUMN_COUNT> operator>=(
-        const mat<TYPE, ROW_COUNT, COLUMN_COUNT>& _lhs, const mat<TYPE, ROW_COUNT, COLUMN_COUNT>& _rhs
-    )
-    {
-        mat<bool, ROW_COUNT, COLUMN_COUNT> res{};
-        for (size_t r = 0; r < ROW_COUNT; ++r)
-        {
-            res[r] = (_lhs[r] >= _rhs[r]);
-        }
-        return res;
-    }
+#undef MAT_BOOL_BINARY_OPERATOR_DEFINE
 
     template <size_t ROW_COUNT, size_t COLUMN_COUNT>
     [[nodiscard]] constexpr mat<bool, ROW_COUNT, COLUMN_COUNT> operator!(const mat<bool, ROW_COUNT, COLUMN_COUNT>& _mat)
