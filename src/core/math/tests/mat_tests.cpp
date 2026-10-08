@@ -73,80 +73,7 @@ namespace veer::tests
         return result::succeeded;
     }
 
-    result mat_utils()
-    {
-        const math::mat4x4f t_3d = veer::math::mat_utils::translation_3d(math::vec3f(4.f, 2.f, 0.f));
-        const math::mat3x3f t_2d = veer::math::mat_utils::translation_2d(math::vec2f(6.f, 7.f));
-        VEER_TEST_ASSERT(math::all(t_3d[0] == math::vec4f(1.f, 0.f, 0.f, 4.f)));
-        VEER_TEST_ASSERT(math::all(t_3d[1] == math::vec4f(0.f, 1.f, 0.f, 2.f)));
-        VEER_TEST_ASSERT(math::all(t_3d[2] == math::vec4f(0.f, 0.f, 1.f, 0.f)));
-        VEER_TEST_ASSERT(math::all(t_3d[3] == math::vec4f(0.f, 0.f, 0.f, 1.f)));
-        VEER_TEST_ASSERT(math::all(t_2d[0] == math::vec3f(1.f, 0.f, 6.f)));
-        VEER_TEST_ASSERT(math::all(t_2d[1] == math::vec3f(0.f, 1.f, 7.f)));
-        VEER_TEST_ASSERT(math::all(t_2d[2] == math::vec3f(0.f, 0.f, 1.f)));
 
-        const float theta = static_cast<float>(math::s_pi) * 0.129f;
-        const float cos_v = static_cast<float>(std::cos(theta));
-        const float sin_v = static_cast<float>(std::sin(theta));
-        const math::mat2x2f r_2d = veer::math::mat_utils::rotation_2d(theta);
-        VEER_TEST_ASSERT(math::all(r_2d[0] == math::vec2f(cos_v, -sin_v)));
-        VEER_TEST_ASSERT(math::all(r_2d[1] == math::vec2f(sin_v, cos_v)));
-
-        const math::mat3x3f r_3d_x = math::mat_utils::rotation_3d(theta * math::vec3f(1.f, 0.f, 0.f));
-        VEER_TEST_ASSERT(math::all(r_3d_x[0] == math::vec3f(1.f, 0.f, 0.f)));
-        VEER_TEST_ASSERT(math::all(r_3d_x[1] == math::vec3f(0.f, cos_v, -sin_v)));
-        VEER_TEST_ASSERT(math::all(r_3d_x[2] == math::vec3f(0.f, sin_v, cos_v)));
-
-        const math::mat3x3f r_3d_y = math::mat_utils::rotation_3d(theta * math::vec3f(0.f, 1.f, 0.f));
-        VEER_TEST_ASSERT(math::all(r_3d_y[0] == math::vec3f(cos_v, 0.f, sin_v)));
-        VEER_TEST_ASSERT(math::all(r_3d_y[1] == math::vec3f(0.f, 1.f, 0.f)));
-        VEER_TEST_ASSERT(math::all(r_3d_y[2] == math::vec3f(-sin_v, 0.f, cos_v)));
-
-        const math::mat3x3f r_3d_z = math::mat_utils::rotation_3d(theta * math::vec3f(0.f, 0.f, 1.f));
-        VEER_TEST_ASSERT(math::all(r_3d_z[0] == math::vec3f(cos_v, -sin_v, 0.f)));
-        VEER_TEST_ASSERT(math::all(r_3d_z[1] == math::vec3f(sin_v, cos_v, 0.f)));
-        VEER_TEST_ASSERT(math::all(r_3d_z[2] == math::vec3f(0.f, 0.f, 1.f)));
-
-        const math::vec4f d(3.f, 5.f, 8.f, 13.f);
-        const math::mat<float, 1u, 1u> s_1d = veer::math::mat_utils::scale(math::vec<float, 1u>(d.x()));
-        const math::mat2x2f s_2d = veer::math::mat_utils::scale(math::vec2f(d.x(), d.y()));
-        const math::mat3x3f s_3d = veer::math::mat_utils::scale(math::vec3f(d.x(), d.y(), d.z()));
-        const math::mat4x4f s_4d = veer::math::mat_utils::scale(math::vec4f(d.x(), d.y(), d.z(), d.w()));
-
-        for (size_t r = 0; r < 4; ++r)
-        {
-            for (size_t c = 0; c < 4; ++c)
-            {
-                if (r < 1 && c < 1)
-                {
-                    VEER_TEST_ASSERT(s_1d[r][c] == ((r == c) ? d[r] : 0.f));
-                }
-
-                if (r < 2 && c < 2)
-                {
-                    VEER_TEST_ASSERT(s_2d[r][c] == ((r == c) ? d[r] : 0.f));
-                }
-
-                if (r < 3 && c < 3)
-                {
-                    VEER_TEST_ASSERT(s_3d[r][c] == ((r == c) ? d[r] : 0.f));
-                }
-
-                if (r < 4 && c < 4)
-                {
-                    VEER_TEST_ASSERT(s_4d[r][c] == ((r == c) ? d[r] : 0.f));
-                }
-            }
-        }
-
-        const math::mat4x2f a(
-            math::vec2f(1.f, 2.f), math::vec2f(3.f, 4.f), math::vec2f(5.f, 6.f), math::vec2f(7.f, 8.f)
-        );
-        const math::mat2x4f a_t = math::mat_utils::transpose(a);
-        VEER_TEST_ASSERT(math::all(a_t[0] == math::vec4f(1.f, 3.f, 5.f, 7.f)));
-        VEER_TEST_ASSERT(math::all(a_t[1] == math::vec4f(2.f, 4.f, 6.f, 8.f)));
-        return result::succeeded;
-    }
 
     result mat_operations()
     {
@@ -201,6 +128,13 @@ namespace veer::tests
         const math::mat3x3i c_3x3 = c.get<3, 3>();
         const math::mat3x3i ci = c_3x3 * math::mat3x3i::identity();
         VEER_TEST_ASSERT(math::all(c_3x3 == ci));
+
+        const math::mat4x2f d(
+            math::vec2f(1.f, 2.f), math::vec2f(3.f, 4.f), math::vec2f(5.f, 6.f), math::vec2f(7.f, 8.f)
+        );
+        const math::mat2x4f d_t = d.transpose();
+        VEER_TEST_ASSERT(math::all(d_t[0] == math::vec4f(1.f, 3.f, 5.f, 7.f)));
+        VEER_TEST_ASSERT(math::all(d_t[1] == math::vec4f(2.f, 4.f, 6.f, 8.f)));
         return result::succeeded;
     }
 
@@ -208,7 +142,6 @@ namespace veer::tests
     {
         VEER_RUN_TEST(mat_constructors())
         VEER_RUN_TEST(mat_get_set())
-        VEER_RUN_TEST(mat_utils())
         VEER_RUN_TEST(mat_operations())
         return result::succeeded;
     }

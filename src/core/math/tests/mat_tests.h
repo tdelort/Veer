@@ -6,7 +6,6 @@ namespace veer::tests
 {
     result mat_constructors();
     result mat_get_set();
-    result mat_utils();
     result mat_operations();
 
 

@@ -38,6 +38,12 @@ namespace veer::math
     }
 
     template <typename T>
+    constexpr T abs(const T& _val)
+    {
+        return max(_val, -_val);
+    }
+
+    template <typename T>
     constexpr const T& clamp(const T& _value, const T& _min, const T& _max)
     {
         return min(max(_value, _min), _max);
@@ -47,6 +53,17 @@ namespace veer::math
     constexpr T ceiled_remainder(const T& _val, const T& _quotient)
     {
         return (_val + _quotient - T(1)) / _quotient;
+    }
+
+
+    constexpr bool nearly_equal_relative(const float& _lhs, const float& _rhs, float _relative_epsilon = FLT_EPSILON)
+    {
+        return math::abs(_lhs - _rhs) <= (_relative_epsilon * math::max(math::abs(_lhs), math::abs(_rhs))); 
+    }
+
+    constexpr bool nearly_equal(const float& _lhs, const float& _rhs, float _epsilon = FLT_EPSILON)
+    {
+        return math::abs(_lhs - _rhs) <= _epsilon;
     }
 
     template <typename T, typename U>

@@ -3,5 +3,6 @@ if(BUILD_TESTS)
 		PRIVATE
 		vec_tests.cpp
 		mat_tests.cpp
+		transform_tests.cpp
 	)
 endif()

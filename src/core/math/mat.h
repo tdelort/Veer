@@ -73,16 +73,18 @@ namespace veer::math
 
         template <size_t OTHER_ROW_COUNT, size_t OTHER_COLUMN_COUNT>
             requires LessEqual<OTHER_ROW_COUNT, ROW_COUNT> && LessEqual<OTHER_COLUMN_COUNT, COLUMN_COUNT>
-        mat<TYPE, OTHER_ROW_COUNT, OTHER_COLUMN_COUNT> get(const vec2u& _offset = vec2u(0u)) const;
+        [[nodiscard]] constexpr mat<TYPE, OTHER_ROW_COUNT, OTHER_COLUMN_COUNT> get(const vec2u& _offset = vec2u(0u)) const;
 
         template <size_t OTHER_ROW_COUNT, size_t OTHER_COLUMN_COUNT>
             requires LessEqual<OTHER_ROW_COUNT, ROW_COUNT> && LessEqual<OTHER_COLUMN_COUNT, COLUMN_COUNT>
-        void set(const mat<TYPE, OTHER_ROW_COUNT, OTHER_COLUMN_COUNT>& _m, const vec2u& _offset = vec2u(0u));
+        constexpr void set(const mat<TYPE, OTHER_ROW_COUNT, OTHER_COLUMN_COUNT>& _m, const vec2u& _offset = vec2u(0u));
 
-        constexpr mat<TYPE, ROW_COUNT, COLUMN_COUNT>& operator+=(const mat<TYPE, ROW_COUNT, COLUMN_COUNT>& _rhs);
-        constexpr mat<TYPE, ROW_COUNT, COLUMN_COUNT>& operator-=(const mat<TYPE, ROW_COUNT, COLUMN_COUNT>& _rhs);
+        [[nodiscard]] constexpr mat<TYPE, COLUMN_COUNT, ROW_COUNT> transpose() const;
 
-        constexpr mat<TYPE, ROW_COUNT, COLUMN_COUNT>& operator*=(TYPE _s);
+        constexpr type& operator+=(const type& _rhs);
+        constexpr type& operator-=(const type& _rhs);
+
+        constexpr type& operator*=(TYPE _s);
 
         // casts
         constexpr explicit operator TYPE()
@@ -120,7 +122,7 @@ namespace veer::math
 
     // ... vector
     template <Arithmetic TYPE, size_t ROW_COUNT, size_t COLUMN_COUNT>
-    [[nodiscard]] constexpr vec<TYPE, ROW_COUNT> operator*(
+    [[nodiscard]] constexpr vec<TYPE, COLUMN_COUNT> operator*(
         const vec<TYPE, ROW_COUNT>& _v, const mat<TYPE, ROW_COUNT, COLUMN_COUNT>& _m
     );
 
@@ -154,34 +156,17 @@ namespace veer::math
     template <size_t ROW_COUNT, size_t COLUMN_COUNT>
     [[nodiscard]] constexpr bool any(const mat<bool, ROW_COUNT, COLUMN_COUNT>& _mat);
 
-    namespace mat_utils
-    {
-        template <Arithmetic TYPE, size_t ROW_COUNT, size_t COLUMN_COUNT>
-        [[nodiscard]] constexpr mat<TYPE, COLUMN_COUNT, ROW_COUNT> transpose(
-            const mat<TYPE, ROW_COUNT, COLUMN_COUNT>& _m
-        );
+    template <size_t ROW_COUNT, size_t COLUMN_COUNT>
+    constexpr mat<bool, ROW_COUNT, COLUMN_COUNT> nearly_equal_relative(
+        const mat<float, ROW_COUNT, COLUMN_COUNT>& _lhs, const mat<float, ROW_COUNT, COLUMN_COUNT>& _rhs,
+        float _relative_epsilon = FLT_EPSILON
+    );
 
-        template <Arithmetic TYPE>
-        [[nodiscard]] constexpr mat<TYPE, 2u, 2u> rotation_2d(TYPE _s);
-
-        template <Arithmetic TYPE>
-        [[nodiscard]] constexpr mat<TYPE, 3u, 3u> rotation_3d(vec<TYPE, 3u> _euler);
-        template <Arithmetic TYPE>
-        [[nodiscard]] constexpr mat<TYPE, 3u, 3u> rotation_3d_x(TYPE _s);
-        template <Arithmetic TYPE>
-        [[nodiscard]] constexpr mat<TYPE, 3u, 3u> rotation_3d_y(TYPE _s);
-        template <Arithmetic TYPE>
-        [[nodiscard]] constexpr mat<TYPE, 3u, 3u> rotation_3d_z(TYPE _s);
-
-        template <Arithmetic TYPE>
-        [[nodiscard]] constexpr mat<TYPE, 3u, 3u> translation_2d(vec<TYPE, 2u> _pos);
-
-        template <Arithmetic TYPE>
-        [[nodiscard]] constexpr mat<TYPE, 4u, 4u> translation_3d(vec<TYPE, 3u> _pos);
-
-        template <Arithmetic TYPE, size_t ELEM_COUNT>
-        [[nodiscard]] constexpr mat<TYPE, ELEM_COUNT, ELEM_COUNT> scale(vec<TYPE, ELEM_COUNT> _scale);
-    }; // namespace mat_utils
+    template <size_t ROW_COUNT, size_t COLUMN_COUNT>
+    constexpr mat<bool, ROW_COUNT, COLUMN_COUNT> nearly_equal(
+        const mat<float, ROW_COUNT, COLUMN_COUNT>& _lhs, const mat<float, ROW_COUNT, COLUMN_COUNT>& _rhs,
+        float _epsilon = FLT_EPSILON
+    );
 
     using mat1x1f = mat<float, 1u, 1u>;
     using mat1x2f = mat<float, 1u, 2u>;

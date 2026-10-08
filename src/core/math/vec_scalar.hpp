@@ -2,6 +2,7 @@
 
 #include "vec.h"
 #include <core/debug.h>
+#include <core/math/math.h>
 
 namespace veer::math
 {
@@ -19,7 +20,7 @@ namespace veer::math
     }
 
     template <Arithmetic TYPE, size_t ELEM_COUNT>
-    TYPE vec<TYPE, ELEM_COUNT>::operator[](size_t _index) const
+    const TYPE& vec<TYPE, ELEM_COUNT>::operator[](size_t _index) const
     {
         if (!std::is_constant_evaluated())
         {
@@ -152,6 +153,13 @@ namespace veer::math
         for (size_t i = 0; i < ELEM_COUNT; ++i)
             m_data[i] /= static_cast<TYPE>(_other.m_data[i]);
         return *this;
+    }
+
+    template <Arithmetic TYPE, size_t ELEM_COUNT>
+    constexpr vec<TYPE, ELEM_COUNT>::operator TYPE()
+        requires Equal<ELEM_COUNT, 1>
+    {
+        return m_data[0u];
     }
 
     template <Arithmetic TYPE, size_t ELEM_COUNT>
@@ -313,6 +321,40 @@ namespace veer::math
         bool result = false;
         for (size_t i = 0u; i < ELEM_COUNT; ++i)
             result = result || _vec[i];
+        return result;
+    }
+
+    template <Arithmetic TYPE, size_t ELEM_COUNT>
+    [[nodiscard]] constexpr vec<TYPE, ELEM_COUNT> select(
+        const vec<bool, ELEM_COUNT>& _cond, vec<TYPE, ELEM_COUNT> _true, vec<TYPE, ELEM_COUNT> _false
+    )
+    {
+        vec<TYPE, ELEM_COUNT> result{};
+        for (size_t i = 0u; i < ELEM_COUNT; ++i)
+            result = _cond[i] ? _true[i] : _false[i];
+        return result;
+    }
+
+    template <size_t ELEM_COUNT>
+    constexpr vec<bool, ELEM_COUNT> nearly_equal_relative(
+        const vec<float, ELEM_COUNT>& _lhs, const vec<float, ELEM_COUNT>& _rhs,
+        float _relative_epsilon /*= FLT_EPSILON*/
+    )
+    {
+        vec<bool, ELEM_COUNT> result{};
+        for (size_t i = 0u; i < ELEM_COUNT; ++i)
+            result = math::nearly_equal_relative(_lhs[i], _rhs[i], _relative_epsilon);
+        return result;
+    }
+
+    template <size_t ELEM_COUNT>
+    constexpr vec<bool, ELEM_COUNT> nearly_equal(
+        const vec<float, ELEM_COUNT>& _lhs, const vec<float, ELEM_COUNT>& _rhs, float _epsilon /*= FLT_EPSILON*/
+    )
+    {
+        vec<bool, ELEM_COUNT> result{};
+        for (size_t i = 0u; i < ELEM_COUNT; ++i)
+            result = math::nearly_equal(_lhs[i], _rhs[i], _epsilon);
         return result;
     }
 } // namespace veer::math

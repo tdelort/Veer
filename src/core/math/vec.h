@@ -83,7 +83,7 @@ namespace veer::math
         }
 
         // not constexpr because of the bounds check assert
-        [[nodiscard]] TYPE operator[](size_type _index) const;
+        [[nodiscard]] const TYPE& operator[](size_type _index) const;
         TYPE& operator[](size_type _index);
 
         ELEM_ACCESS_DECLARE(x, 0u)
@@ -132,6 +132,9 @@ namespace veer::math
             _os << ")";
             return _os;
         }
+
+        constexpr explicit operator TYPE()
+            requires Equal<ELEM_COUNT, 1>;
     };
 
     template <Arithmetic TYPE, size_t ELEM_COUNT>
@@ -210,6 +213,22 @@ namespace veer::math
 
     template <size_t ELEM_COUNT>
     [[nodiscard]] constexpr bool any(const vec<bool, ELEM_COUNT>& _vec);
+
+    template <Arithmetic TYPE, size_t ELEM_COUNT>
+    [[nodiscard]] constexpr vec<TYPE, ELEM_COUNT> select(
+        const vec<bool, ELEM_COUNT>& _cond, vec<TYPE, ELEM_COUNT> _true, vec<TYPE, ELEM_COUNT> _false
+    );
+
+    template <size_t ELEM_COUNT>
+    constexpr vec<bool, ELEM_COUNT> nearly_equal_relative(
+        const vec<float, ELEM_COUNT>& _lhs, const vec<float, ELEM_COUNT>& _rhs,
+        float _relative_epsilon = FLT_EPSILON
+    );
+
+    template <size_t ELEM_COUNT>
+    constexpr vec<bool, ELEM_COUNT> nearly_equal(
+        const vec<float, ELEM_COUNT>& _lhs, const vec<float, ELEM_COUNT>& _rhs, float _epsilon = FLT_EPSILON
+    );
 
     using vec2u = vec<uint32_t, 2u>;
     using vec2i = vec<int32_t, 2u>;

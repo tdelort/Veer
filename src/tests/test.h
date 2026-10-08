@@ -7,7 +7,7 @@
 
 namespace veer::tests
 {
-    enum result
+    enum class result
     {
         succeeded = 0,
         failed,
