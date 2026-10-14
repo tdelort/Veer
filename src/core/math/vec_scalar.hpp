@@ -220,14 +220,14 @@ namespace veer::math
         return res /= _rhs;
     }
 
-#define VEC_BOOL_BINARY_OPERATOR_DEFINE(_op)                                                                           \
-    template <Arithmetic TYPE, size_t ELEM_COUNT>                                                                      \
-    constexpr vec<bool, ELEM_COUNT> operator _op(const vec<TYPE, ELEM_COUNT>& _lhs, const vec<TYPE, ELEM_COUNT>& _rhs) \
-    {                                                                                                                  \
-        vec<bool, ELEM_COUNT> result;                                                                                  \
-        for (size_t i = 0; i < ELEM_COUNT; ++i)                                                                        \
-            result[i] = (_lhs[i] _op _rhs[i]);                                                                         \
-        return result;                                                                                                 \
+#define VEC_BOOL_BINARY_OPERATOR_DEFINE(_op)                                                                                                                                       \
+    template <Arithmetic TYPE, size_t ELEM_COUNT>                                                                                                                                  \
+    constexpr vec<bool, ELEM_COUNT> operator _op(const vec<TYPE, ELEM_COUNT>& _lhs, const vec<TYPE, ELEM_COUNT>& _rhs)                                                             \
+    {                                                                                                                                                                              \
+        vec<bool, ELEM_COUNT> result;                                                                                                                                              \
+        for (size_t i = 0; i < ELEM_COUNT; ++i)                                                                                                                                    \
+            result[i] = (_lhs[i] _op _rhs[i]);                                                                                                                                     \
+        return result;                                                                                                                                                             \
     }
 
     VEC_BOOL_BINARY_OPERATOR_DEFINE(==)
@@ -264,10 +264,7 @@ namespace veer::math
     template <Arithmetic TYPE>
     constexpr vec<TYPE, 3u> cross(const vec<TYPE, 3u>& _lhs, const vec<TYPE, 3u>& _rhs)
     {
-        return vec<TYPE, 3u>(
-            _lhs[1] * _rhs[2] - _lhs[2] * _rhs[1], _lhs[2] * _rhs[0] - _lhs[0] * _rhs[2],
-            _lhs[0] * _rhs[1] - _lhs[1] * _rhs[0]
-        );
+        return vec<TYPE, 3u>(_lhs[1] * _rhs[2] - _lhs[2] * _rhs[1], _lhs[2] * _rhs[0] - _lhs[0] * _rhs[2], _lhs[0] * _rhs[1] - _lhs[1] * _rhs[0]);
     }
 
     // sq_length
@@ -325,9 +322,7 @@ namespace veer::math
     }
 
     template <Arithmetic TYPE, size_t ELEM_COUNT>
-    [[nodiscard]] constexpr vec<TYPE, ELEM_COUNT> select(
-        const vec<bool, ELEM_COUNT>& _cond, vec<TYPE, ELEM_COUNT> _true, vec<TYPE, ELEM_COUNT> _false
-    )
+    [[nodiscard]] constexpr vec<TYPE, ELEM_COUNT> select(const vec<bool, ELEM_COUNT>& _cond, vec<TYPE, ELEM_COUNT> _true, vec<TYPE, ELEM_COUNT> _false)
     {
         vec<TYPE, ELEM_COUNT> result{};
         for (size_t i = 0u; i < ELEM_COUNT; ++i)
@@ -337,7 +332,8 @@ namespace veer::math
 
     template <size_t ELEM_COUNT>
     constexpr vec<bool, ELEM_COUNT> nearly_equal_relative(
-        const vec<float, ELEM_COUNT>& _lhs, const vec<float, ELEM_COUNT>& _rhs,
+        const vec<float, ELEM_COUNT>& _lhs,
+        const vec<float, ELEM_COUNT>& _rhs,
         float _relative_epsilon /*= FLT_EPSILON*/
     )
     {
@@ -349,7 +345,9 @@ namespace veer::math
 
     template <size_t ELEM_COUNT>
     constexpr vec<bool, ELEM_COUNT> nearly_equal(
-        const vec<float, ELEM_COUNT>& _lhs, const vec<float, ELEM_COUNT>& _rhs, float _epsilon /*= FLT_EPSILON*/
+        const vec<float, ELEM_COUNT>& _lhs,
+        const vec<float, ELEM_COUNT>& _rhs,
+        float _epsilon /*= FLT_EPSILON*/
     )
     {
         vec<bool, ELEM_COUNT> result{};

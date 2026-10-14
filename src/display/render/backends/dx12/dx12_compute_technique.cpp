@@ -20,7 +20,8 @@ namespace veer::display::render
 {
     compute_technique::compute_technique(
         const constant_buffer_definition& _frame_constant_buffer_definition,
-        const constant_buffer_definition& _material_constant_buffer_definition, const render_device& _device,
+        const constant_buffer_definition& _material_constant_buffer_definition,
+        const render_device& _device,
         const shader_stage_source_container_t& _source_code
     )
         : technique(_frame_constant_buffer_definition, _material_constant_buffer_definition)
@@ -36,9 +37,10 @@ namespace veer::display::render
         pso_desc.CS.BytecodeLength = shader_cs.size();
 
         VEER_LOG("CreateComputePipelineState");
-        HRESULT hr = _device.get_api_handle()->CreateComputePipelineState(&pso_desc, IID_PPV_ARGS(&m_pso));
-        containers::string hr_string = HrToString(hr);
-        VEER_ASSERT(SUCCEEDED(hr), "Failed to create PSO. Error (" << hr_string.c_str() << ")");
+        veer::hr hr = _device.get_api_handle()->CreateComputePipelineState(&pso_desc, IID_PPV_ARGS(&m_pso));
+        VEER_ASSERT(hr.succeeded(), "Failed to create PSO. Error (" << hr << ")");
+
+        _device.check_errors();
     }
 
     compute_technique::~compute_technique()

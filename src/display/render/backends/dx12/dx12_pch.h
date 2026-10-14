@@ -14,6 +14,16 @@
 #include <wrl/client.h>
 using namespace Microsoft::WRL;
 
+// #if defined(_DEBUG)
+// #define D3D12MA_DEBUG_LOG(format, ...)                                                                                                                                             \
+//     do                                                                                                                                                                             \
+//     {                                                                                                                                                                              \
+//         char buffer[512u];                                                                                                                                                         \
+//         std::sprintf(buffer, format, __VA_ARGS__);                                                                                                                                 \
+//         VEER_LOG_DEBUG(buffer);                                                                                                                                                    \
+//     } while (false)
+// #endif // defined(_DEBUG)
+
 #include <D3D12MemAlloc.h>
 
 #include <ostream>

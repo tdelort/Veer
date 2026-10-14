@@ -287,18 +287,18 @@ namespace veer::display::render
         // set in the loop above
         command_buffer.set_scissors(containers::span<rect>(m_scissors.data(), m_viewports_count));
 
-        if (m_index_buffer != nullptr)
-        {
-            command_buffer.transition_barrier(*m_index_buffer, render_device_resource_sync_state::IndexBuffer);
-            command_buffer.set_index_buffer(*m_index_buffer);
-        }
-
         if (m_vertex_buffer != nullptr)
         {
             command_buffer.transition_barrier(
                 *m_vertex_buffer, render_device_resource_sync_state::VertexAndConstantBuffer
             );
             command_buffer.set_vertex_buffer(*m_vertex_buffer);
+        }
+
+        if (m_index_buffer != nullptr)
+        {
+            command_buffer.transition_barrier(*m_index_buffer, render_device_resource_sync_state::IndexBuffer);
+            command_buffer.set_index_buffer(*m_index_buffer);
         }
     }
 

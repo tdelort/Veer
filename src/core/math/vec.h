@@ -6,24 +6,24 @@
 // TODO : implement it
 // #define VEC_SIMD
 
-#define ELEM_ACCESS_DECLARE(_elem, _index)                                                                             \
-    [[nodiscard]] constexpr TYPE _elem() const                                                                         \
-        requires veer::Greater<ELEM_COUNT, _index>;                                                                    \
-    constexpr TYPE& _elem()                                                                                            \
+#define ELEM_ACCESS_DECLARE(_elem, _index)                                                                                                                                         \
+    [[nodiscard]] constexpr TYPE _elem() const                                                                                                                                     \
+        requires veer::Greater<ELEM_COUNT, _index>;                                                                                                                                \
+    constexpr TYPE& _elem()                                                                                                                                                        \
         requires veer::Greater<ELEM_COUNT, _index>;
 
-#define ELEM_ACCESS_DEFINE(_elem, _index)                                                                              \
-    template <Arithmetic TYPE, size_t ELEM_COUNT>                                                                      \
-    constexpr TYPE vec<TYPE, ELEM_COUNT>::_elem() const                                                                \
-        requires veer::Greater<ELEM_COUNT, _index>                                                                     \
-    {                                                                                                                  \
-        return m_data[_index];                                                                                         \
-    }                                                                                                                  \
-    template <Arithmetic TYPE, size_t ELEM_COUNT>                                                                      \
-    constexpr TYPE& vec<TYPE, ELEM_COUNT>::_elem()                                                                     \
-        requires veer::Greater<ELEM_COUNT, _index>                                                                     \
-    {                                                                                                                  \
-        return m_data[_index];                                                                                         \
+#define ELEM_ACCESS_DEFINE(_elem, _index)                                                                                                                                          \
+    template <Arithmetic TYPE, size_t ELEM_COUNT>                                                                                                                                  \
+    constexpr TYPE vec<TYPE, ELEM_COUNT>::_elem() const                                                                                                                            \
+        requires veer::Greater<ELEM_COUNT, _index>                                                                                                                                 \
+    {                                                                                                                                                                              \
+        return m_data[_index];                                                                                                                                                     \
+    }                                                                                                                                                                              \
+    template <Arithmetic TYPE, size_t ELEM_COUNT>                                                                                                                                  \
+    constexpr TYPE& vec<TYPE, ELEM_COUNT>::_elem()                                                                                                                                 \
+        requires veer::Greater<ELEM_COUNT, _index>                                                                                                                                 \
+    {                                                                                                                                                                              \
+        return m_data[_index];                                                                                                                                                     \
     }
 
 namespace veer::math
@@ -141,14 +141,10 @@ namespace veer::math
     [[nodiscard]] constexpr vec<TYPE, ELEM_COUNT> operator-(const vec<TYPE, ELEM_COUNT>& _vec);
 
     template <Arithmetic TYPE, size_t ELEM_COUNT>
-    [[nodiscard]] constexpr vec<TYPE, ELEM_COUNT> operator+(
-        const vec<TYPE, ELEM_COUNT>& _lhs, const vec<TYPE, ELEM_COUNT>& _rhs
-    );
+    [[nodiscard]] constexpr vec<TYPE, ELEM_COUNT> operator+(const vec<TYPE, ELEM_COUNT>& _lhs, const vec<TYPE, ELEM_COUNT>& _rhs);
 
     template <Arithmetic TYPE, size_t ELEM_COUNT>
-    [[nodiscard]] constexpr vec<TYPE, ELEM_COUNT> operator-(
-        const vec<TYPE, ELEM_COUNT>& _lhs, const vec<TYPE, ELEM_COUNT>& _rhs
-    );
+    [[nodiscard]] constexpr vec<TYPE, ELEM_COUNT> operator-(const vec<TYPE, ELEM_COUNT>& _lhs, const vec<TYPE, ELEM_COUNT>& _rhs);
 
     template <Arithmetic TYPE, size_t ELEM_COUNT>
     [[nodiscard]] constexpr vec<TYPE, ELEM_COUNT> operator*(TYPE _s, const vec<TYPE, ELEM_COUNT>& _v);
@@ -156,23 +152,17 @@ namespace veer::math
     [[nodiscard]] constexpr vec<TYPE, ELEM_COUNT> operator*(const vec<TYPE, ELEM_COUNT>& _v, TYPE _s);
 
     template <Arithmetic TYPE, size_t ELEM_COUNT>
-    [[nodiscard]] constexpr vec<TYPE, ELEM_COUNT> operator*(
-        const vec<TYPE, ELEM_COUNT>& _lhs, const vec<TYPE, ELEM_COUNT>& _rhs
-    );
+    [[nodiscard]] constexpr vec<TYPE, ELEM_COUNT> operator*(const vec<TYPE, ELEM_COUNT>& _lhs, const vec<TYPE, ELEM_COUNT>& _rhs);
 
     template <Arithmetic TYPE, size_t ELEM_COUNT>
     [[nodiscard]] constexpr vec<TYPE, ELEM_COUNT> operator/(const vec<TYPE, ELEM_COUNT>& _v, TYPE _s);
 
     template <Arithmetic TYPE, size_t ELEM_COUNT>
-    [[nodiscard]] constexpr vec<TYPE, ELEM_COUNT> operator/(
-        const vec<TYPE, ELEM_COUNT>& _lhs, const vec<TYPE, ELEM_COUNT>& _rhs
-    );
+    [[nodiscard]] constexpr vec<TYPE, ELEM_COUNT> operator/(const vec<TYPE, ELEM_COUNT>& _lhs, const vec<TYPE, ELEM_COUNT>& _rhs);
 
-#define VEC_BOOL_BINARY_OPERATOR_DECLARE(_op)                                                                          \
-    template <Arithmetic TYPE, size_t ELEM_COUNT>                                                                      \
-    [[nodiscard]] constexpr vec<bool, ELEM_COUNT> operator _op(                                                        \
-        const vec<TYPE, ELEM_COUNT>& _lhs, const vec<TYPE, ELEM_COUNT>& _rhs                                           \
-    );
+#define VEC_BOOL_BINARY_OPERATOR_DECLARE(_op)                                                                                                                                      \
+    template <Arithmetic TYPE, size_t ELEM_COUNT>                                                                                                                                  \
+    [[nodiscard]] constexpr vec<bool, ELEM_COUNT> operator _op(const vec<TYPE, ELEM_COUNT>& _lhs, const vec<TYPE, ELEM_COUNT>& _rhs);
 
     VEC_BOOL_BINARY_OPERATOR_DECLARE(==)
     VEC_BOOL_BINARY_OPERATOR_DECLARE(!=)
@@ -204,9 +194,7 @@ namespace veer::math
     [[nodiscard]] constexpr vec<TYPE, ELEM_COUNT> normalize(const vec<TYPE, ELEM_COUNT>& _v);
 
     template <Arithmetic TYPE, size_t ELEM_COUNT>
-    [[nodiscard]] constexpr vec<TYPE, ELEM_COUNT> normalize_safe(
-        const vec<TYPE, ELEM_COUNT>& _v, float _epsilon = FLT_EPSILON
-    );
+    [[nodiscard]] constexpr vec<TYPE, ELEM_COUNT> normalize_safe(const vec<TYPE, ELEM_COUNT>& _v, float _epsilon = FLT_EPSILON);
 
     template <size_t ELEM_COUNT>
     [[nodiscard]] constexpr bool all(const vec<bool, ELEM_COUNT>& _vec);
@@ -215,20 +203,13 @@ namespace veer::math
     [[nodiscard]] constexpr bool any(const vec<bool, ELEM_COUNT>& _vec);
 
     template <Arithmetic TYPE, size_t ELEM_COUNT>
-    [[nodiscard]] constexpr vec<TYPE, ELEM_COUNT> select(
-        const vec<bool, ELEM_COUNT>& _cond, vec<TYPE, ELEM_COUNT> _true, vec<TYPE, ELEM_COUNT> _false
-    );
+    [[nodiscard]] constexpr vec<TYPE, ELEM_COUNT> select(const vec<bool, ELEM_COUNT>& _cond, vec<TYPE, ELEM_COUNT> _true, vec<TYPE, ELEM_COUNT> _false);
 
     template <size_t ELEM_COUNT>
-    constexpr vec<bool, ELEM_COUNT> nearly_equal_relative(
-        const vec<float, ELEM_COUNT>& _lhs, const vec<float, ELEM_COUNT>& _rhs,
-        float _relative_epsilon = FLT_EPSILON
-    );
+    constexpr vec<bool, ELEM_COUNT> nearly_equal_relative(const vec<float, ELEM_COUNT>& _lhs, const vec<float, ELEM_COUNT>& _rhs, float _relative_epsilon = FLT_EPSILON);
 
     template <size_t ELEM_COUNT>
-    constexpr vec<bool, ELEM_COUNT> nearly_equal(
-        const vec<float, ELEM_COUNT>& _lhs, const vec<float, ELEM_COUNT>& _rhs, float _epsilon = FLT_EPSILON
-    );
+    constexpr vec<bool, ELEM_COUNT> nearly_equal(const vec<float, ELEM_COUNT>& _lhs, const vec<float, ELEM_COUNT>& _rhs, float _epsilon = FLT_EPSILON);
 
     using vec2u = vec<uint32_t, 2u>;
     using vec2i = vec<int32_t, 2u>;

@@ -8,4 +8,4 @@ namespace veer::tests
     result transform_operations();
 
     result transform_all();
-};
+}; // namespace veer::tests

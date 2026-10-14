@@ -58,24 +58,12 @@ namespace veer::tests
         VEER_TEST_ASSERT(math::any(math::vec4b(false, true, false, false)));
         VEER_TEST_ASSERT(math::all((!math::vec2b(true, false)) == math::vec2b(false, true)));
 
-        VEER_TEST_ASSERT(
-            math::all((math::vec3f(-1.f, 0.f, 1.f) == math::vec3f(1.f, 0.f, -1.f)) == math::vec3b(false, true, false))
-        );
-        VEER_TEST_ASSERT(
-            math::all((math::vec3f(-1.f, 0.f, 1.f) != math::vec3f(1.f, 0.f, -1.f)) == math::vec3b(true, false, true))
-        );
-        VEER_TEST_ASSERT(
-            math::all((math::vec3f(-1.f, 0.f, 1.f) >= math::vec3f(1.f, 0.f, -1.f)) == math::vec3b(false, true, true))
-        );
-        VEER_TEST_ASSERT(
-            math::all((math::vec3f(-1.f, 0.f, 1.f) > math::vec3f(1.f, 0.f, -1.f)) == math::vec3b(false, false, true))
-        );
-        VEER_TEST_ASSERT(
-            math::all((math::vec3f(-1.f, 0.f, 1.f) <= math::vec3f(1.f, 0.f, -1.f)) == math::vec3b(true, true, false))
-        );
-        VEER_TEST_ASSERT(
-            math::all((math::vec3f(-1.f, 0.f, 1.f) < math::vec3f(1.f, 0.f, -1.f)) == math::vec3b(true, false, false))
-        );
+        VEER_TEST_ASSERT(math::all((math::vec3f(-1.f, 0.f, 1.f) == math::vec3f(1.f, 0.f, -1.f)) == math::vec3b(false, true, false)));
+        VEER_TEST_ASSERT(math::all((math::vec3f(-1.f, 0.f, 1.f) != math::vec3f(1.f, 0.f, -1.f)) == math::vec3b(true, false, true)));
+        VEER_TEST_ASSERT(math::all((math::vec3f(-1.f, 0.f, 1.f) >= math::vec3f(1.f, 0.f, -1.f)) == math::vec3b(false, true, true)));
+        VEER_TEST_ASSERT(math::all((math::vec3f(-1.f, 0.f, 1.f) > math::vec3f(1.f, 0.f, -1.f)) == math::vec3b(false, false, true)));
+        VEER_TEST_ASSERT(math::all((math::vec3f(-1.f, 0.f, 1.f) <= math::vec3f(1.f, 0.f, -1.f)) == math::vec3b(true, true, false)));
+        VEER_TEST_ASSERT(math::all((math::vec3f(-1.f, 0.f, 1.f) < math::vec3f(1.f, 0.f, -1.f)) == math::vec3b(true, false, false)));
 
         const math::vec3f a{1.f, -3.f, 5.f};
         math::vec3f b;
@@ -115,9 +103,7 @@ namespace veer::tests
         VEER_TEST_ASSERT((l <= 1.001f) && (l >= 0.999f));
         VEER_TEST_ASSERT(math::length(math::normalize_safe(math::vec4f(0.f))) == 0.f);
 
-        VEER_TEST_ASSERT(
-            math::all(math::cross(math::vec3f(1.f, 0.f, 0.f), math::vec3f(0.f, 1.f, 0.f)) == math::vec3f(0.f, 0.f, 1.f))
-        );
+        VEER_TEST_ASSERT(math::all(math::cross(math::vec3f(1.f, 0.f, 0.f), math::vec3f(0.f, 1.f, 0.f)) == math::vec3f(0.f, 0.f, 1.f)));
 
         VEER_TEST_ASSERT(math::dot(math::vec3f(1.f, 0.f, 0.f), math::vec3f(0.f, 1.f, 0.f)) == 0.f);
 

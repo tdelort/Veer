@@ -73,8 +73,6 @@ namespace veer::tests
         return result::succeeded;
     }
 
-
-
     result mat_operations()
     {
         using mat2x2b = math::mat<bool, 2u, 2u>;
@@ -82,12 +80,7 @@ namespace veer::tests
         VEER_TEST_ASSERT(!math::all(mat2x2b(math::vec2b(true, true), math::vec2b(false, true))));
         VEER_TEST_ASSERT(!math::any(mat2x2b(math::vec2b(false, false), math::vec2b(false, false))));
         VEER_TEST_ASSERT(math::any(mat2x2b(math::vec2b(false, true), math::vec2b(false, false))));
-        VEER_TEST_ASSERT(
-            math::all(
-                !mat2x2b(math::vec2b(false, true), math::vec2b(true, false)) ==
-                mat2x2b(math::vec2b(true, false), math::vec2b(false, true))
-            )
-        );
+        VEER_TEST_ASSERT(math::all(!mat2x2b(math::vec2b(false, true), math::vec2b(true, false)) == mat2x2b(math::vec2b(true, false), math::vec2b(false, true))));
         VEER_TEST_ASSERT(math::all((!math::vec2b(true, false)) == math::vec2b(false, true)));
 
         math::vec2f lhs_0(-1.f, 0.f);
@@ -129,9 +122,7 @@ namespace veer::tests
         const math::mat3x3i ci = c_3x3 * math::mat3x3i::identity();
         VEER_TEST_ASSERT(math::all(c_3x3 == ci));
 
-        const math::mat4x2f d(
-            math::vec2f(1.f, 2.f), math::vec2f(3.f, 4.f), math::vec2f(5.f, 6.f), math::vec2f(7.f, 8.f)
-        );
+        const math::mat4x2f d(math::vec2f(1.f, 2.f), math::vec2f(3.f, 4.f), math::vec2f(5.f, 6.f), math::vec2f(7.f, 8.f));
         const math::mat2x4f d_t = d.transpose();
         VEER_TEST_ASSERT(math::all(d_t[0] == math::vec4f(1.f, 3.f, 5.f, 7.f)));
         VEER_TEST_ASSERT(math::all(d_t[1] == math::vec4f(2.f, 4.f, 6.f, 8.f)));

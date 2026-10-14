@@ -1,3 +1,3 @@
-target_sources(${PROJECT_NAME}
+target_sources(veer
 	PRIVATE
 )

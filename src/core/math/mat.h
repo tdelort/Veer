@@ -29,10 +29,7 @@ namespace veer::math
         // supply the arguments row by row
         template <typename... ARGS>
         constexpr mat(ARGS... _args)
-            requires(
-                std::conjunction<std::is_same<ARGS, vec<TYPE, COLUMN_COUNT>>...>::value &&
-                Equal<sizeof...(ARGS), ROW_COUNT>
-            )
+            requires(std::conjunction<std::is_same<ARGS, vec<TYPE, COLUMN_COUNT>>...>::value && Equal<sizeof...(ARGS), ROW_COUNT>)
         {
             size_t i = 0u;
             ((m_rows[i++] = _args), ...);
@@ -99,42 +96,30 @@ namespace veer::math
     };
 
     template <Arithmetic TYPE, size_t ROW_COUNT, size_t COLUMN_COUNT>
-    [[nodiscard]] constexpr mat<TYPE, ROW_COUNT, COLUMN_COUNT> operator+(
-        const mat<TYPE, ROW_COUNT, COLUMN_COUNT>& _lhs, const mat<TYPE, ROW_COUNT, COLUMN_COUNT>& _rhs
-    );
+    [[nodiscard]] constexpr mat<TYPE, ROW_COUNT, COLUMN_COUNT> operator+(const mat<TYPE, ROW_COUNT, COLUMN_COUNT>& _lhs, const mat<TYPE, ROW_COUNT, COLUMN_COUNT>& _rhs);
 
     template <Arithmetic TYPE, size_t ROW_COUNT, size_t COLUMN_COUNT>
-    [[nodiscard]] constexpr vec<TYPE, ROW_COUNT> operator-(
-        const mat<TYPE, ROW_COUNT, COLUMN_COUNT>& _lhs, const mat<TYPE, ROW_COUNT, COLUMN_COUNT>& _rhs
-    );
+    [[nodiscard]] constexpr vec<TYPE, ROW_COUNT> operator-(const mat<TYPE, ROW_COUNT, COLUMN_COUNT>& _lhs, const mat<TYPE, ROW_COUNT, COLUMN_COUNT>& _rhs);
 
     // multiply by a ...
     // ... scalar
     template <Arithmetic TYPE, size_t ROW_COUNT, size_t COLUMN_COUNT>
-    [[nodiscard]] constexpr mat<TYPE, ROW_COUNT, COLUMN_COUNT> operator*(
-        TYPE _s, const mat<TYPE, ROW_COUNT, COLUMN_COUNT>& _m
-    );
+    [[nodiscard]] constexpr mat<TYPE, ROW_COUNT, COLUMN_COUNT> operator*(TYPE _s, const mat<TYPE, ROW_COUNT, COLUMN_COUNT>& _m);
 
     template <Arithmetic TYPE, size_t ROW_COUNT, size_t COLUMN_COUNT>
-    [[nodiscard]] constexpr mat<TYPE, ROW_COUNT, COLUMN_COUNT> operator*(
-        const mat<TYPE, ROW_COUNT, COLUMN_COUNT>& _m, TYPE _s
-    );
+    [[nodiscard]] constexpr mat<TYPE, ROW_COUNT, COLUMN_COUNT> operator*(const mat<TYPE, ROW_COUNT, COLUMN_COUNT>& _m, TYPE _s);
 
     // ... vector
     template <Arithmetic TYPE, size_t ROW_COUNT, size_t COLUMN_COUNT>
-    [[nodiscard]] constexpr vec<TYPE, COLUMN_COUNT> operator*(
-        const vec<TYPE, ROW_COUNT>& _v, const mat<TYPE, ROW_COUNT, COLUMN_COUNT>& _m
-    );
+    [[nodiscard]] constexpr vec<TYPE, COLUMN_COUNT> operator*(const vec<TYPE, ROW_COUNT>& _v, const mat<TYPE, ROW_COUNT, COLUMN_COUNT>& _m);
 
     // ... matrix
     template <Arithmetic TYPE, size_t M, size_t N, size_t P>
     [[nodiscard]] constexpr mat<TYPE, M, P> operator*(const mat<TYPE, M, N>& _lhs, const mat<TYPE, N, P>& _rhs);
 
-#define MAT_BOOL_BINARY_OPERATOR_DECLARE(_op)                                                                          \
-    template <Arithmetic TYPE, size_t ROW_COUNT, size_t COLUMN_COUNT>                                                  \
-    [[nodiscard]] constexpr mat<bool, ROW_COUNT, COLUMN_COUNT> operator _op(                                           \
-        const mat<TYPE, ROW_COUNT, COLUMN_COUNT>& _lhs, const mat<TYPE, ROW_COUNT, COLUMN_COUNT>& _rhs                 \
-    );
+#define MAT_BOOL_BINARY_OPERATOR_DECLARE(_op)                                                                                                                                      \
+    template <Arithmetic TYPE, size_t ROW_COUNT, size_t COLUMN_COUNT>                                                                                                              \
+    [[nodiscard]] constexpr mat<bool, ROW_COUNT, COLUMN_COUNT> operator _op(const mat<TYPE, ROW_COUNT, COLUMN_COUNT>& _lhs, const mat<TYPE, ROW_COUNT, COLUMN_COUNT>& _rhs);
 
     MAT_BOOL_BINARY_OPERATOR_DECLARE(==)
     MAT_BOOL_BINARY_OPERATOR_DECLARE(!=)
@@ -146,9 +131,7 @@ namespace veer::math
 #undef MAT_BOOL_BINARY_OPERATOR_DECLARE
 
     template <size_t ROW_COUNT, size_t COLUMN_COUNT>
-    [[nodiscard]] constexpr mat<bool, ROW_COUNT, COLUMN_COUNT> operator!(
-        const mat<bool, ROW_COUNT, COLUMN_COUNT>& _mat
-    );
+    [[nodiscard]] constexpr mat<bool, ROW_COUNT, COLUMN_COUNT> operator!(const mat<bool, ROW_COUNT, COLUMN_COUNT>& _mat);
 
     template <size_t ROW_COUNT, size_t COLUMN_COUNT>
     [[nodiscard]] constexpr bool all(const mat<bool, ROW_COUNT, COLUMN_COUNT>& _mat);
@@ -158,13 +141,15 @@ namespace veer::math
 
     template <size_t ROW_COUNT, size_t COLUMN_COUNT>
     constexpr mat<bool, ROW_COUNT, COLUMN_COUNT> nearly_equal_relative(
-        const mat<float, ROW_COUNT, COLUMN_COUNT>& _lhs, const mat<float, ROW_COUNT, COLUMN_COUNT>& _rhs,
+        const mat<float, ROW_COUNT, COLUMN_COUNT>& _lhs,
+        const mat<float, ROW_COUNT, COLUMN_COUNT>& _rhs,
         float _relative_epsilon = FLT_EPSILON
     );
 
     template <size_t ROW_COUNT, size_t COLUMN_COUNT>
     constexpr mat<bool, ROW_COUNT, COLUMN_COUNT> nearly_equal(
-        const mat<float, ROW_COUNT, COLUMN_COUNT>& _lhs, const mat<float, ROW_COUNT, COLUMN_COUNT>& _rhs,
+        const mat<float, ROW_COUNT, COLUMN_COUNT>& _lhs,
+        const mat<float, ROW_COUNT, COLUMN_COUNT>& _rhs,
         float _epsilon = FLT_EPSILON
     );
 

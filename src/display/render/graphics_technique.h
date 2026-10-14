@@ -17,8 +17,10 @@ namespace veer::display::render
     public:
         graphics_technique(
             const constant_buffer_definition& _frame_constant_buffer_definition,
-            const constant_buffer_definition& _material_constant_buffer_definition, const render_device& _device,
-            const shader_stage_source_container_t& _source_code, const shader_signature& _signature,
+            const constant_buffer_definition& _material_constant_buffer_definition,
+            const render_device& _device,
+            const shader_stage_source_container_t& _source_code,
+            const shader_signature& _signature,
             const shader_render_state& _render_state
         );
         virtual ~graphics_technique();

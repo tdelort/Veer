@@ -35,8 +35,7 @@ namespace veer::math
     // 3D rotations :
     [[nodiscard]] constexpr mat3x3f transform::s_rotation_3d(const vec3f& _euler)
     {
-        return transform::s_rotation_3d_x(_euler.x()) * transform::s_rotation_3d_y(_euler.y()) *
-               transform::s_rotation_3d_z(_euler.z());
+        return transform::s_rotation_3d_x(_euler.x()) * transform::s_rotation_3d_y(_euler.y()) * transform::s_rotation_3d_z(_euler.z());
     }
 
     [[nodiscard]] constexpr mat3x3f transform::s_rotation_3d_x(float _s)
@@ -50,9 +49,9 @@ namespace veer::math
         // |  0  c  s |
         // |  0 -s  c |
 
-        vec3f r0{1.f, 0.f, 0.f};
-        vec3f r1{0.f, _cos_sin.x(), _cos_sin.y()};
-        vec3f r2{0.f, -_cos_sin.y(), _cos_sin.x()};
+        const vec3f r0{1.f, 0.f, 0.f};
+        const vec3f r1{0.f, _cos_sin.x(), _cos_sin.y()};
+        const vec3f r2{0.f, -_cos_sin.y(), _cos_sin.x()};
         return mat3x3f(r0, r1, r2);
     }
 
@@ -66,9 +65,9 @@ namespace veer::math
         // |  c  0 -s |
         // |  0  1  0 |
         // |  s  0  c |
-        vec3f r0{_cos_sin.x(), 0.f, -_cos_sin.y()};
-        vec3f r1{0.f, 1.f, 0.f};
-        vec3f r2{_cos_sin.y(), 0.f, _cos_sin.x()};
+        const vec3f r0{_cos_sin.x(), 0.f, -_cos_sin.y()};
+        const vec3f r1{0.f, 1.f, 0.f};
+        const vec3f r2{_cos_sin.y(), 0.f, _cos_sin.x()};
         return mat3x3f(r0, r1, r2);
     }
 
@@ -82,9 +81,9 @@ namespace veer::math
         // |  c  s  0 |
         // | -s  c  0 |
         // |  0  0  1 |
-        vec3f r0{_cos_sin.x(), _cos_sin.y(), 0.f};
-        vec3f r1{-_cos_sin.y(), _cos_sin.x(), 0.f};
-        vec3f r2{0.f, 0.f, 1.f};
+        const vec3f r0{_cos_sin.x(), _cos_sin.y(), 0.f};
+        const vec3f r1{-_cos_sin.y(), _cos_sin.x(), 0.f};
+        const vec3f r2{0.f, 0.f, 1.f};
         return mat3x3f(r0, r1, r2);
     }
 

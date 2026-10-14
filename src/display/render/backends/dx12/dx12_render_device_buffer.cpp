@@ -110,8 +110,9 @@ namespace veer::display::render
 
         if (flags::get(buffer_desc.m_flags, buffer_desc::usage_flags::index))
         {
+            m_index_buffer_view = {};
             m_index_buffer_view.BufferLocation = location;
-            m_index_buffer_view.SizeInBytes = size_in_bytes;
+            m_index_buffer_view.SizeInBytes = buffer_desc.m_stride * buffer_desc.m_size;
 
             // TODO : expose this if needed
             m_index_buffer_view.Format = DXGI_FORMAT_R32_UINT;
@@ -119,8 +120,9 @@ namespace veer::display::render
 
         if (flags::get(buffer_desc.m_flags, buffer_desc::usage_flags::vertex))
         {
+            m_vertex_buffer_view = {};
             m_vertex_buffer_view.BufferLocation = location;
-            m_vertex_buffer_view.SizeInBytes = size_in_bytes;
+            m_vertex_buffer_view.SizeInBytes = buffer_desc.m_stride * buffer_desc.m_size;
 
             m_vertex_buffer_view.StrideInBytes = buffer_desc.m_stride;
         }

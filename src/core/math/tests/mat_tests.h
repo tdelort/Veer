@@ -8,6 +8,5 @@ namespace veer::tests
     result mat_get_set();
     result mat_operations();
 
-
     result mat_all();
 } // namespace veer::tests

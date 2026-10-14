@@ -6,7 +6,6 @@
 #include <core/core.h>
 #include <core/math/vec.h>
 
-
 #if defined(D3D12_RENDER_BACKEND)
 #include <core/containers/span.h>
 #include <display/render/backends/dx12/dx12_pch.h>
@@ -119,8 +118,6 @@ namespace veer::display::render
     template <typename T>
     containers::span<const T> render_device_resource::get_data() const
     {
-        return containers::span<const T>(
-            static_cast<const T*>(m_data.data()), (m_data.size() / sizeof(T)) * sizeof(byte_t)
-        );
+        return containers::span<const T>(static_cast<const T*>(m_data.data()), (m_data.size() / sizeof(T)) * sizeof(byte_t));
     }
 } // namespace veer::display::render

@@ -36,8 +36,6 @@ namespace veer::display::render
 
         D3D12_RESOURCE_DESC resource_desc = get_resource_desc();
 
-        HRESULT hr;
-
         D3D12MA::ALLOCATION_DESC default_alloc_desc = {};
         default_alloc_desc.HeapType = _heap;
 
@@ -62,17 +60,13 @@ namespace veer::display::render
 
         D3D12MA::Allocation* resource_alloc;
         VEER_LOG("CreateResource");
-        hr = m_device.get_allocator()->CreateResource(
-            &default_alloc_desc, &resource_desc, _state, clear_value_arg, &m_resource_alloc, IID_NULL, NULL
-        );
-        VEER_ASSERT(SUCCEEDED(hr), "Failed to create D3D12 resource. Error (" << hr << ")");
+        veer::hr hr = m_device.get_allocator()->CreateResource(&default_alloc_desc, &resource_desc, _state, clear_value_arg, &m_resource_alloc, IID_NULL, NULL);
+        VEER_ASSERT(hr.succeeded(), "Failed to create D3D12 resource. Error (" << hr << ")");
 
         set_api_handle(m_resource_alloc->GetResource());
     }
 
-    void render_device_resource::upload_data_to_default_heap(
-        copy_command_buffer& _upload_buffer, veer::containers::span<const byte_t> _data
-    )
+    void render_device_resource::upload_data_to_default_heap(copy_command_buffer& _upload_buffer, veer::containers::span<const byte_t> _data)
     {
         D3D12_RESOURCE_DESC resource_desc = get_resource_desc();
 
@@ -87,10 +81,8 @@ namespace veer::display::render
         layouts.resize(sub_resource_count);
 
         size_t size = 0u;
-        m_device.get_api_handle()->GetCopyableFootprints(
-            &resource_desc, first_sub_resource, sub_resource_count, 0, layouts.data(), num_rows.data(),
-            row_sizes_in_bytes.data(), &size
-        );
+        m_device.get_api_handle()
+            ->GetCopyableFootprints(&resource_desc, first_sub_resource, sub_resource_count, 0, layouts.data(), num_rows.data(), row_sizes_in_bytes.data(), &size);
 
         D3D12_RESOURCE_DESC upload_resource_desc = {};
         {
@@ -113,11 +105,16 @@ namespace veer::display::render
 
         D3D12MA::Allocation* upload_alloc;
         VEER_LOG("CreateResource");
-        veer::hr hr = m_device.get_allocator()->CreateResource(
-            &upload_alloc_desc, &upload_resource_desc, D3D12_RESOURCE_STATE_GENERIC_READ, NULL, &upload_alloc, IID_NULL,
-            NULL
-        );
+        veer::hr hr = m_device.get_allocator()->CreateResource(&upload_alloc_desc, &upload_resource_desc, D3D12_RESOURCE_STATE_GENERIC_READ, NULL, &upload_alloc, IID_NULL, NULL);
         VEER_ASSERT(hr.succeeded(), "Failed to create upload resource. Error (" << hr << ")");
+
+#if defined(_DEBUG)
+        containers::string upload_debug_name(m_debug_name);
+        upload_debug_name += "_upload_resource";
+        containers::wstring w_debug_name(upload_debug_name);
+        get_api_handle()->SetName(w_debug_name.c_str());
+        upload_alloc->SetName(w_debug_name.c_str());
+#endif // defined(_DEBUG)
 
         // basically UpdateSubresources with less features
         {
@@ -129,8 +126,7 @@ namespace veer::display::render
             {
                 byte_t* dest_ptr = gpu_data + layouts[sub_resource_index].Offset;
                 const size_t row_pitch = layouts[sub_resource_index].Footprint.RowPitch;
-                const size_t slice_pitch = static_cast<size_t>(layouts[sub_resource_index].Footprint.RowPitch) *
-                                     static_cast<size_t>(num_rows[sub_resource_index]);
+                const size_t slice_pitch = static_cast<size_t>(layouts[sub_resource_index].Footprint.RowPitch) * static_cast<size_t>(num_rows[sub_resource_index]);
 
                 for (size_t slice_index = 0; slice_index < layouts[sub_resource_index].Footprint.Depth; ++slice_index)
                 {
@@ -182,7 +178,7 @@ namespace veer::display::render
     {
         uint8_t* gpu_data;
         get_api_handle()->Map(0u, nullptr, reinterpret_cast<void**>(&gpu_data));
-        memcpy(gpu_data, _data.data(), _data.size());
+        std::memcpy(gpu_data, _data.data(), _data.size());
         get_api_handle()->Unmap(0u, nullptr);
     }
 
@@ -265,6 +261,8 @@ namespace veer::display::render
 #if defined(_DEBUG)
             containers::wstring w_debug_name(m_debug_name);
             get_api_handle()->SetName(w_debug_name.c_str());
+            if(m_resource_alloc)
+                m_resource_alloc->SetName(w_debug_name.c_str());
 #endif // defined(_DEBUG)
             m_api_handle->AddRef();
         }

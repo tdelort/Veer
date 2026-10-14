@@ -1,6 +1,6 @@
 add_subdirectory(backends)
 
-target_sources(${PROJECT_NAME}
+target_sources(veer
 	PRIVATE
         command_queue_base.cpp
         constant_buffer.cpp

@@ -48,8 +48,9 @@ namespace veer::math
         mat4x4f result = mat4x4f::identity();
 
         {
-            mat4x4f translation = transform::s_translation_3d(m_translation);
-            result = result * translation;
+            mat4x4f scale = mat4x4f::identity();
+            scale.set(transform::s_scale(m_scale));
+            result = result * scale;
         }
 
         {
@@ -58,12 +59,11 @@ namespace veer::math
             result = result * rotation;
         }
 
-
         {
-            mat4x4f scale = mat4x4f::identity();
-            scale.set(transform::s_scale(m_scale));
-            result = result * scale;
+            mat4x4f translation = transform::s_translation_3d(m_translation);
+            result = result * translation;
         }
+
 
         return result;
     }
@@ -71,18 +71,14 @@ namespace veer::math
     mat4x4f transform::generate_inverse_matrix() const
     {
         // generate_matrix() returns a matrix M = T * R * S where T : translation, R : rotation, S : scale
-        // we are looking for M-1 such that M * M-1 = I <=> T * R * S * M-1 = I
-        // thus M-1 = S-1 * R-1 * T-1
+        // we are looking for M-1 such that M * M-1 = I <=> S * R * T * M-1 = I
+        // thus M-1 = T-1 * R-1 *  S-1 
 
         mat4x4f result = mat4x4f::identity();
 
         {
-            mat4x4f inv_scale = mat4x4f::identity();
-            static constexpr vec3f s_epsilon = vec3f(FLT_EPSILON);
-            const vec3f sanitized_scale(select(m_scale > s_epsilon, m_scale, s_epsilon));
-            inv_scale.set(transform::s_scale(vec3f(1.f) / sanitized_scale));
-
-            result = result * inv_scale;
+            mat4x4f inv_translation = transform::s_translation_3d(-m_translation);
+            result = result * inv_translation;
         }
 
         {
@@ -92,8 +88,12 @@ namespace veer::math
         }
 
         {
-            mat4x4f inv_translation = transform::s_translation_3d(-m_translation);
-            result = result * inv_translation;
+            mat4x4f inv_scale = mat4x4f::identity();
+            static constexpr vec3f s_epsilon = vec3f(FLT_EPSILON);
+            const vec3f sanitized_scale(select(m_scale > s_epsilon, m_scale, s_epsilon));
+            inv_scale.set(transform::s_scale(vec3f(1.f) / sanitized_scale));
+
+            result = result * inv_scale;
         }
 
         return result;

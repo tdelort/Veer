@@ -136,7 +136,7 @@ namespace veer::containers
         {
             grow(_string.size());
             size_t converted_chars_count = 0;
-            mbstowcs_s(&converted_chars_count, str(), capacity(), _string.str(), _string.size());
+            mbstowcs_s(&converted_chars_count, str(), capacity() + 1u, _string.str(), _string.size());
             m_size = converted_chars_count;
         }
     };

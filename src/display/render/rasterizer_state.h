@@ -3,7 +3,7 @@
 #include <core/core.h>
 
 namespace veer::display::render
-{ 
+{
     struct rasterizer_state
     {
         enum class cull_mode
@@ -14,7 +14,7 @@ namespace veer::display::render
 
             COUNT
         };
-        
+
         // enum class winding_mode
         // {
         //     clockwise,
@@ -25,4 +25,4 @@ namespace veer::display::render
         cull_mode m_cull_mode{cull_mode::back};
         // winding_mode m_winding;
     };
-}
+} // namespace veer::display::render

@@ -4,7 +4,6 @@
 #include "render_device_resource.h"
 #include "resource_desc.h"
 
-
 #if defined(D3D12_RENDER_BACKEND)
 #include <display/render/backends/dx12/dx12_descriptor_heap.h>
 #include <display/render/backends/dx12/dx12_pch.h>

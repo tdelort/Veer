@@ -52,8 +52,7 @@ namespace veer::math
     template <Arithmetic TYPE, size_t ROW_COUNT, size_t COLUMN_COUNT>
     template <size_t OTHER_ROW_COUNT, size_t OTHER_COLUMN_COUNT>
         requires LessEqual<OTHER_ROW_COUNT, ROW_COUNT> && LessEqual<OTHER_COLUMN_COUNT, COLUMN_COUNT>
-    constexpr mat<TYPE, OTHER_ROW_COUNT, OTHER_COLUMN_COUNT> mat<
-        TYPE, ROW_COUNT, COLUMN_COUNT>::get(const vec2u& _offset /*= vec2u(0u)*/) const
+    constexpr mat<TYPE, OTHER_ROW_COUNT, OTHER_COLUMN_COUNT> mat<TYPE, ROW_COUNT, COLUMN_COUNT>::get(const vec2u& _offset /*= vec2u(0u)*/) const
     {
         mat<TYPE, OTHER_ROW_COUNT, OTHER_COLUMN_COUNT> result{};
         for (size_t r = 0; r < OTHER_ROW_COUNT; ++r)
@@ -67,7 +66,8 @@ namespace veer::math
     template <size_t OTHER_ROW_COUNT, size_t OTHER_COLUMN_COUNT>
         requires LessEqual<OTHER_ROW_COUNT, ROW_COUNT> && LessEqual<OTHER_COLUMN_COUNT, COLUMN_COUNT>
     constexpr void mat<TYPE, ROW_COUNT, COLUMN_COUNT>::set(
-        const mat<TYPE, OTHER_ROW_COUNT, OTHER_COLUMN_COUNT>& _m, const vec2u& _offset /*= vec2u(0u)*/
+        const mat<TYPE, OTHER_ROW_COUNT, OTHER_COLUMN_COUNT>& _m,
+        const vec2u& _offset /*= vec2u(0u)*/
     )
     {
         for (size_t r = 0; r < OTHER_ROW_COUNT; ++r)
@@ -91,9 +91,7 @@ namespace veer::math
     }
 
     template <Arithmetic TYPE, size_t ROW_COUNT, size_t COLUMN_COUNT>
-    constexpr mat<TYPE, ROW_COUNT, COLUMN_COUNT>& mat<TYPE, ROW_COUNT, COLUMN_COUNT>::operator+=(
-        const mat<TYPE, ROW_COUNT, COLUMN_COUNT>& _other
-    )
+    constexpr mat<TYPE, ROW_COUNT, COLUMN_COUNT>& mat<TYPE, ROW_COUNT, COLUMN_COUNT>::operator+=(const mat<TYPE, ROW_COUNT, COLUMN_COUNT>& _other)
     {
         for (size_t i = 0u; i < ROW_COUNT; ++i)
             operator[](i) += _other[i];
@@ -101,9 +99,7 @@ namespace veer::math
     }
 
     template <Arithmetic TYPE, size_t ROW_COUNT, size_t COLUMN_COUNT>
-    constexpr mat<TYPE, ROW_COUNT, COLUMN_COUNT>& mat<TYPE, ROW_COUNT, COLUMN_COUNT>::operator-=(
-        const mat<TYPE, ROW_COUNT, COLUMN_COUNT>& _other
-    )
+    constexpr mat<TYPE, ROW_COUNT, COLUMN_COUNT>& mat<TYPE, ROW_COUNT, COLUMN_COUNT>::operator-=(const mat<TYPE, ROW_COUNT, COLUMN_COUNT>& _other)
     {
         for (size_t i = 0u; i < ROW_COUNT; ++i)
             operator[](i) -= _other[i];
@@ -134,9 +130,7 @@ namespace veer::math
     }
 
     template <Arithmetic TYPE, size_t ROW_COUNT, size_t COLUMN_COUNT>
-    [[nodiscard]] constexpr mat<TYPE, ROW_COUNT, COLUMN_COUNT> operator+(
-        const mat<TYPE, ROW_COUNT, COLUMN_COUNT>& _lhs, const mat<TYPE, ROW_COUNT, COLUMN_COUNT>& _rhs
-    )
+    [[nodiscard]] constexpr mat<TYPE, ROW_COUNT, COLUMN_COUNT> operator+(const mat<TYPE, ROW_COUNT, COLUMN_COUNT>& _lhs, const mat<TYPE, ROW_COUNT, COLUMN_COUNT>& _rhs)
     {
         mat<TYPE, ROW_COUNT, COLUMN_COUNT> res(_lhs);
         res += _rhs;
@@ -144,9 +138,7 @@ namespace veer::math
     }
 
     template <Arithmetic TYPE, size_t ROW_COUNT, size_t COLUMN_COUNT>
-    [[nodiscard]] constexpr vec<TYPE, ROW_COUNT> operator-(
-        const mat<TYPE, ROW_COUNT, COLUMN_COUNT>& _lhs, const mat<TYPE, ROW_COUNT, COLUMN_COUNT>& _rhs
-    )
+    [[nodiscard]] constexpr vec<TYPE, ROW_COUNT> operator-(const mat<TYPE, ROW_COUNT, COLUMN_COUNT>& _lhs, const mat<TYPE, ROW_COUNT, COLUMN_COUNT>& _rhs)
     {
         mat<TYPE, ROW_COUNT, COLUMN_COUNT> res(_lhs);
         res -= _rhs;
@@ -173,9 +165,7 @@ namespace veer::math
 
     // ... vector
     template <Arithmetic TYPE, size_t ROW_COUNT, size_t COLUMN_COUNT>
-    [[nodiscard]] constexpr vec<TYPE, COLUMN_COUNT> operator*(
-        const vec<TYPE, ROW_COUNT>& _v, const mat<TYPE, ROW_COUNT, COLUMN_COUNT>& _m
-    )
+    [[nodiscard]] constexpr vec<TYPE, COLUMN_COUNT> operator*(const vec<TYPE, ROW_COUNT>& _v, const mat<TYPE, ROW_COUNT, COLUMN_COUNT>& _m)
     {
         vec<TYPE, COLUMN_COUNT> res{};
         for (size_t c = 0; c < COLUMN_COUNT; ++c)
@@ -206,18 +196,16 @@ namespace veer::math
         return res;
     }
 
-#define MAT_BOOL_BINARY_OPERATOR_DEFINE(_op)                                                                           \
-    template <Arithmetic TYPE, size_t ROW_COUNT, size_t COLUMN_COUNT>                                                  \
-    [[nodiscard]] constexpr mat<bool, ROW_COUNT, COLUMN_COUNT> operator _op(                                           \
-        const mat<TYPE, ROW_COUNT, COLUMN_COUNT>& _lhs, const mat<TYPE, ROW_COUNT, COLUMN_COUNT>& _rhs                 \
-    )                                                                                                                  \
-    {                                                                                                                  \
-        mat<bool, ROW_COUNT, COLUMN_COUNT> res{};                                                                      \
-        for (size_t r = 0; r < ROW_COUNT; ++r)                                                                         \
-        {                                                                                                              \
-            res[r] = (_lhs[r] _op _rhs[r]);                                                                            \
-        }                                                                                                              \
-        return res;                                                                                                    \
+#define MAT_BOOL_BINARY_OPERATOR_DEFINE(_op)                                                                                                                                       \
+    template <Arithmetic TYPE, size_t ROW_COUNT, size_t COLUMN_COUNT>                                                                                                              \
+    [[nodiscard]] constexpr mat<bool, ROW_COUNT, COLUMN_COUNT> operator _op(const mat<TYPE, ROW_COUNT, COLUMN_COUNT>& _lhs, const mat<TYPE, ROW_COUNT, COLUMN_COUNT>& _rhs)        \
+    {                                                                                                                                                                              \
+        mat<bool, ROW_COUNT, COLUMN_COUNT> res{};                                                                                                                                  \
+        for (size_t r = 0; r < ROW_COUNT; ++r)                                                                                                                                     \
+        {                                                                                                                                                                          \
+            res[r] = (_lhs[r] _op _rhs[r]);                                                                                                                                        \
+        }                                                                                                                                                                          \
+        return res;                                                                                                                                                                \
     }
 
     MAT_BOOL_BINARY_OPERATOR_DEFINE(==)
@@ -264,7 +252,8 @@ namespace veer::math
 
     template <size_t ROW_COUNT, size_t COLUMN_COUNT>
     constexpr mat<bool, ROW_COUNT, COLUMN_COUNT> nearly_equal_relative(
-        const mat<float, ROW_COUNT, COLUMN_COUNT>& _lhs, const mat<float, ROW_COUNT, COLUMN_COUNT>& _rhs,
+        const mat<float, ROW_COUNT, COLUMN_COUNT>& _lhs,
+        const mat<float, ROW_COUNT, COLUMN_COUNT>& _rhs,
         float _relative_epsilon /*= FLT_EPSILON*/
     )
     {
@@ -276,7 +265,8 @@ namespace veer::math
 
     template <size_t ROW_COUNT, size_t COLUMN_COUNT>
     constexpr mat<bool, ROW_COUNT, COLUMN_COUNT> nearly_equal(
-        const mat<float, ROW_COUNT, COLUMN_COUNT>& _lhs, const mat<float, ROW_COUNT, COLUMN_COUNT>& _rhs,
+        const mat<float, ROW_COUNT, COLUMN_COUNT>& _lhs,
+        const mat<float, ROW_COUNT, COLUMN_COUNT>& _rhs,
         float _epsilon /*= FLT_EPSILON*/
     )
     {

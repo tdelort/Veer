@@ -250,7 +250,7 @@ namespace veer::display::render
 		D3D12_CPU_DESCRIPTOR_HANDLE depth_descriptor{};
 		if(_depth)
 		{
-			depth_descriptor = _depth->get_render_target_view().m_handle;
+			depth_descriptor = _depth->get_depth_stencil_view().m_handle;
 		}
 
 		get_api_handle()->OMSetRenderTargets(count, color_descriptors.data(), false, _depth != nullptr ? &depth_descriptor : nullptr);
@@ -302,7 +302,7 @@ namespace veer::display::render
 
 	void graphics_command_buffer::clear_depth_stencil(render_device_texture_2d& _render_target_resource, float _depth, uint8_t _stencil)
 	{
-		get_api_handle()->ClearDepthStencilView(_render_target_resource.get_render_target_view().m_handle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, _depth, _stencil, 0, nullptr);
+		get_api_handle()->ClearDepthStencilView(_render_target_resource.get_depth_stencil_view().m_handle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, _depth, _stencil, 0, nullptr);
 	}
 
 	void graphics_command_buffer::set_index_buffer(const render_device_buffer& _index_buffer)

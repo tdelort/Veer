@@ -20,8 +20,10 @@ namespace veer::display::render
 
     graphics_technique::graphics_technique(
         const constant_buffer_definition& _frame_constant_buffer_definition,
-        const constant_buffer_definition& _material_constant_buffer_definition, const render_device& _device,
-        const shader_stage_source_container_t& _source_code, const shader_signature& _signature,
+        const constant_buffer_definition& _material_constant_buffer_definition,
+        const render_device& _device,
+        const shader_stage_source_container_t& _source_code,
+        const shader_signature& _signature,
         const shader_render_state& _render_state
     )
         : technique(_frame_constant_buffer_definition, _material_constant_buffer_definition)
@@ -67,28 +69,50 @@ namespace veer::display::render
         pso_desc.InputLayout.NumElements = input_elems_desc.size();
         pso_desc.InputLayout.pInputElementDescs = input_elems_desc.data();
 
-        // TODO depth state
-        pso_desc.DepthStencilState.DepthEnable = _render_state.m_depth_enable;
+        if (_render_state.m_depth_state.m_access != access_mode::none)
+        {
+            pso_desc.DepthStencilState.DepthEnable = true;
+            const bool depth_write = flags::get(_render_state.m_depth_state.m_access, access_mode::write);
+            pso_desc.DepthStencilState.DepthWriteMask = depth_write ? D3D12_DEPTH_WRITE_MASK_ALL : D3D12_DEPTH_WRITE_MASK_ZERO;
+            pso_desc.DepthStencilState.DepthFunc = s_convert(_render_state.m_depth_state.m_func);
+
+            VEER_ASSERT(_signature.m_depth_output_elems, "Depth is enabled but depth output format is not set");
+        }
+        else
+        {
+            pso_desc.DepthStencilState.DepthEnable = false;
+        }
+
+        if (_signature.m_depth_output_elems)
+        {
+            VEER_ASSERT(pso_desc.DepthStencilState.DepthEnable, "Depth output format is set but depth is not enabled");
+            pso_desc.DSVFormat = s_convert(_signature.m_depth_output_elems->m_format);
+        }
+
         pso_desc.DepthStencilState.StencilEnable = _render_state.m_stencil_enable;
+        VEER_ASSERT(!_render_state.m_stencil_enable, "Not implemented");
+        // UINT8 StencilReadMask;
+        // UINT8 StencilWriteMask;
+        // D3D12_DEPTH_STENCILOP_DESC FrontFace;
+        // D3D12_DEPTH_STENCILOP_DESC BackFace;
 
         // TODO other state data
         pso_desc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
         pso_desc.SampleMask = UINT_MAX;
         pso_desc.SampleDesc.Count = 1;
 
-        for (size_t i = 0; i < _signature.m_output_elems.size(); ++i)
+        for (size_t i = 0; i < _signature.m_color_output_elems.size(); ++i)
         {
-            pso_desc.RTVFormats[i] = s_convert(_signature.m_output_elems[i].m_format);
+            pso_desc.RTVFormats[i] = s_convert(_signature.m_color_output_elems[i].m_format);
         }
-        pso_desc.NumRenderTargets = _signature.m_output_elems.size();
+        pso_desc.NumRenderTargets = _signature.m_color_output_elems.size();
+
 
         VEER_LOG("CreateGraphicsPipelineState");
-        HRESULT hr = _device.get_api_handle()->CreateGraphicsPipelineState(&pso_desc, IID_PPV_ARGS(&m_pso));
-        if (!SUCCEEDED(hr))
-        {
-            containers::string hr_string = HrToString(hr);
-            VEER_LOG_ERROR("Failed to create PSO. Error (" << hr_string.c_str() << ")");
-        }
+        veer::hr hr = _device.get_api_handle()->CreateGraphicsPipelineState(&pso_desc, IID_PPV_ARGS(&m_pso));
+        VEER_ASSERT(hr.succeeded(), "Failed to create PSO. Error (" << hr << ")");
+
+        _device.check_errors();
     }
 
     graphics_technique::~graphics_technique()

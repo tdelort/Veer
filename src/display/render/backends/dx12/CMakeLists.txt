@@ -1,4 +1,4 @@
-target_sources(${PROJECT_NAME}
+target_sources(veer
 	PRIVATE
         dx12_command_buffer.cpp
         dx12_command_queue.cpp

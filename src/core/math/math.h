@@ -33,7 +33,7 @@ namespace veer::math
         requires veer::Greater<sizeof...(ARGS), 1>
     {
         T accum = _arg0;
-        ((accum = max(_args, accum)), ...);
+        ((accum = math::max<T>(_args, accum)), ...);
         return accum;
     }
 
@@ -55,10 +55,9 @@ namespace veer::math
         return (_val + _quotient - T(1)) / _quotient;
     }
 
-
     constexpr bool nearly_equal_relative(const float& _lhs, const float& _rhs, float _relative_epsilon = FLT_EPSILON)
     {
-        return math::abs(_lhs - _rhs) <= (_relative_epsilon * math::max(math::abs(_lhs), math::abs(_rhs))); 
+        return math::abs(_lhs - _rhs) <= (_relative_epsilon * math::max(math::abs(_lhs), math::abs(_rhs)));
     }
 
     constexpr bool nearly_equal(const float& _lhs, const float& _rhs, float _epsilon = FLT_EPSILON)
@@ -88,8 +87,7 @@ namespace veer::math
         const uint32_t e_32 = (u_32 >> 23) & 0xFF;
         const uint32_t m_32 = (u_32) & 0x7FFFFF;
 
-        const uint16_t tmp =
-            static_cast<uint16_t>(clamp<int32_t>(static_cast<int32_t>(e_32) - s_f32_to_f16_exponent_offset, 0, 31));
+        const uint16_t tmp = static_cast<uint16_t>(clamp<int32_t>(static_cast<int32_t>(e_32) - s_f32_to_f16_exponent_offset, 0, 31));
 
         // sign 1, exponent 5, mantissa 10
         // -1 ^ s_16 * 2 ^ (e_16 - 15) * (1.m_32)

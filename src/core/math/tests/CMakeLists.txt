@@ -1,5 +1,5 @@
 if(BUILD_TESTS)
-	target_sources(${PROJECT_NAME}
+	target_sources(veer
 		PRIVATE
 		vec_tests.cpp
 		mat_tests.cpp

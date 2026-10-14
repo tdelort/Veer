@@ -1,7 +1,7 @@
 #include "transform_tests.h"
 
-#include <core/math/vec.h>
 #include <core/math/transform.h>
+#include <core/math/vec.h>
 
 namespace veer::tests
 {
@@ -59,7 +59,6 @@ namespace veer::tests
         VEER_TEST_ASSERT(all(math::nearly_equal(pos_2d * s_2d, (pos_2d * d.get<2u>()))));
         VEER_TEST_ASSERT(all(math::nearly_equal(pos_3d * s_3d, (pos_3d * d))));
 
-
         const math::vec3f translation = math::vec3f(-1.f, 5.f, 12.f);
         const math::vec3f rotation = static_cast<float>(math::s_pi) * math::vec3f(-0.2f, 1.7f, 0.08f);
         const math::vec3f scale = math::vec3f(1.f, 2.3f, 2.f);
@@ -77,4 +76,4 @@ namespace veer::tests
         VEER_RUN_TEST(transform_operations())
         return result::succeeded;
     }
-}
+} // namespace veer::tests

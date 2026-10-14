@@ -1,13 +1,15 @@
 #pragma once
 
 #include "core/containers/resizable_array.h"
-#include <core/core.h>
 #include <core/containers/span.h>
-#include <core/containers/string.h>
 #include <core/containers/static_array.h>
+#include <core/containers/string.h>
+#include <core/core.h>
 #include <display/render/blend_state.h>
+#include <display/render/depth_state.h>
 #include <display/render/rasterizer_state.h>
 #include <display/render/render_device_data_format.h>
+
 
 namespace veer::display::render
 {
@@ -39,15 +41,16 @@ namespace veer::display::render
 
         // input / output
         veer::containers::span<input_elem> m_input_elems;
-        veer::containers::span<output_elem> m_output_elems;
+        output_elem* m_depth_output_elems{nullptr};
+        veer::containers::span<output_elem> m_color_output_elems;
     };
 
     struct shader_render_state
     {
         veer::containers::span<blend_state> m_blend_states;
         rasterizer_state m_rasterizer_state;
-        bool m_depth_enable;
-        bool m_stencil_enable;
+        depth_state m_depth_state;
+        bool m_stencil_enable{false};
         // depth_state ? m_depth_enable / m_stencil_enable ?
     };
 
@@ -56,6 +59,6 @@ namespace veer::display::render
 
     struct shader_source
     {
-        shader_source( const shader_stage_source_container_t& _source_code, const shader_signature& _signature, const shader_render_state& _render_state );
+        shader_source(const shader_stage_source_container_t& _source_code, const shader_signature& _signature, const shader_render_state& _render_state);
     };
-}
+} // namespace veer::display::render
