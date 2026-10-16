@@ -5,15 +5,23 @@ namespace veer::math
 {
     static constexpr double s_pi = 3.1415926535897932; // 16 decimals ought to do it
 
+    // TODO : improve these so that select/min/max/clamp can return refs
+
     template <typename T>
-    constexpr const T& min(const T& _lhs, const T& _rhs)
+    [[nodiscard]] constexpr T select(const bool& _cond, const T& _true, const T& _false)
     {
-        return _lhs < _rhs ? _lhs : _rhs;
+        return _cond ? _true : _false;
+    }
+
+    template <typename T>
+    [[nodiscard]] constexpr T min(const T& _lhs, const T& _rhs)
+    {
+        return select(_lhs < _rhs, _lhs, _rhs);
     }
 
     // fold version for any number of args
     template <typename T, typename... ARGS>
-    constexpr T min(const T& _arg0, const ARGS&... _args)
+    [[nodiscard]] constexpr T min(const T& _arg0, const ARGS&... _args)
         requires veer::Greater<sizeof...(ARGS), 1>
     {
         T accum = _arg0;
@@ -22,14 +30,14 @@ namespace veer::math
     }
 
     template <typename T>
-    constexpr const T& max(const T& _lhs, const T& _rhs)
+    [[nodiscard]] constexpr T max(const T& _lhs, const T& _rhs)
     {
-        return _lhs < _rhs ? _rhs : _lhs;
+        return select(_lhs < _rhs, _rhs, _lhs);
     }
 
     // fold version for any number of args
     template <typename T, typename... ARGS>
-    constexpr T max(const T& _arg0, const ARGS&... _args)
+    [[nodiscard]] constexpr T max(const T& _arg0, const ARGS&... _args)
         requires veer::Greater<sizeof...(ARGS), 1>
     {
         T accum = _arg0;
@@ -38,36 +46,43 @@ namespace veer::math
     }
 
     template <typename T>
-    constexpr T abs(const T& _val)
+    [[nodiscard]] constexpr T abs(const T& _val)
     {
-        return max(_val, -_val);
+        return math::max(_val, -_val);
     }
 
     template <typename T>
-    constexpr const T& clamp(const T& _value, const T& _min, const T& _max)
+    [[nodiscard]] constexpr T clamp(const T& _value, const T& _min, const T& _max)
     {
-        return min(max(_value, _min), _max);
+        const T tmp = math::max(_value, _min);
+        return math::min(tmp, _max);
+    }
+
+    template <typename T, typename U>
+    [[nodiscard]] constexpr T lerp(const T& _a, const T& _b, const U& _t)
+    {
+        return _a + (_b - _a) * _t;
     }
 
     template <typename T>
-    constexpr T ceiled_remainder(const T& _val, const T& _quotient)
+    [[nodiscard]] constexpr T ceiled_remainder(const T& _val, const T& _quotient)
     {
         return (_val + _quotient - T(1)) / _quotient;
     }
 
-    constexpr bool nearly_equal_relative(const float& _lhs, const float& _rhs, float _relative_epsilon = FLT_EPSILON)
+    [[nodiscard]] constexpr bool nearly_equal_relative(const float& _lhs, const float& _rhs, float _relative_epsilon = FLT_EPSILON)
     {
-        return math::abs(_lhs - _rhs) <= (_relative_epsilon * math::max(math::abs(_lhs), math::abs(_rhs)));
+        return math::abs(_lhs - _rhs) <= (_relative_epsilon * math::max(math::abs(_lhs), math::abs(_rhs), 1.f));
     }
 
-    constexpr bool nearly_equal(const float& _lhs, const float& _rhs, float _epsilon = FLT_EPSILON)
+    [[nodiscard]] constexpr bool nearly_equal(const float& _lhs, const float& _rhs, float _epsilon = FLT_EPSILON)
     {
         return math::abs(_lhs - _rhs) <= _epsilon;
     }
 
     template <typename T, typename U>
         requires(sizeof(T) == sizeof(U))
-    constexpr U bit_cast(T _value)
+    [[nodiscard]] constexpr U bit_cast(T _value)
     {
         U result;
         std::memcpy(&result, &_value, sizeof(T));
@@ -77,7 +92,7 @@ namespace veer::math
     // 127 - 15
     static constexpr int64_t s_f32_to_f16_exponent_offset = 112;
 
-    constexpr uint16_t to_float_16(float _value)
+    [[nodiscard]] constexpr uint16_t to_float_16(float _value)
     {
         uint32_t u_32 = bit_cast<float, uint32_t>(_value);
 
@@ -98,7 +113,7 @@ namespace veer::math
         return s_16 | e_16 | m_16;
     }
 
-    constexpr float to_float_32(uint16_t _value)
+    [[nodiscard]] constexpr float to_float_32(uint16_t _value)
     {
         // sign 1, exponent 5, mantissa 10
         // -1 ^ s_16 * 2 ^ (e_16 - 15) * (1.m_32)
@@ -117,22 +132,5 @@ namespace veer::math
         const uint32_t u_32 = s_32 | e_32 | m_32;
 
         return bit_cast<uint32_t, float>(u_32);
-    }
-
-    //------------------------------------------------------------------------
-    inline static float convertHalfToFloat(uint16_t _value) noexcept
-    {
-        union U32toF32
-        {
-            uint32_t u;
-            float f;
-        } val;
-
-        const uint32_t sign = (((const uint32_t)_value) & 0x8000) << 16;
-        const uint32_t mant = (_value & 0x3ffu) << 13; // 13 bits are zeros
-        const uint32_t exp = (_value & 0x7fff) == 0 ? 0 : (((((const uint32_t)_value) >> 10) & 0x1f) - 15 + 127) << 23;
-
-        val.u = sign | exp | mant;
-        return val.f;
     }
 }; // namespace veer::math

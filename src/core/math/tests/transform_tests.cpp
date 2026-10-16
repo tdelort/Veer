@@ -29,6 +29,9 @@ namespace veer::tests
 
     result transform_operations()
     {
+        // 1.f * 10-6
+        static constexpr float s_matrix_operation_epsilon = 0.000001f;
+
         const math::vec2f pos_2d(1.f, 2.f);
         const math::vec3f pos_3d(1.f, 2.f, 3.f);
 
@@ -43,21 +46,21 @@ namespace veer::tests
         const float cos_v = static_cast<float>(std::cos(theta));
         const float sin_v = static_cast<float>(std::sin(theta));
         const math::mat2x2f r_2d = math::transform::s_rotation_2d(theta);
-        VEER_TEST_ASSERT(all(math::nearly_equal(pos_2d * r_2d, math::vec2f(-2.f, 1.f))));
-        VEER_TEST_ASSERT(all(math::nearly_equal(pos_2d * r_2d * r_2d * r_2d * r_2d, pos_2d)));
+        VEER_TEST_ASSERT(all(math::nearly_equal_relative(pos_2d * r_2d, math::vec2f(-2.f, 1.f), s_matrix_operation_epsilon)));
+        VEER_TEST_ASSERT(all(math::nearly_equal_relative(pos_2d * r_2d * r_2d * r_2d * r_2d, pos_2d, s_matrix_operation_epsilon)));
 
         const math::mat3x3f r_3d_x = math::transform::s_rotation_3d_x(theta);
         const math::mat3x3f r_3d_y = math::transform::s_rotation_3d_y(theta);
         const math::mat3x3f r_3d_z = math::transform::s_rotation_3d_z(theta);
-        VEER_TEST_ASSERT(all(math::nearly_equal(pos_3d * r_3d_x, math::vec3f(1.f, -3.f, 2.f)))); // x unchanged
-        VEER_TEST_ASSERT(all(math::nearly_equal(pos_3d * r_3d_y, math::vec3f(3.f, 2.f, -1.f)))); // y unchanged
-        VEER_TEST_ASSERT(all(math::nearly_equal(pos_3d * r_3d_z, math::vec3f(-2.f, 1.f, 3.f)))); // z unchanged
+        VEER_TEST_ASSERT(all(math::nearly_equal_relative(pos_3d * r_3d_x, math::vec3f(1.f, -3.f, 2.f), s_matrix_operation_epsilon))); // x unchanged
+        VEER_TEST_ASSERT(all(math::nearly_equal_relative(pos_3d * r_3d_y, math::vec3f(3.f, 2.f, -1.f), s_matrix_operation_epsilon))); // y unchanged
+        VEER_TEST_ASSERT(all(math::nearly_equal_relative(pos_3d * r_3d_z, math::vec3f(-2.f, 1.f, 3.f), s_matrix_operation_epsilon))); // z unchanged
 
         const math::vec3f d(3.f, 5.f, 8.f);
         const math::mat2x2f s_2d = math::transform::s_scale(math::vec2f(d.x(), d.y()));
         const math::mat3x3f s_3d = math::transform::s_scale(math::vec3f(d.x(), d.y(), d.z()));
-        VEER_TEST_ASSERT(all(math::nearly_equal(pos_2d * s_2d, (pos_2d * d.get<2u>()))));
-        VEER_TEST_ASSERT(all(math::nearly_equal(pos_3d * s_3d, (pos_3d * d))));
+        VEER_TEST_ASSERT(all(math::nearly_equal_relative(pos_2d * s_2d, (pos_2d * d.get<2u>()), s_matrix_operation_epsilon)));
+        VEER_TEST_ASSERT(all(math::nearly_equal_relative(pos_3d * s_3d, (pos_3d * d), s_matrix_operation_epsilon)));
 
         const math::vec3f translation = math::vec3f(-1.f, 5.f, 12.f);
         const math::vec3f rotation = static_cast<float>(math::s_pi) * math::vec3f(-0.2f, 1.7f, 0.08f);
@@ -65,7 +68,8 @@ namespace veer::tests
         math::transform a{translation, rotation, scale};
         const math::mat4x4f mat = a.generate_matrix();
         const math::mat4x4f inv_mat = a.generate_inverse_matrix();
-        VEER_TEST_ASSERT(all(math::nearly_equal(mat * inv_mat, math::mat4x4f::identity())));
+        const math::mat4x4f product = mat * inv_mat;
+        VEER_TEST_ASSERT(all(math::nearly_equal_relative(product, math::mat4x4f::identity(), s_matrix_operation_epsilon)));
 
         return result::succeeded;
     }

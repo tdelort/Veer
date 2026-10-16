@@ -83,7 +83,7 @@ namespace veer::math
 
         {
             mat4x4f inv_rotation = mat4x4f::identity();
-            inv_rotation.set(transform::s_rotation_3d(-m_rotation_euler));
+            inv_rotation.set(transform::s_rotation_3d(m_rotation_euler).transpose());
             result = result * inv_rotation;
         }
 

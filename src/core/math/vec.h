@@ -47,7 +47,7 @@ namespace veer::math
     public:
         constexpr vec();
 
-        constexpr vec(TYPE _e);
+        constexpr explicit vec(TYPE _e);
 
         template <Arithmetic... ARGS>
             requires(sizeof...(ARGS) == ELEM_COUNT)

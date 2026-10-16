@@ -299,7 +299,7 @@ namespace veer::math
     {
         const float len = length(_v);
         if (len < _epsilon)
-            return 0.f;
+            return vec<TYPE, ELEM_COUNT>(0.f);
         return _v / len;
     }
 
@@ -326,7 +326,7 @@ namespace veer::math
     {
         vec<TYPE, ELEM_COUNT> result{};
         for (size_t i = 0u; i < ELEM_COUNT; ++i)
-            result = _cond[i] ? _true[i] : _false[i];
+            result[i] = _cond[i] ? _true[i] : _false[i];
         return result;
     }
 
@@ -339,7 +339,7 @@ namespace veer::math
     {
         vec<bool, ELEM_COUNT> result{};
         for (size_t i = 0u; i < ELEM_COUNT; ++i)
-            result = math::nearly_equal_relative(_lhs[i], _rhs[i], _relative_epsilon);
+            result[i] = math::nearly_equal_relative(_lhs[i], _rhs[i], _relative_epsilon);
         return result;
     }
 
@@ -352,7 +352,7 @@ namespace veer::math
     {
         vec<bool, ELEM_COUNT> result{};
         for (size_t i = 0u; i < ELEM_COUNT; ++i)
-            result = math::nearly_equal(_lhs[i], _rhs[i], _epsilon);
+            result[i] = math::nearly_equal(_lhs[i], _rhs[i], _epsilon);
         return result;
     }
 } // namespace veer::math
