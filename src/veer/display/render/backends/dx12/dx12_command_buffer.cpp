@@ -1,0 +1,338 @@
+#include <veer/display/render/command_buffer.h>
+
+#include <veer/core/containers/static_array.h>
+#include <veer/core/debug.h>
+#include <veer/core/math/math.h>
+
+#include <veer/display/render/compute_technique.h>
+#include <veer/display/render/constant_buffer.h>
+#include <veer/display/render/graphics_technique.h>
+#include <veer/display/render/render_device.h>
+#include <veer/display/render/render_device_resource.h>
+#include <veer/display/render/render_thread.h>
+#include <veer/display/render/resource_desc.h>
+
+#include <veer/display/render/backends/dx12/dx12_render_device_resource_sync_state.h>
+#include <veer/display/render/backends/dx12/dx12_technique_helpers.h>
+
+namespace veer::display::render
+{
+
+    // --- dx12 specific functions (declared in dx12_command_buffer.inl) ---
+    D3D12_COMMAND_LIST_TYPE command_buffer::s_convert(const command_buffer::type _type)
+    {
+        D3D12_COMMAND_LIST_TYPE dx12_type;
+        switch (_type)
+        {
+        case command_buffer::type::graphics:
+            dx12_type = D3D12_COMMAND_LIST_TYPE_DIRECT;
+            break;
+        case command_buffer::type::compute:
+            dx12_type = D3D12_COMMAND_LIST_TYPE_COMPUTE;
+            break;
+        case command_buffer::type::copy:
+            dx12_type = D3D12_COMMAND_LIST_TYPE_COPY;
+            break;
+        default:
+            VEER_ASSERT(false, "All command_buffer::type should be covered");
+            break;
+        }
+        return dx12_type;
+    }
+
+    ID3D12GraphicsCommandList* command_buffer::get_api_handle()
+    {
+        return m_command_list_handle;
+    }
+
+    ID3D12GraphicsCommandList* command_buffer::release_handle()
+    {
+        ID3D12GraphicsCommandList* tmp = m_command_list_handle;
+        m_command_list_handle = nullptr;
+        return tmp;
+    }
+
+    // --- command_buffer ---
+    command_buffer::command_buffer()
+        : m_type{command_buffer::type::none}
+        , m_owner_thread{nullptr}
+        , m_command_list_handle{nullptr}
+    {
+    }
+
+    command_buffer::command_buffer(render_thread& _render_thread, command_buffer::type _type)
+        : m_type{_type}
+        , m_owner_thread{&_render_thread}
+    {
+        m_command_list_handle = _render_thread.alloc_api_command_list(s_convert(_type));
+    }
+
+    command_buffer::command_buffer(command_buffer&& _other)
+    {
+        *this = std::move(_other);
+    }
+
+    command_buffer& command_buffer::operator=(command_buffer&& _other)
+    {
+        m_owner_thread = _other.m_owner_thread;
+        _other.m_owner_thread = nullptr;
+
+        m_type = _other.m_type;
+
+        m_after_execution_callbacks = std::move(_other.m_after_execution_callbacks);
+
+        m_command_list_handle = _other.m_command_list_handle;
+        _other.m_command_list_handle = nullptr;
+
+        return *this;
+    }
+
+    command_buffer::~command_buffer()
+    {
+        VEER_ASSERT(m_command_list_handle == nullptr, "command_buffer destroyed without actually being executed!!!");
+    }
+
+    void command_buffer::transition_barrier(render_device_resource& _resource, render_device_resource_sync_state _to_state)
+    {
+        if (_resource.get_sync_state_tracking().get_resource_state() == _to_state)
+            return;
+
+        D3D12_RESOURCE_BARRIER barrier = {};
+        barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+        barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+        barrier.Transition.pResource = _resource.get_api_handle();
+        barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+        barrier.Transition.StateBefore = display::render::s_convert(_resource.get_sync_state_tracking().get_resource_state());
+        barrier.Transition.StateAfter = display::render::s_convert(_to_state);
+        get_api_handle()->ResourceBarrier(1, &barrier);
+
+        _resource.get_sync_state_tracking().set_resource_state(_to_state);
+    }
+
+    // --- copy_command_buffer ---
+
+    copy_command_buffer::copy_command_buffer(render_thread& _render_thread)
+        : copy_command_buffer(_render_thread, command_buffer::type::copy)
+    {
+    }
+
+    copy_command_buffer::copy_command_buffer(render_thread& _render_thread, command_buffer::type _type)
+        : command_buffer(_render_thread, _type)
+    {
+    }
+
+    copy_command_buffer::~copy_command_buffer()
+    {
+    }
+
+    void copy_command_buffer::copy_texture(const render_device_texture_base& _dst, const render_device_texture_base& _src)
+    {
+        // TODO : implement other args of CopyTextureRegion if needed
+        get_api_handle()->CopyResource(_dst.get_api_handle(), _src.get_api_handle());
+    }
+
+    void copy_command_buffer::copy_buffer(const render_device_buffer& _dst, const render_device_buffer& _src, uint64_t _num_bytes)
+    {
+        // TODO : implement other args if needed
+        get_api_handle()->CopyBufferRegion(_dst.get_api_handle(), 0u, _src.get_api_handle(), 0u, _num_bytes);
+    }
+
+    // --- compute_command_buffer ---
+
+    compute_command_buffer::compute_command_buffer(render_thread& _render_thread)
+        : compute_command_buffer(_render_thread, command_buffer::type::compute)
+    {
+    }
+
+    compute_command_buffer::compute_command_buffer(render_thread& _render_thread, command_buffer::type _type)
+        : copy_command_buffer(_render_thread, _type)
+    {
+        // needs to be set on each command list once before most calls (at least before setting root signatures)
+        containers::static_array<ID3D12DescriptorHeap*, 2> shader_visible_heaps;
+        shader_visible_heaps[0] = _render_thread.get_device().get_srv_uav_cbv_descriptor_heap().get_api_handle();
+        shader_visible_heaps[1] = _render_thread.get_device().get_sampler_descriptor_heap().get_api_handle();
+
+        get_api_handle()->SetDescriptorHeaps(2u, shader_visible_heaps.data());
+    }
+
+    compute_command_buffer::~compute_command_buffer()
+    {
+    }
+
+    void compute_command_buffer::set_technique(compute_technique& _technique)
+    {
+        get_api_handle()->SetPipelineState(_technique.get_pipeline_state_object());
+        get_api_handle()->SetComputeRootSignature(_technique.get_root_signature());
+    }
+
+    void compute_command_buffer::clear_texture(const render_device_texture_base& _texture, math::vec4u _color)
+    {
+        (void)_texture;
+        (void)_color;
+        // TODO : maybe won't implement
+        VEER_ASSERT(false, "Not implemented");
+    }
+
+    void compute_command_buffer::clear_texture(const render_device_texture_base& _texture, math::vec4f _color)
+    {
+        (void)_texture;
+        (void)_color;
+        VEER_ASSERT(false, "Not implemented");
+    }
+
+    void compute_command_buffer::clear_buffer(const render_device_buffer& _buffer, uint32_t _value)
+    {
+        (void)_buffer;
+        (void)_value;
+        VEER_ASSERT(false, "Not implemented");
+    }
+
+    void compute_command_buffer::clear_buffer(const render_device_buffer& _buffer, float _value)
+    {
+        (void)_buffer;
+        (void)_value;
+        VEER_ASSERT(false, "Not implemented");
+    }
+
+    void compute_command_buffer::set_constant_buffer(const render_device_buffer& _buffer, constant_buffer_type _type)
+    {
+        get_api_handle()->SetComputeRootConstantBufferView(veer::display::render::s_get_root_param_index(_type), _buffer.get_api_handle()->GetGPUVirtualAddress());
+    }
+
+    void compute_command_buffer::dispatch(math::vec3u _group_count)
+    {
+        get_api_handle()->Dispatch(_group_count.x(), _group_count.y(), _group_count.z());
+    }
+
+    // --- graphics_command_buffer ---
+
+    graphics_command_buffer::graphics_command_buffer(render_thread& _render_thread)
+        : compute_command_buffer(_render_thread, command_buffer::type::graphics)
+    {
+    }
+
+    graphics_command_buffer::~graphics_command_buffer()
+    {
+    }
+
+    void graphics_command_buffer::set_technique(graphics_technique& _technique)
+    {
+        graphics_technique& dx12_technique = static_cast<graphics_technique&>(_technique);
+        get_api_handle()->SetPipelineState(dx12_technique.get_pipeline_state_object());
+        get_api_handle()->SetGraphicsRootSignature(dx12_technique.get_root_signature());
+    }
+
+    void graphics_command_buffer::set_render_output(render_device_texture_2d* _depth, containers::span<render_device_texture_2d*> _colors)
+    {
+        VEER_ASSERT(
+            _colors.size() < D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT,
+            "Too many render targets set on command buffer for current backend (set " << _colors.size() << " but supports at most " << D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT
+                                                                                      << " )"
+        );
+
+        const size_t count = math::min<size_t>(_colors.size(), D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT);
+
+        containers::static_array<D3D12_CPU_DESCRIPTOR_HANDLE, D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT> color_descriptors{};
+        for (size_t i = 0; i < count; ++i)
+        {
+            if (_colors[i] == nullptr)
+            {
+                VEER_LOG_ERROR("Invalid render target passed in set_render_output at _color[" << i << "]");
+                continue;
+            }
+
+            color_descriptors[i] = _colors[i]->get_render_target_view().m_handle;
+        }
+
+        D3D12_CPU_DESCRIPTOR_HANDLE depth_descriptor{};
+        if (_depth)
+        {
+            depth_descriptor = _depth->get_depth_stencil_view().m_handle;
+        }
+
+        get_api_handle()->OMSetRenderTargets(count, color_descriptors.data(), false, _depth != nullptr ? &depth_descriptor : nullptr);
+    }
+
+    void graphics_command_buffer::set_viewports(containers::span<viewport> _viewports)
+    {
+        containers::resizable_array<D3D12_VIEWPORT> dx12_viewports;
+        dx12_viewports.reserve(_viewports.size());
+
+        for (viewport& vp : _viewports)
+        {
+            D3D12_VIEWPORT viewport;
+            viewport.TopLeftX = vp.m_position.x();
+            viewport.TopLeftY = vp.m_position.y();
+            viewport.Width = vp.m_size.x();
+            viewport.Height = vp.m_size.y();
+            viewport.MinDepth = vp.m_depth[0];
+            viewport.MaxDepth = vp.m_depth[1];
+            dx12_viewports.push_back(viewport);
+        }
+
+        get_api_handle()->RSSetViewports(dx12_viewports.size(), dx12_viewports.data());
+    }
+
+    void graphics_command_buffer::set_scissors(containers::span<rect> _scissor_rects)
+    {
+        containers::resizable_array<D3D12_RECT> dx12_rects;
+        dx12_rects.reserve(_scissor_rects.size());
+
+        for (rect& rect : _scissor_rects)
+        {
+            D3D12_RECT scissor_rect;
+            scissor_rect.left = rect.m_min.x();
+            scissor_rect.top = rect.m_min.y();
+            scissor_rect.right = rect.m_max.x();
+            scissor_rect.bottom = rect.m_max.y();
+            dx12_rects.push_back(scissor_rect);
+        }
+
+        get_api_handle()->RSSetScissorRects(dx12_rects.size(), dx12_rects.data());
+    }
+
+    void graphics_command_buffer::clear_render_target(render_device_texture_2d& _render_target_resource, math::vec4f _color)
+    {
+        const float arr[4] = {_color[0], _color[1], _color[2], _color[3]};
+        get_api_handle()->ClearRenderTargetView(_render_target_resource.get_render_target_view().m_handle, arr, 0, nullptr);
+    }
+
+    void graphics_command_buffer::clear_depth_stencil(render_device_texture_2d& _render_target_resource, float _depth, uint8_t _stencil)
+    {
+        get_api_handle()
+            ->ClearDepthStencilView(_render_target_resource.get_depth_stencil_view().m_handle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, _depth, _stencil, 0, nullptr);
+    }
+
+    void graphics_command_buffer::set_index_buffer(const render_device_buffer& _index_buffer)
+    {
+        get_api_handle()->IASetIndexBuffer(&_index_buffer.get_index_buffer_view());
+    }
+
+    void graphics_command_buffer::set_vertex_buffer(const render_device_buffer& _vertex_buffer)
+    {
+        get_api_handle()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+        get_api_handle()->IASetVertexBuffers(0 /*first index*/, 1 /*vertex buffer count*/, &_vertex_buffer.get_vertex_buffer_view());
+    }
+
+    void graphics_command_buffer::set_constant_buffer(const render_device_buffer& _buffer, constant_buffer_type _type)
+    {
+        get_api_handle()->SetGraphicsRootConstantBufferView(s_get_root_param_index(_type), _buffer.get_api_handle()->GetGPUVirtualAddress());
+    }
+
+    void graphics_command_buffer::draw_instanced(size_t _vertex_count, size_t _instance_count)
+    {
+        (void)_vertex_count, _instance_count;
+        VEER_ASSERT(false, "Not implemented");
+    }
+
+    void graphics_command_buffer::draw_indexed_instanced(size_t _index_count, size_t _instance_count)
+    {
+        get_api_handle()->DrawIndexedInstanced(_index_count, _instance_count, 0, 0, 0);
+    }
+
+    void graphics_command_buffer::draw_indirect(const render_device_buffer& _buffer, size_t _arg_index)
+    {
+        (void)_buffer, _arg_index;
+        VEER_ASSERT(false, "Not implemented");
+    }
+} // namespace veer::display::render

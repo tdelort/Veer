@@ -1,0 +1,24 @@
+#pragma once
+
+#include <veer/core/core.h>
+#include <veer/display/window/windowing_service.h>
+#include <veer/display/window/window.h>
+
+struct GLFWwindow;
+
+namespace veer::display::window
+{
+	class glfw_windowing_service : public windowing_service
+	{
+	public:
+		glfw_windowing_service();
+		virtual ~glfw_windowing_service() override;
+
+		window& create_window(veer::math::vec2u _dims) override;
+
+		window& get_window(size_t _index) const override;
+		size_t get_window_count() override;
+
+		void destroy_window(size_t _index) override;
+	};
+}

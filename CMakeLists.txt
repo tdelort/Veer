@@ -27,9 +27,6 @@ target_compile_definitions(veer PRIVATE
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -g -Xclang -gcodeview -D_DEBUG -DEBUG")
 set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -O3 -D_DEBUG")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")
-# set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} -DEBUG")
-# set(CMAKE_STATIC_LINKER_FLAGS_DEBUG "${CMAKE_STATIC_LINKER_FLAGS_DEBUG} -DEBUG")
-# set(CMAKE_SHARED_LINKER_FLAGS_DEBUG "${CMAKE_SHARED_LINKER_FLAGS_DEBUG} -DEBUG")
 
 
 # GLFW build 
@@ -53,12 +50,12 @@ add_subdirectory(${D3D12MA_PATH})
 add_subdirectory(src)
 
 target_include_directories(veer
-    PUBLIC
-        include
-
-    # TODO : meh, when I have a clear seperation between private and public API ( in include vs src ) I should get this back to PRIVATE
     PUBLIC 
         src
+
+    # allow to internally link directly without prefixing "veer"
+    PRIVATE 
+        src/veer
 
     PRIVATE 
         libraries/glfw-3.3.8.bin.WIN64/include

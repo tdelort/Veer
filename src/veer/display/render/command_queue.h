@@ -1,0 +1,68 @@
+#pragma once
+
+#include <veer/core/containers/span.h>
+#include <veer/core/unique_ptr.h>
+
+#include <veer/display/render/command_buffer.h>
+#include <veer/display/render/command_queue_base.h>
+
+#if defined(D3D12_RENDER_BACKEND)
+#include <veer/display/render/backends/dx12/dx12_pch.h>
+#endif // defined(D3D12_RENDER_BACKEND)
+
+namespace veer::display::render
+{
+    // different implementation for all backends, still abstract
+    class command_queue : public command_queue_base
+    {
+    public:
+        command_queue(render_device& _device, command_buffer::type _type);
+
+        void enqueue(command_buffer&& _command_buffers) override;
+
+        void signal(uint64_t _value) override;
+        void wait_for_value(uint64_t _value) override;
+
+        virtual ~command_queue() = 0;
+
+        void flush();
+
+    private:
+        command_buffer::type m_type;
+
+#if defined(D3D12_RENDER_BACKEND)
+#include "backends/dx12/dx12_command_queue.inl"
+#elif defined(VULKAN_RENDER_BACKEND)
+#error not implemented
+#elif defined(METAL_RENDER_BACKEND)
+#error not implemented
+#endif
+    };
+
+    class copy_command_queue : public command_queue
+    {
+    public:
+        copy_command_queue(render_device& _device);
+        ~copy_command_queue();
+
+    protected:
+        copy_command_queue(render_device& _device, command_buffer::type _type);
+    };
+
+    class compute_command_queue : public copy_command_queue
+    {
+    public:
+        compute_command_queue(render_device& _device);
+        ~compute_command_queue();
+
+    protected:
+        compute_command_queue(render_device& _device, command_buffer::type _type);
+    };
+
+    class graphics_command_queue : public compute_command_queue
+    {
+    public:
+        graphics_command_queue(render_device& _device);
+        ~graphics_command_queue();
+    };
+} // namespace veer::display::render
