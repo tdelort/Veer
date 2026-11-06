@@ -24,12 +24,6 @@ namespace veer::display::render
         );
         virtual ~compute_technique();
 
-#if defined(D3D12_RENDER_BACKEND)
-#include "backends/dx12/dx12_compute_technique.inl"
-#elif defined(VULKAN_RENDER_BACKEND)
-#error not implemented
-#elif defined(METAL_RENDER_BACKEND)
-#error not implemented
-#endif
+#include VEER_INL(compute_technique)
     };
 } // namespace veer::display::render

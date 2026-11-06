@@ -7,7 +7,7 @@
 #include <veer/core/debug.h>
 #include <veer/core/unique_ptr.h>
 
-#include <veer/display/render/backends/dx12/dx12_swap_chain.h>
+#include <veer/display/render/swap_chain.h>
 
 #include <veer/display/render/command_buffer.h>
 #include <veer/display/render/command_queue.h>
@@ -187,24 +187,19 @@ namespace veer::display::render
 #endif // defined(_DEBUG)
     }
 
-    copy_command_queue& render_device::get_copy_command_queue()
+    copy_command_queue& render_device::get_copy_command_queue() const
     {
         return *m_copy_queue.get();
     }
 
-    compute_command_queue& render_device::get_compute_command_queue()
+    compute_command_queue& render_device::get_compute_command_queue() const
     {
         return *m_compute_queue.get();
     }
 
-    graphics_command_queue& render_device::get_graphics_command_queue()
+    graphics_command_queue& render_device::get_graphics_command_queue() const
     {
         return *m_graphics_queue.get();
-    }
-
-    unique_ptr<swap_chain> render_device::alloc_internal(veer::display::window::window& _window)
-    {
-        return unique_ptr<dx12_swap_chain>::make(*this, _window);
     }
 
     void render_device::check_errors() const

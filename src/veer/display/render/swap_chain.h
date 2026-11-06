@@ -4,6 +4,16 @@
 
 #include <veer/display/render/render_device_texture_2d.h>
 
+#if defined(D3D12_RENDER_BACKEND) 
+#include <veer/core/containers/static_array.h>
+#include <veer/display/render/backends/dx12/dx12_render_device_backbuffer.h>
+#endif // defined(D3D12_RENDER_BACKEND) 
+
+namespace veer::display::window
+{
+    class window;
+}
+
 namespace veer::display::render
 {
     class render_device;
@@ -12,17 +22,20 @@ namespace veer::display::render
     class swap_chain
     {
     public:
-        virtual ~swap_chain() = 0;
+        swap_chain(render_device& _device, veer::display::window::window& _window);
+        ~swap_chain();
 
-        virtual render_device_texture_2d& get_current_backbuffer() = 0;
+        render_device_texture_2d& get_current_backbuffer();
 
-        virtual size_t get_backbuffer_index() = 0;
+        size_t get_backbuffer_index();
 
-        virtual void present(size_t _sync_intervals) = 0;
+        void present();
 
         static constexpr size_t s_swap_chain_buffer_count = 2u;
 
     protected:
         bool m_tearing_allowed;
+
+#include VEER_INL(swap_chain)
     };
 } // namespace veer::display::render

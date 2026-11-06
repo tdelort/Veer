@@ -79,13 +79,7 @@ namespace veer::display::render
         render_thread* m_owner_thread;
         type m_type;
 
-#if defined(D3D12_RENDER_BACKEND)
-#include "backends/dx12/dx12_command_buffer.inl"
-#elif defined(VULKAN_RENDER_BACKEND)
-#error not implemented
-#elif defined(METAL_RENDER_BACKEND)
-#error not implemented
-#endif
+#include VEER_INL(command_buffer)
     };
 
     class copy_command_buffer : public command_buffer

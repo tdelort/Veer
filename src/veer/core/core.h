@@ -10,13 +10,24 @@
 
 #if defined(D3D12_RENDER_BACKEND)
 #define RENDER_BACKEND_PLATFORM_PREFIX "dx12"
+#define RENDER_BACKEND_DIR dx12/
 #elif defined(VULKAN_RENDER_BACKEND)
 #error not implemented
+#define RENDER_BACKEND_DIR vk/
 #define RENDER_BACKEND_PLATFORM_PREFIX "vulkan"
 #elif defined(METAL_RENDER_BACKEND)
 #error not implemented
+#define RENDER_BACKEND_DIR mtl/
 #define RENDER_BACKEND_PLATFORM_PREFIX "metal"
 #endif
+
+#define EXPAND(x) x
+#define STR_INTERNAL(x) #x
+#define STR(x) STR_INTERNAL(x)
+
+#define VEER_INL(file) STR(EXPAND(backends/)EXPAND(RENDER_BACKEND_DIR)EXPAND(file)EXPAND(.inl))
+
+#include <veer/core/os.h>
 
 // STD lib headers
 // TODO : remove them one by one by implementing your own version (we are here to make an apple pie,
@@ -94,47 +105,47 @@
  */
 #include <iostream>
 
-#define VEER_MAKE_STMT(_expr)                                                                                          \
-    do                                                                                                                 \
-    {                                                                                                                  \
-        _expr                                                                                                          \
+#define VEER_MAKE_STMT(_expr)                                                                                                                                                      \
+    do                                                                                                                                                                             \
+    {                                                                                                                                                                              \
+        _expr                                                                                                                                                                      \
     } while (0)
 #define VEER_FLOAT_EPSILON FLT_EPSILON
 #define VEER_DLLEXPORT __declspec(dllexport)
 #define VEER_STATIC_ARRAY_SIZE(_arr) ((size_t)(sizeof(_arr) / sizeof(_arr[0])))
 
-#define VEER_ENUM_CLASS_COMPOUND_OP(_cls, _op)                                                                         \
-    constexpr inline _cls& operator _op(_cls& _lhs, _cls _rhs)                                                         \
-    {                                                                                                                  \
-        using cls_underlying_type = std::underlying_type_t<_cls>;                                                      \
-        cls_underlying_type lhs = static_cast<cls_underlying_type>(_lhs);                                              \
-        lhs _op static_cast<cls_underlying_type>(_rhs);                                                                \
-        _lhs = static_cast<_cls>(lhs);                                                                                 \
-        return _lhs;                                                                                                   \
+#define VEER_ENUM_CLASS_COMPOUND_OP(_cls, _op)                                                                                                                                     \
+    constexpr inline _cls& operator _op(_cls& _lhs, _cls _rhs)                                                                                                                     \
+    {                                                                                                                                                                              \
+        using cls_underlying_type = std::underlying_type_t<_cls>;                                                                                                                  \
+        cls_underlying_type lhs = static_cast<cls_underlying_type>(_lhs);                                                                                                          \
+        lhs _op static_cast<cls_underlying_type>(_rhs);                                                                                                                            \
+        _lhs = static_cast<_cls>(lhs);                                                                                                                                             \
+        return _lhs;                                                                                                                                                               \
     }
 // VEER_ENUM_CLASS_COMPOUND_OP's last line
 
-#define VEER_ENUM_CLASS_BINARY_OP(_cls, _op)                                                                           \
-    constexpr inline _cls operator _op(_cls _lhs, _cls _rhs)                                                           \
-    {                                                                                                                  \
-        using cls_underlying_type = std::underlying_type_t<_cls>;                                                      \
-        return static_cast<_cls>(static_cast<cls_underlying_type>(_lhs) _op static_cast<cls_underlying_type>(_rhs));   \
+#define VEER_ENUM_CLASS_BINARY_OP(_cls, _op)                                                                                                                                       \
+    constexpr inline _cls operator _op(_cls _lhs, _cls _rhs)                                                                                                                       \
+    {                                                                                                                                                                              \
+        using cls_underlying_type = std::underlying_type_t<_cls>;                                                                                                                  \
+        return static_cast<_cls>(static_cast<cls_underlying_type>(_lhs) _op static_cast<cls_underlying_type>(_rhs));                                                               \
     }
 
-#define VEER_ENUM_CLASS_UNARY_OP(_cls, _op)                                                                            \
-    constexpr inline _cls operator _op(_cls _lhs)                                                                      \
-    {                                                                                                                  \
-        using cls_underlying_type = std::underlying_type_t<_cls>;                                                      \
-        return static_cast<_cls>(_op static_cast<cls_underlying_type>(_lhs));                                          \
+#define VEER_ENUM_CLASS_UNARY_OP(_cls, _op)                                                                                                                                        \
+    constexpr inline _cls operator _op(_cls _lhs)                                                                                                                                  \
+    {                                                                                                                                                                              \
+        using cls_underlying_type = std::underlying_type_t<_cls>;                                                                                                                  \
+        return static_cast<_cls>(_op static_cast<cls_underlying_type>(_lhs));                                                                                                      \
     }
 
-#define VEER_ENUM_CLASS_FLAG_OPERATORS(cls)                                                                            \
-    VEER_ENUM_CLASS_BINARY_OP(cls, &)                                                                                  \
-    VEER_ENUM_CLASS_BINARY_OP(cls, |)                                                                                  \
-    VEER_ENUM_CLASS_BINARY_OP(cls, ^)                                                                                  \
-    VEER_ENUM_CLASS_UNARY_OP(cls, ~)                                                                                   \
-    VEER_ENUM_CLASS_COMPOUND_OP(cls, &=)                                                                               \
-    VEER_ENUM_CLASS_COMPOUND_OP(cls, |=)                                                                               \
+#define VEER_ENUM_CLASS_FLAG_OPERATORS(cls)                                                                                                                                        \
+    VEER_ENUM_CLASS_BINARY_OP(cls, &)                                                                                                                                              \
+    VEER_ENUM_CLASS_BINARY_OP(cls, |)                                                                                                                                              \
+    VEER_ENUM_CLASS_BINARY_OP(cls, ^)                                                                                                                                              \
+    VEER_ENUM_CLASS_UNARY_OP(cls, ~)                                                                                                                                               \
+    VEER_ENUM_CLASS_COMPOUND_OP(cls, &=)                                                                                                                                           \
+    VEER_ENUM_CLASS_COMPOUND_OP(cls, |=)                                                                                                                                           \
     VEER_ENUM_CLASS_COMPOUND_OP(cls, ^=)
 // VEER_ENUM_CLASS_OPERATORS's last line
 
@@ -175,12 +186,3 @@ namespace veer::flags
 } // namespace veer::flags
 
 using byte_t = uint8_t;
-
-#if defined(_WIN32)
-#define VEER_OS_WINDOWS
-
-#define WIN32_LEAN_AND_MEAN
-#define NOMINMAX
-#include <Windows.h>
-
-#endif // defined( _WIN32 )

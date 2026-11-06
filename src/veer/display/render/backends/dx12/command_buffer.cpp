@@ -18,7 +18,7 @@
 namespace veer::display::render
 {
 
-    // --- dx12 specific functions (declared in dx12_command_buffer.inl) ---
+    // --- dx12 specific functions (declared in command_buffer.inl) ---
     D3D12_COMMAND_LIST_TYPE command_buffer::s_convert(const command_buffer::type _type)
     {
         D3D12_COMMAND_LIST_TYPE dx12_type;

@@ -19,7 +19,7 @@ namespace veer::display::render
 
     constant_buffer::update_context::~update_context()
     {
-        const uint64_t current_frame_index = m_render_thread.get_frame_index();
+        const uint64_t current_frame_index = m_render_thread.get_render_frame_index();
 
         if (m_constant_buffer.m_current_buffer.m_buffer_ptr != nullptr)
         {

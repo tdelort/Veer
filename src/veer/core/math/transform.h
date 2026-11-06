@@ -31,6 +31,7 @@ namespace veer::math
         [[nodiscard]] static constexpr mat2x2f s_rotation_2d(const vec2f& _cos_sin);
 
         [[nodiscard]] static constexpr mat3x3f s_rotation_3d(const vec3f& _euler);
+        [[nodiscard]] static constexpr mat3x3f s_rotation_3d_inv(const vec3f& _euler);
 
         [[nodiscard]] static constexpr mat3x3f s_rotation_3d_x(float _s);
         [[nodiscard]] static constexpr mat3x3f s_rotation_3d_x(const vec2f& _cos_sin);

@@ -1,4 +1,4 @@
-#include "dx12_swap_chain.h"
+#include <veer/display/render/swap_chain.h>
 
 #include <veer/display/render/command_queue.h>
 #include <veer/display/render/render_device.h>
@@ -10,8 +10,7 @@
 
 namespace veer::display::render
 {
-    dx12_swap_chain::dx12_swap_chain(render_device& _device, veer::display::window::window& _window)
-        : veer::display::render::swap_chain()
+    swap_chain::swap_chain(render_device& _device, veer::display::window::window& _window)
     {
 
         ComPtr<IDXGIFactory4> factory4 = _device.get_dxgi_factory();
@@ -51,14 +50,14 @@ namespace veer::display::render
 
             ComPtr<IDXGISwapChain1> swap_chain1;
             VEER_LOG("CreateSwapChainForHwnd");
-            HRESULT hr = factory4->CreateSwapChainForHwnd(command_queue.get_api_handle().Get(), windows_window_handle, &swap_chain_desc, nullptr, nullptr, &swap_chain1);
-            VEER_ASSERT(SUCCEEDED(hr), "Failed to create swap chain (" << hr << ")");
+            veer::hr hr = factory4->CreateSwapChainForHwnd(command_queue.get_api_handle().Get(), windows_window_handle, &swap_chain_desc, nullptr, nullptr, &swap_chain1);
+            VEER_ASSERT(hr.succeeded(), "Failed to create swap chain (" << hr << ")");
 
             hr = swap_chain1.As(&m_api_swap_chain_handle);
-            VEER_ASSERT(SUCCEEDED(hr), "Failed to cast swap chain to DXGI 4 version (" << hr << ")");
+            VEER_ASSERT(hr.succeeded(), "Failed to cast swap chain to DXGI 4 version (" << hr << ")");
 
             hr = factory4->MakeWindowAssociation(windows_window_handle, DXGI_MWA_NO_ALT_ENTER);
-            VEER_ASSERT(SUCCEEDED(hr), "Failed to create make window association (" << hr << ")");
+            VEER_ASSERT(hr.succeeded(), "Failed to create make window association (" << hr << ")");
         }
 
         ComPtr<ID3D12Device2> id3d12_device = _device.get_api_handle();
@@ -83,7 +82,7 @@ namespace veer::display::render
         }
     }
 
-    dx12_swap_chain::~dx12_swap_chain()
+    swap_chain::~swap_chain()
     {
         for (size_t i = 0; i < s_swap_chain_buffer_count; ++i)
         {
@@ -92,20 +91,20 @@ namespace veer::display::render
         m_api_swap_chain_handle.Reset();
     }
 
-    void dx12_swap_chain::present(size_t _sync_intervals)
+    void swap_chain::present()
     {
-        UINT flags = m_tearing_allowed && (_sync_intervals == 0) ? DXGI_PRESENT_ALLOW_TEARING : 0;
-        HRESULT hr = m_api_swap_chain_handle->Present((UINT)_sync_intervals, flags);
+        UINT flags = m_tearing_allowed /*&& (_sync_intervals == 0)*/ ? DXGI_PRESENT_ALLOW_TEARING : 0;
+        HRESULT hr = m_api_swap_chain_handle->Present((UINT)0u, flags);
 
         VEER_ASSERT(SUCCEEDED(hr), "Failed to Present swap chain");
     }
 
-    render_device_texture_2d& dx12_swap_chain::get_current_backbuffer()
+    render_device_texture_2d& swap_chain::get_current_backbuffer()
     {
         return *(m_back_buffers_resources[get_backbuffer_index()].get());
     }
 
-    size_t dx12_swap_chain::get_backbuffer_index()
+    size_t swap_chain::get_backbuffer_index()
     {
         UINT index = m_api_swap_chain_handle->GetCurrentBackBufferIndex();
         return (size_t)index;

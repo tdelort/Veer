@@ -34,12 +34,6 @@ namespace veer::display::render
     private:
         texture_3d_desc m_desc{};
 
-#if defined(D3D12_RENDER_BACKEND)
-#include "backends/dx12/dx12_render_device_texture_3d.inl"
-#elif defined(VULKAN_RENDER_BACKEND)
-#error not implemented
-#elif defined(METAL_RENDER_BACKEND)
-#error not implemented
-#endif
+#include VEER_INL(render_device_texture_3d)
     };
 } // namespace veer::display::render

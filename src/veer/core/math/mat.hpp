@@ -77,6 +77,22 @@ namespace veer::math
     }
 
     template <Arithmetic TYPE, size_t ROW_COUNT, size_t COLUMN_COUNT>
+    constexpr void mat<TYPE, ROW_COUNT, COLUMN_COUNT>::transpose_inplace()
+        requires Equal<ROW_COUNT, COLUMN_COUNT>
+    {
+        // iterate over everything under the diagonal and swap it with its equivalent above the diagonal
+        for (size_t r = 1; r < ROW_COUNT; ++r)
+        {
+            for (size_t c = 0; c < r; ++c)
+            {
+                TYPE tmp = operator[](r)[c];
+                operator[](r)[c] = operator[](c)[r];
+                operator[](c)[r] = tmp;
+            }
+        }
+    }
+
+    template <Arithmetic TYPE, size_t ROW_COUNT, size_t COLUMN_COUNT>
     [[nodiscard]] constexpr mat<TYPE, COLUMN_COUNT, ROW_COUNT> mat<TYPE, ROW_COUNT, COLUMN_COUNT>::transpose() const
     {
         mat<TYPE, COLUMN_COUNT, ROW_COUNT> res{};
@@ -168,9 +184,9 @@ namespace veer::math
     [[nodiscard]] constexpr vec<TYPE, COLUMN_COUNT> operator*(const vec<TYPE, ROW_COUNT>& _v, const mat<TYPE, ROW_COUNT, COLUMN_COUNT>& _m)
     {
         vec<TYPE, COLUMN_COUNT> res{};
-        for (size_t c = 0; c < COLUMN_COUNT; ++c)
+        for (size_t r = 0; r < ROW_COUNT; ++r)
         {
-            for (size_t r = 0; r < ROW_COUNT; ++r)
+            for (size_t c = 0; c < COLUMN_COUNT; ++c)
             {
                 res[c] += _v[r] * _m[r][c];
             }

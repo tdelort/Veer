@@ -57,8 +57,8 @@ namespace veer::display::render
         template <typename T>
         containers::span<const T> get_data() const;
 
-        using bindless_id = uint64_t;
-        static constexpr bindless_id s_invalid_bindless_id = static_cast<uint64_t>(-1);
+        using bindless_id = uint32_t;
+        static constexpr bindless_id s_invalid_bindless_id = static_cast<bindless_id>(-1);
 
         virtual bindless_id get_bindless_id(render_device_resource_heap_type _heap_type) const = 0;
 
@@ -74,13 +74,8 @@ namespace veer::display::render
         containers::resizable_array<byte_t> m_data;
 
         containers::string m_debug_name;
-#if defined(D3D12_RENDER_BACKEND)
-#include "backends/dx12/dx12_render_device_resource.inl"
-#elif defined(VULKAN_RENDER_BACKEND)
-#error not implemented
-#elif defined(METAL_RENDER_BACKEND)
-#error not implemented
-#endif
+
+#include VEER_INL(render_device_resource)
     };
 
     VEER_ENUM_CLASS_FLAG_OPERATORS(render_device_resource::upload_flags)

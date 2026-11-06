@@ -1,6 +1,7 @@
 #include "glfw_window.h"
 #include "GLFW/glfw3.h"
 
+#include <veer/core/core.h>
 #include <veer/core/math/vec.h>
 
 #define GLFW_EXPOSE_NATIVE_WIN32

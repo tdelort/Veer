@@ -126,6 +126,14 @@ namespace veer::tests
         const math::mat2x4f d_t = d.transpose();
         VEER_TEST_ASSERT(math::all(d_t[0] == math::vec4f(1.f, 3.f, 5.f, 7.f)));
         VEER_TEST_ASSERT(math::all(d_t[1] == math::vec4f(2.f, 4.f, 6.f, 8.f)));
+
+        const math::mat4x4f d2(math::vec4f(1.f, 2.f, 3.f, 4.f), math::vec4f(5.f, 6.f, 7.f, 8.f), math::vec4f(9.f, 10.f, 11.f, 12.f), math::vec4f(13.f, 14.f, 15.f, 16.f));
+        math::mat4x4f d2_t = d2;
+        d2_t.transpose_inplace();
+        VEER_TEST_ASSERT(math::all(d2_t[0] == math::vec4f(1.f, 5.f, 9.f, 13.f)));
+        VEER_TEST_ASSERT(math::all(d2_t[1] == math::vec4f(2.f, 6.f, 10.f, 14.f)));
+        VEER_TEST_ASSERT(math::all(d2_t[2] == math::vec4f(3.f, 7.f, 11.f, 15.f)));
+        VEER_TEST_ASSERT(math::all(d2_t[3] == math::vec4f(4.f, 8.f, 12.f, 16.f)));
         return result::succeeded;
     }
 

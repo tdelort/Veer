@@ -76,6 +76,9 @@ namespace veer::math
             requires LessEqual<OTHER_ROW_COUNT, ROW_COUNT> && LessEqual<OTHER_COLUMN_COUNT, COLUMN_COUNT>
         constexpr void set(const mat<TYPE, OTHER_ROW_COUNT, OTHER_COLUMN_COUNT>& _m, const vec2u& _offset = vec2u(0u));
 
+        constexpr void transpose_inplace()
+            requires Equal<ROW_COUNT, COLUMN_COUNT>;
+
         [[nodiscard]] constexpr mat<TYPE, COLUMN_COUNT, ROW_COUNT> transpose() const;
 
         constexpr type& operator+=(const type& _rhs);

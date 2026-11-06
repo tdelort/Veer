@@ -20,12 +20,12 @@ namespace veer::display::render
         render_thread(const render_device& _device);
         ~render_thread();
 
-        void start_frame(uint64_t _frame_index);
+        void start_frame();
         void end_frame();
 
-        uint64_t get_frame_index()
+        uint64_t get_render_frame_index()
         {
-            return m_current_frame_index;
+            return m_current_render_frame_index;
         }
 
         const render_device& get_device() const
@@ -41,15 +41,9 @@ namespace veer::display::render
 
     private:
         const render_device& m_device;
-        size_t m_current_frame_index{0u};
+        size_t m_current_render_frame_index{0u};
         bool m_command_buffer_open{false};
 
-#if defined(D3D12_RENDER_BACKEND)
-#include "backends/dx12/dx12_render_thread.inl"
-#elif defined(VULKAN_RENDER_BACKEND)
-#error not implemented
-#elif defined(METAL_RENDER_BACKEND)
-#error not implemented
-#endif
+#include VEER_INL(render_thread)
     };
 } // namespace veer::display::render

@@ -1,20 +1,20 @@
 target_sources(veer
 	PRIVATE
-        dx12_command_buffer.cpp
-        dx12_command_queue.cpp
-        dx12_compute_technique.cpp
-        dx12_graphics_technique.cpp
-        dx12_render_device_buffer.cpp
-        dx12_render_device_resource.cpp
-        dx12_render_device_texture_base.cpp
-        dx12_render_device_texture_2d.cpp
-        dx12_render_device_texture_3d.cpp
-        dx12_render_device.cpp
-        dx12_render_thread.cpp
+        command_buffer.cpp
+        command_queue.cpp
+        compute_technique.cpp
+        graphics_technique.cpp
+        render_device_buffer.cpp
+        render_device_resource.cpp
+        render_device_texture_base.cpp
+        render_device_texture_2d.cpp
+        render_device_texture_3d.cpp
+        render_device.cpp
+        render_thread.cpp
+        swap_chain.cpp
 
         dx12_descriptor_heap.cpp
         dx12_render_device_backbuffer.cpp
         dx12_shader_compiler.cpp
-        dx12_swap_chain.cpp
         dx12_technique_helpers.cpp
 )

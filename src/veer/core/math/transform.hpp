@@ -35,7 +35,33 @@ namespace veer::math
     // 3D rotations :
     [[nodiscard]] constexpr mat3x3f transform::s_rotation_3d(const vec3f& _euler)
     {
-        return transform::s_rotation_3d_x(_euler.x()) * transform::s_rotation_3d_y(_euler.y()) * transform::s_rotation_3d_z(_euler.z());
+        // |  cy*cz           cy*sz          -sy    |
+        // |  sx*sy*cz-cx*sz  sx*sy*sz+cx*cz  sx*cy |
+        // |  cx*sy*cz+sx*sz  cx*sy*sz-sx*cz  cx*cy |
+
+        const float cx = std::cos(_euler.x());
+        const float sx = std::sin(_euler.x());
+        const float cy = std::cos(_euler.y());
+        const float sy = std::sin(_euler.y());
+        const float cz = std::cos(_euler.z());
+        const float sz = std::sin(_euler.z());
+
+        const float cxsy = cx * sy;
+        const float sxsy = sx * sy;
+
+        const vec3f r0{cy * cz, cy * sz, -sy};
+        const vec3f r1{sxsy * cz - cx * sz, sx * sy * sz + cx * cz, sx * cy};
+        const vec3f r2{cxsy * cz + sx * sz, cx * sy * sz - sx * cz, cx * cy};
+
+        return mat3x3f(r0, r1, r2);
+    }
+
+    // 3D rotations :
+    [[nodiscard]] constexpr mat3x3f transform::s_rotation_3d_inv(const vec3f& _euler)
+    {
+        mat3x3f rotation = s_rotation_3d(_euler);
+        rotation.transpose_inplace();
+        return rotation;
     }
 
     [[nodiscard]] constexpr mat3x3f transform::s_rotation_3d_x(float _s)

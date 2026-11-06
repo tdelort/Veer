@@ -42,11 +42,10 @@ namespace veer::display::render
         }
     }
 
-    void render_thread::start_frame(uint64_t _frame_index)
+    void render_thread::start_frame()
     {
-        m_current_frame_index = _frame_index;
+        ++m_current_render_frame_index;
 
-        VEER_LOG("\n" << "start_frame " << _frame_index << " with allocator set " << (m_current_frame_index % swap_chain::s_swap_chain_buffer_count));
         command_list_allocators_t& allocators = get_current_command_allocator();
         allocators.m_graphics->Reset();
         allocators.m_compute->Reset();
@@ -57,10 +56,6 @@ namespace veer::display::render
     {
         m_device.check_errors();
 
-        VEER_LOG(
-            "end_frame " << m_current_frame_index << " with allocator set " << (m_current_frame_index % swap_chain::s_swap_chain_buffer_count) << " and "
-                         << m_allocated_command_lists << " live command buffers" << "\n"
-        );
         VEER_ASSERT(m_allocated_command_lists == 0u, "There are still some live command buffers at the end of the frame");
     }
 
@@ -115,6 +110,6 @@ namespace veer::display::render
 
     render_thread::command_list_allocators_t& render_thread::get_current_command_allocator()
     {
-        return m_command_list_allocators[m_current_frame_index % swap_chain::s_swap_chain_buffer_count];
+        return m_command_list_allocators[m_current_render_frame_index % swap_chain::s_swap_chain_buffer_count];
     }
 } // namespace veer::display::render

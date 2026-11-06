@@ -30,13 +30,7 @@ namespace veer::display::render
     private:
         command_buffer::type m_type;
 
-#if defined(D3D12_RENDER_BACKEND)
-#include "backends/dx12/dx12_command_queue.inl"
-#elif defined(VULKAN_RENDER_BACKEND)
-#error not implemented
-#elif defined(METAL_RENDER_BACKEND)
-#error not implemented
-#endif
+#include VEER_INL(command_queue)
     };
 
     class copy_command_queue : public command_queue
