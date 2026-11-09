@@ -50,8 +50,8 @@ namespace veer::math
         const float sxsy = sx * sy;
 
         const vec3f r0{cy * cz, cy * sz, -sy};
-        const vec3f r1{sxsy * cz - cx * sz, sx * sy * sz + cx * cz, sx * cy};
-        const vec3f r2{cxsy * cz + sx * sz, cx * sy * sz - sx * cz, cx * cy};
+        const vec3f r1{sxsy * cz - cx * sz, sxsy * sz + cx * cz, sx * cy};
+        const vec3f r2{cxsy * cz + sx * sz, cxsy * sz - sx * cz, cx * cy};
 
         return mat3x3f(r0, r1, r2);
     }
